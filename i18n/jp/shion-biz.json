@@ -1,0 +1,20 @@
+{
+  "COMMON_VALIDATION_FAILED": "検証に失敗しました",
+
+  "AUTH_UNAUTHORIZED": "認証されていません",
+  "AUTH_INVALID_TOKEN": "無効なトークン",
+
+  "USER_NOT_FOUND": "ユーザーが見つかりません",
+
+  "GAME_NOT_FOUND": "ゲームが見つかりません",
+
+  "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
+
+  "GAME_CHARACTER_NOT_FOUND": "キャラクターが見つかりません",
+
+  "GAME_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
+
+  "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
+
+  "COMMENT_NOT_FOUND": "コメントが見つかりません"
+}

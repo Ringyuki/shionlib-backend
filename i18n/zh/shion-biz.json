@@ -1,0 +1,20 @@
+{
+  "COMMON_VALIDATION_FAILED": "参数校验失败",
+
+  "AUTH_UNAUTHORIZED": "未认证",
+  "AUTH_INVALID_TOKEN": "无效的令牌",
+
+  "USER_NOT_FOUND": "用户不存在",
+
+  "GAME_NOT_FOUND": "游戏不存在",
+
+  "GAME_DEVELOPER_NOT_FOUND": "制作组不存在",
+
+  "GAME_CHARACTER_NOT_FOUND": "角色不存在",
+
+  "GAME_RESOURCE_NOT_FOUND": "下载资源不存在",
+
+  "FAVORITE_ALREADY_EXISTS": "已收藏该游戏",
+
+  "COMMENT_NOT_FOUND": "评论不存在"
+}
