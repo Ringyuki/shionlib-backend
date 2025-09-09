@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// user roles: 1 -> user, 2 -> admin, 3 -> super_admin
+// user status: 1 -> active, 2 -> banned
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String @unique @db.VarChar(20)
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+  avatar   String @default("")
+  cover    String @default("")
+
+  games                        Game[]                     @relation("user_create_game")
+  game_download_resources      GameDownloadResource[]     @relation("user_create_game_download_resource")
+  game_download_resource_files GameDownloadResourceFile[] @relation("user_create_game_download_resource_file")
+  comments                     Comment[]                  @relation("user_create_comment")
+
+  favorite_games GameFavoriteRelation[] @relation("user_favorite_game")
+
+  role   Int @default(1)
+  status Int @default(1)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("users")
+}
+
+// game status: 1 -> visible, 2 -> hide
+// game staffs: Array<Record<name, role>>
+// extra_info: Array<Record<key, value>>
+model Game {
+  id         Int      @id @default(autoincrement())
+  title_jp   String[] @default([])
+  title_zh   String[] @default([])
+  title_en   String[] @default([])
+  intro_jp   String   @default("") @db.VarChar(2000)
+  aliases    String[] @default([])
+  intro_zh   String   @default("") @db.VarChar(2000)
+  intro_en   String   @default("") @db.VarChar(2000)
+  covers     String[] @default([])
+  cgs        String[] @default([])
+  extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  tags       String[]                @default([])
+  developers GameDeveloperRelation[] @relation("game_developer")
+  characters GameCharacterRelation[] @relation("game_character")
+  staffs     Json?                   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  nsfw     Boolean  @default(false)
+  type     String?
+  platform String[] @default([])
+
+  download_resources GameDownloadResource[] @relation("game_download_resource")
+
+  creator_id Int
+  creator    User @relation("user_create_game", fields: [creator_id], references: [id])
+
+  favorite_users GameFavoriteRelation[] @relation("game_favorite")
+
+  comments Comment[] @relation("game_comment")
+
+  status  Int      @default(1)
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("games")
+}
+
+// extra_info: Array<Record<key, value>>
+model GameDeveloper {
+  id         Int      @id @default(autoincrement())
+  name       String[] @default([])
+  logo       String?
+  intro_jp   String   @default("") @db.VarChar(2000)
+  intro_zh   String   @default("") @db.VarChar(2000)
+  intro_en   String   @default("") @db.VarChar(2000)
+  extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  games GameDeveloperRelation[] @relation("game_produce")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("game_developers")
+}
+
+model GameDeveloperRelation {
+  id           Int     @id @default(autoincrement())
+  role         String?
+  game_id      Int
+  developer_id Int
+
+  game      Game          @relation("game_developer", fields: [game_id], references: [id])
+  developer GameDeveloper @relation("game_produce", fields: [developer_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_id, developer_id])
+  @@map("game_developer_relations")
+}
+
+// extra_info: Array<Record<key, value>>
+model GameCharacter {
+  id         Int      @id @default(autoincrement())
+  name_jp    String
+  name_zh    String?
+  name_en    String?
+  aliases    String[] @default([])
+  extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  games GameCharacterRelation[] @relation("game_appear_on")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("game_characters")
+}
+
+// extra_info: Array<Record<key, value>>
+model GameCharacterRelation {
+  id         Int     @id @default(autoincrement())
+  image      String?
+  actor      String?
+  extra_info Json?   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  game_id      Int
+  character_id Int
+
+  game      Game          @relation("game_character", fields: [game_id], references: [id])
+  character GameCharacter @relation("game_appear_on", fields: [character_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_id, character_id])
+  @@map("game_character_relations")
+}
+
+model GameDownloadResource {
+  id      Int                        @id @default(autoincrement())
+  game_id Int
+  game    Game                       @relation("game_download_resource", fields: [game_id], references: [id])
+  files   GameDownloadResourceFile[] @relation("game_download_resource_files")
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("game_download_resources")
+}
+
+// file type: 1 -> s3 native, 2 -> direct link, 3 -> third party link
+model GameDownloadResourceFile {
+  id        Int     @id @default(autoincrement())
+  type      Int     @default(1)
+  file_name String
+  file_path String?
+  file_size Int
+  file_url  String?
+  file_hash String
+
+  game_download_resource_id Int
+  game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id])
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("game_download_resource_files")
+}
+
+model GameFavoriteRelation {
+  id      Int @id @default(autoincrement())
+  user_id Int
+  game_id Int
+
+  user User @relation("user_favorite_game", fields: [user_id], references: [id])
+  game Game @relation("game_favorite", fields: [game_id], references: [id])
+
+  @@unique([user_id, game_id])
+  @@map("game_favorite_relations")
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  game_id Int
+  game    Game @relation("game_comment", fields: [game_id], references: [id])
+
+  creator_id Int
+  creator    User @relation("user_create_comment", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("comments")
+}
