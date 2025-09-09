@@ -34,4 +34,4 @@ $ pnpm run test:cov
 
 ## License
 
-[AGPL-3.0](https://github.com/Ringyuki/shionlib-backend/blob/master/LICENSE).
+[AGPL-3.0](https://github.com/Ringyuki/shionlib-backend/blob/main/LICENSE).
