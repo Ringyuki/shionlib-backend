@@ -1,19 +1,20 @@
 {
   "common": {
-    "IS_NOT_EMPTY": "{property} is required",
-    "MIN_LENGTH": "{property} must be longer than {min} characters",
-    "MAX_LENGTH": "{property} must be shorter than {max} characters",
+    "IS_NOT_EMPTY": "{property} は必須です",
+    "MIN_LENGTH": "{property} は {min} 文字以上である必要があります",
+    "MAX_LENGTH": "{property} は {max} 文字以下である必要があります",
+    "PROPERTY_SHOULD_NOT_EXIST": "{property} は存在してはいけません",
 
-    "IS_STRING": "{property} must be a string",
-    "IS_EMAIL": "{property} must be a valid email address",
-    "IS_NUMBER": "{property} must be a number",
-    "IS_BOOLEAN": "{property} must be a boolean",
-    "IS_ARRAY": "{property} must be an array",
-    "IS_OBJECT": "{property} must be an object",
-    "IS_DATE": "{property} must be a date",
-    "IS_URL": "{property} must be a valid URL"
+    "IS_STRING": "{property} は文字列である必要があります",
+    "IS_EMAIL": "{property} は有効なメールアドレスである必要があります",
+    "IS_NUMBER": "{property} は数字である必要があります",
+    "IS_BOOLEAN": "{property} は真偽値である必要があります",
+    "IS_ARRAY": "{property} は配列である必要があります",
+    "IS_OBJECT": "{property} はオブジェクトである必要があります",
+    "IS_DATE": "{property} は日付である必要があります",
+    "IS_URL": "{property} は有効なURLである必要があります"
   },
   "user": {
-    "PASSWORD_MATCHES": "password must contain at least one uppercase letter, one lowercase letter, and one number"
+    "PASSWORD_MATCHES": "パスワードには少なくとも1つの大文字、1つの小文字、そして1つの数字が含まれている必要があります"
   }
 }

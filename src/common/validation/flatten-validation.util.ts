@@ -17,8 +17,10 @@ export const flattenValidationErrors = (
   const walk = (err: ValidationError, parent?: string) => {
     const path = join(parent, err.property)
     if (err.constraints && Object.keys(err.constraints).length) {
-      const msgs = Array.from(new Set(Object.values(err.constraints)))
-      out.push({ field: path, messages: msgs })
+      const msgs = Array.from(new Set(Object.values(err.constraints ?? {}))).map(msg =>
+        normalizeMsg(msg, path),
+      )
+      out.push({ field: path, messages: msgs as string[] })
     }
     if (err.children?.length) {
       for (const child of err.children) walk(child, path)
@@ -27,4 +29,16 @@ export const flattenValidationErrors = (
 
   for (const e of errors) walk(e)
   return out
+}
+
+/*
+ * this function is used to normalize the message
+ * like: "should not exist" -> "validation.common.PROPERTY_SHOULD_NOT_EXIST|{property}"
+ */
+const normalizeMsg = (msg: unknown, property: string) => {
+  if (typeof msg !== 'string') return msg
+  if (/should not exist/i.test(msg) || /forbidden property/i.test(msg)) {
+    return `validation.common.PROPERTY_SHOULD_NOT_EXIST|${JSON.stringify({ property })}`
+  }
+  return msg
 }

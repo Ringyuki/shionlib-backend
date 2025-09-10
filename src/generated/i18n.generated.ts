@@ -33,6 +33,7 @@ export type I18nTranslations = {
             "IS_NOT_EMPTY": string;
             "MIN_LENGTH": string;
             "MAX_LENGTH": string;
+            "PROPERTY_SHOULD_NOT_EXIST": string;
             "IS_STRING": string;
             "IS_EMAIL": string;
             "IS_NUMBER": string;

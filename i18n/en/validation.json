@@ -3,6 +3,7 @@
     "IS_NOT_EMPTY": "{property} is required",
     "MIN_LENGTH": "{property} must be longer than {min} characters",
     "MAX_LENGTH": "{property} must be shorter than {max} characters",
+    "PROPERTY_SHOULD_NOT_EXIST": "{property} should not exist",
 
     "IS_STRING": "{property} must be a string",
     "IS_EMAIL": "{property} must be a valid email address",
