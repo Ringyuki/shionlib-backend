@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { I18nModule, AcceptLanguageResolver, QueryResolver, CookieResolver } from 'nestjs-i18n'
 import { PrismaModule } from './prisma.module'
+import { AuthModule } from './modules/auth/auth.module'
 import { ShionConfigModule } from './common/config/config.module'
 import { join } from 'path'
-import path from 'path'
 
 import { UserModule } from './modules/user/user.module'
 
@@ -17,14 +17,14 @@ import { UserModule } from './modules/user/user.module'
         path: join(__dirname, '..', 'i18n/'),
         watch: true,
       },
-      typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
+      typesOutputPath: join(__dirname, '../src/generated/i18n.generated.ts'),
       resolvers: [
         { use: QueryResolver, options: ['lang'] },
         new CookieResolver(['lang']),
         new AcceptLanguageResolver(),
       ],
     }),
-
+    AuthModule,
     UserModule,
   ],
   controllers: [],

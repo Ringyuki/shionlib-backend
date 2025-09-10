@@ -1,7 +1,7 @@
-import { Injectable, ExecutionContext } from '@nestjs/common'
+import { Injectable, ExecutionContext, HttpStatus } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { JwtService } from '@nestjs/jwt'
-import { ShionBizException } from '../../../shared/exceptions/shion-business.exception'
+import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
@@ -18,7 +18,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest<RequestWithUser>()
     const token = this.extractTokenFromHeader(request) || this.extractTokenFromCookie(request)
     if (!token) {
-      throw new ShionBizException(ShionBizCode.AUTH_UNAUTHORIZED, 'shion-biz.AUTH_UNAUTHORIZED')
+      throw new ShionBizException(
+        ShionBizCode.AUTH_UNAUTHORIZED,
+        'shion-biz.AUTH_UNAUTHORIZED',
+        undefined,
+        HttpStatus.UNAUTHORIZED,
+      )
     }
 
     try {
@@ -28,7 +33,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.user = payload
       return true
     } catch {
-      throw new ShionBizException(ShionBizCode.AUTH_UNAUTHORIZED, 'shion-biz.AUTH_UNAUTHORIZED')
+      throw new ShionBizException(
+        ShionBizCode.AUTH_UNAUTHORIZED,
+        'shion-biz.AUTH_UNAUTHORIZED',
+        undefined,
+        HttpStatus.UNAUTHORIZED,
+      )
     }
   }
 

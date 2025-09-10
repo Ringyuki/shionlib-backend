@@ -5,6 +5,11 @@
   "AUTH_INVALID_TOKEN": "无效的令牌",
 
   "USER_NOT_FOUND": "用户不存在",
+  "USER_EMAIL_ALREADY_EXISTS": "邮箱已存在",
+  "USER_NAME_ALREADY_EXISTS": "用户名已存在",
+  "USER_NOT_ALLOW_REGISTER": "注册已关闭",
+  "USER_BANNED": "用户已封禁",
+  "USER_INVALID_PASSWORD": "无效的密码",
 
   "GAME_NOT_FOUND": "游戏不存在",
 

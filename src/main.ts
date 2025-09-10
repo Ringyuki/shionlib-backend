@@ -1,5 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core'
-import { ConfigService } from '@nestjs/config'
+import { ShionConfigService } from './common/config/services/config.service'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { I18nService } from 'nestjs-i18n'
 import { AppModule } from './app.module'
@@ -7,20 +7,22 @@ import { requestId } from './common/middlewares/request-id.middleware'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor'
 import { ValidationPipe } from '@nestjs/common'
-import { ShionBizException } from './shared/exceptions/shion-business.exception'
+import { ShionBizException } from './common/exceptions/shion-business.exception'
 import { ShionBizCode } from './shared/enums/biz-code/shion-biz-code.enum'
 import { flattenValidationErrors } from './common/validation/flatten-validation.util'
 import { HttpStatus } from '@nestjs/common'
+import cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
   app.disable('x-powered-by')
   app.use(requestId())
-  const configService = app.get(ConfigService)
+  app.use(cookieParser())
+  const configService = app.get(ShionConfigService)
 
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN'),
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: configService.get('cors.origin'),
+    methods: configService.get('cors.methods'),
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 
@@ -45,7 +47,7 @@ async function bootstrap() {
     new SuccessResponseInterceptor(app.get(Reflector), app.get(I18nService)),
   )
 
-  const port = configService.get('PORT')
+  const port = configService.get('port')
   await app.listen(port)
   console.log(`shionlib backend running on http://localhost:${port}`)
 }

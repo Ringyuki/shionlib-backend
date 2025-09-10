@@ -21,6 +21,11 @@ export type I18nTranslations = {
         "AUTH_UNAUTHORIZED": string;
         "AUTH_INVALID_TOKEN": string;
         "USER_NOT_FOUND": string;
+        "USER_EMAIL_ALREADY_EXISTS": string;
+        "USER_NAME_ALREADY_EXISTS": string;
+        "USER_NOT_ALLOW_REGISTER": string;
+        "USER_BANNED": string;
+        "USER_INVALID_PASSWORD": string;
         "GAME_NOT_FOUND": string;
         "GAME_DEVELOPER_NOT_FOUND": string;
         "GAME_CHARACTER_NOT_FOUND": string;

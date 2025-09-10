@@ -5,6 +5,11 @@
   "AUTH_INVALID_TOKEN": "無効なトークン",
 
   "USER_NOT_FOUND": "ユーザーが見つかりません",
+  "USER_EMAIL_ALREADY_EXISTS": "メールアドレスがすでに存在します",
+  "USER_NAME_ALREADY_EXISTS": "ユーザー名がすでに存在します",
+  "USER_NOT_ALLOW_REGISTER": "登録は締め切られました",
+  "USER_BANNED": "ユーザーが禁止されました",
+  "USER_INVALID_PASSWORD": "無効なパスワード",
 
   "GAME_NOT_FOUND": "ゲームが見つかりません",
 

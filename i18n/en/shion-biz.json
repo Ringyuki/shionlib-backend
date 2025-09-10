@@ -5,6 +5,11 @@
   "AUTH_INVALID_TOKEN": "invalid token",
 
   "USER_NOT_FOUND": "user not found",
+  "USER_EMAIL_ALREADY_EXISTS": "email already exists",
+  "USER_NAME_ALREADY_EXISTS": "name already exists",
+  "USER_NOT_ALLOW_REGISTER": "register is closed",
+  "USER_BANNED": "user banned",
+  "USER_INVALID_PASSWORD": "invalid password",
 
   "GAME_NOT_FOUND": "game not found",
 

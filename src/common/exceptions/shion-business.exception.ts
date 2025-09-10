@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
-import { ShionBizCode } from '../enums/biz-code/shion-biz-code.enum'
+import { ShionBizCode } from '../../shared/enums/biz-code/shion-biz-code.enum'
 import { I18nPath } from '../../generated/i18n.generated'
 
 export class ShionBizException extends HttpException {

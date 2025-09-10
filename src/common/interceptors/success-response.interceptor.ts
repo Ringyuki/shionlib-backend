@@ -21,17 +21,17 @@ export class SuccessResponseInterceptor implements NestInterceptor {
     )
 
     return next.handle().pipe(
-      map(data => (): ResponseInterface<typeof data> => {
-        return {
+      map(
+        (data): ResponseInterface<typeof data> => ({
           code: ShionBizCode.COMMON_SUCCESS,
           message: messageKey
-            ? this.i18n.t(messageKey, { lang: i18nCtx?.lang, args: data })
-            : this.i18n.t('common.success', { lang: i18nCtx?.lang }),
+            ? (this.i18n.t(messageKey, { lang: i18nCtx?.lang, args: data }) as string)
+            : (this.i18n.t('common.success', { lang: i18nCtx?.lang }) as string),
           data,
           requestId: req.id,
           timestamp: Date.now(),
-        }
-      }),
+        }),
+      ),
     )
   }
 }
