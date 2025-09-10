@@ -1,0 +1,19 @@
+{
+  "common": {
+    "IS_NOT_EMPTY": "{property} is required",
+    "MIN_LENGTH": "{property} must be longer than {min} characters",
+    "MAX_LENGTH": "{property} must be shorter than {max} characters",
+
+    "IS_STRING": "{property} must be a string",
+    "IS_EMAIL": "{property} must be a valid email address",
+    "IS_NUMBER": "{property} must be a number",
+    "IS_BOOLEAN": "{property} must be a boolean",
+    "IS_ARRAY": "{property} must be an array",
+    "IS_OBJECT": "{property} must be an object",
+    "IS_DATE": "{property} must be a date",
+    "IS_URL": "{property} must be a valid URL"
+  },
+  "user": {
+    "PASSWORD_MATCHES": "password must contain at least one uppercase letter, one lowercase letter, and one number"
+  }
+}

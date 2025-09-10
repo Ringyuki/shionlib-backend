@@ -1,12 +1,16 @@
 import { NestFactory, Reflector } from '@nestjs/core'
-import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestExpressApplication } from '@nestjs/platform-express'
-import { I18nService, I18nValidationPipe } from 'nestjs-i18n'
+import { I18nService } from 'nestjs-i18n'
 import { AppModule } from './app.module'
 import { requestId } from './common/middlewares/request-id.middleware'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor'
+import { ValidationPipe } from '@nestjs/common'
+import { ShionBizException } from './shared/exceptions/shion-business.exception'
+import { ShionBizCode } from './shared/enums/biz-code/shion-biz-code.enum'
+import { flattenValidationErrors } from './common/validation/flatten-validation.util'
+import { HttpStatus } from '@nestjs/common'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -22,13 +26,17 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
       transform: true,
+      whitelist: true,
       forbidNonWhitelisted: true,
-    }),
-    new I18nValidationPipe({
-      transform: true,
-      whitelist: true,
+      stopAtFirstError: false,
+      exceptionFactory: errors =>
+        new ShionBizException(
+          ShionBizCode.COMMON_VALIDATION_FAILED,
+          'shion-biz.COMMON_VALIDATION_FAILED',
+          { errors: flattenValidationErrors(errors) },
+          HttpStatus.BAD_REQUEST,
+        ),
     }),
   )
 

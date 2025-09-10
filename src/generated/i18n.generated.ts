@@ -28,6 +28,24 @@ export type I18nTranslations = {
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
     };
+    "validation": {
+        "common": {
+            "IS_NOT_EMPTY": string;
+            "MIN_LENGTH": string;
+            "MAX_LENGTH": string;
+            "IS_STRING": string;
+            "IS_EMAIL": string;
+            "IS_NUMBER": string;
+            "IS_BOOLEAN": string;
+            "IS_ARRAY": string;
+            "IS_OBJECT": string;
+            "IS_DATE": string;
+            "IS_URL": string;
+        };
+        "user": {
+            "PASSWORD_MATCHES": string;
+        };
+    };
 };
 /* prettier-ignore */
 export type I18nPath = Path<I18nTranslations>;

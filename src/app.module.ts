@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common'
-import { ShionConfigModule } from './common/config/config.module'
 import { I18nModule, AcceptLanguageResolver, QueryResolver, CookieResolver } from 'nestjs-i18n'
+import { PrismaModule } from './prisma.module'
+import { ShionConfigModule } from './common/config/config.module'
 import { join } from 'path'
 import path from 'path'
+
+import { UserModule } from './modules/user/user.module'
 
 @Module({
   imports: [
     ShionConfigModule,
+    PrismaModule,
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
@@ -20,6 +24,8 @@ import path from 'path'
         new AcceptLanguageResolver(),
       ],
     }),
+
+    UserModule,
   ],
   controllers: [],
   providers: [],

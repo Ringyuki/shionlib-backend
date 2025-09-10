@@ -16,3 +16,8 @@ export interface PaginatedResult<T> {
     currentPage: number
   }
 }
+
+export interface FieldError {
+  field: string
+  messages: string[]
+}

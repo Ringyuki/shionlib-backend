@@ -1,0 +1,19 @@
+{
+  "common": {
+    "IS_NOT_EMPTY": "{property} 不能为空",
+    "MIN_LENGTH": "{property} 必须大于 {min} 个字符",
+    "MAX_LENGTH": "{property} 必须小于 {max} 个字符",
+
+    "IS_STRING": "{property} 必须是字符串",
+    "IS_EMAIL": "{property} 必须是有效的邮箱地址",
+    "IS_NUMBER": "{property} 必须是数字",
+    "IS_BOOLEAN": "{property} 必须是布尔值",
+    "IS_ARRAY": "{property} 必须是数组",
+    "IS_OBJECT": "{property} 必须是对象",
+    "IS_DATE": "{property} 必须是日期",
+    "IS_URL": "{property} 必须是有效的URL"
+  },
+  "user": {
+    "PASSWORD_MATCHES": "密码必须至少包含一个大写字母，一个小写字母和一个数字"
+  }
+}
