@@ -5,12 +5,14 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { CacheService } from '../../cache/services/cache.service'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ShionConfigService,
+    private readonly cacheService: CacheService,
   ) {
     super()
   }
@@ -31,8 +33,29 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         secret: this.configService.get('token.secret'),
       })) as RequestWithUser['user']
       request.user = payload
+
+      const cacheKey = `auth:family:blocked:${payload.fid}`
+      const blocked = await this.cacheService.get<boolean>(cacheKey)
+      if (blocked) {
+        throw new ShionBizException(
+          ShionBizCode.AUTH_FAMILY_BLOCKED,
+          'shion-biz.AUTH_FAMILY_BLOCKED',
+          undefined,
+          HttpStatus.FORBIDDEN,
+        )
+      }
       return true
-    } catch {
+    } catch (error) {
+      if (error instanceof ShionBizException) {
+        if (error.code === ShionBizCode.AUTH_FAMILY_BLOCKED) {
+          throw new ShionBizException(
+            ShionBizCode.AUTH_FAMILY_BLOCKED,
+            'shion-biz.AUTH_FAMILY_BLOCKED',
+            undefined,
+            HttpStatus.FORBIDDEN,
+          )
+        }
+      }
       throw new ShionBizException(
         ShionBizCode.AUTH_UNAUTHORIZED,
         'shion-biz.AUTH_UNAUTHORIZED',

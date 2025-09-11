@@ -23,6 +23,7 @@ export type I18nTranslations = {
         "AUTH_INVALID_REFRESH_TOKEN": string;
         "AUTH_REFRESH_TOKEN_EXPIRED": string;
         "AUTH_REFRESH_TOKEN_REUSED": string;
+        "AUTH_FAMILY_BLOCKED": string;
         "USER_NOT_FOUND": string;
         "USER_EMAIL_ALREADY_EXISTS": string;
         "USER_NAME_ALREADY_EXISTS": string;

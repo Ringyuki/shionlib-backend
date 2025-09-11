@@ -6,6 +6,7 @@
   "AUTH_INVALID_REFRESH_TOKEN": "无效的刷新令牌",
   "AUTH_REFRESH_TOKEN_EXPIRED": "刷新令牌已过期",
   "AUTH_REFRESH_TOKEN_REUSED": "刷新令牌已重用",
+  "AUTH_FAMILY_BLOCKED": "令牌已被封禁",
 
   "USER_NOT_FOUND": "用户不存在",
   "USER_EMAIL_ALREADY_EXISTS": "邮箱已存在",

@@ -6,6 +6,7 @@
   "AUTH_INVALID_REFRESH_TOKEN": "invalid refresh token",
   "AUTH_REFRESH_TOKEN_EXPIRED": "refresh token expired",
   "AUTH_REFRESH_TOKEN_REUSED": "refresh token reused",
+  "AUTH_FAMILY_BLOCKED": "token blocked",
 
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",

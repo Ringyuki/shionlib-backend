@@ -6,6 +6,7 @@
   "AUTH_INVALID_REFRESH_TOKEN": "無効なリフレッシュトークン",
   "AUTH_REFRESH_TOKEN_EXPIRED": "リフレッシュトークンが期限切れです",
   "AUTH_REFRESH_TOKEN_REUSED": "リフレッシュトークンが再利用されました",
+  "AUTH_FAMILY_BLOCKED": "トークンがブロックされました",
 
   "USER_NOT_FOUND": "ユーザーが見つかりません",
   "USER_EMAIL_ALREADY_EXISTS": "メールアドレスがすでに存在します",

@@ -17,6 +17,8 @@ import { UserRole } from '../../../shared/enums/auth/user-role.enum'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { CacheService } from '../../cache/services/cache.service'
+import { SignResInterface } from '../interfaces/sign.res.interface'
 
 @Injectable()
 export class LoginSessionService {
@@ -24,8 +26,13 @@ export class LoginSessionService {
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
     private readonly configService: ShionConfigService,
+    private readonly cacheService: CacheService,
   ) {}
-  async issueOnLogin(userId: number, device: DeviceSignals, role: UserRole) {
+  async issueOnLogin(
+    userId: number,
+    device: DeviceSignals,
+    role: UserRole,
+  ): Promise<SignResInterface> {
     const now = new Date()
     const fid = globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID()
 
@@ -67,7 +74,7 @@ export class LoginSessionService {
     }
   }
 
-  async refresh(incoming: string, device: DeviceSignals) {
+  async refresh(incoming: string, device: DeviceSignals): Promise<SignResInterface> {
     const now = new Date()
     const { prefix, opaque } = parseRefreshToken(incoming)
 
@@ -85,7 +92,6 @@ export class LoginSessionService {
           HttpStatus.UNAUTHORIZED,
         )
       }
-
       const ok = await verifyOpaque(
         old.refresh_token_hash,
         opaque,
@@ -109,6 +115,12 @@ export class LoginSessionService {
         )
 
       if (old.status !== UserLoginSessionStatus.ACTIVE) {
+        if (old.status === UserLoginSessionStatus.ROTATED) {
+          const idemp = await this.idempWaitAndLoad(old.id)
+          if (idemp) {
+            return { kind: 'idempotent' as const, res: idemp }
+          }
+        }
         if (old.status !== UserLoginSessionStatus.REUSED) {
           await tx.userLoginSession.update({
             where: {
@@ -131,6 +143,7 @@ export class LoginSessionService {
             blocked_reason: 'refresh_token_reuse_detected',
           },
         })
+        await this.blockAllSessions(old.family_id)
         return { kind: 'reuse' as const }
       }
 
@@ -150,6 +163,7 @@ export class LoginSessionService {
             blocked_reason: 'user_not_found',
           },
         })
+        await this.blockAllSessions(old.family_id)
         return { kind: 'user_not_found' as const }
       }
 
@@ -165,10 +179,9 @@ export class LoginSessionService {
             blocked_reason: 'user_banned',
           },
         })
+        await this.blockAllSessions(old.family_id)
         return { kind: 'user_banned' as const }
       }
-
-      // TODO: handle with idempotency
 
       const newOpaque = generateOpaque()
       const newPrefix = calcPrefix(newOpaque)
@@ -210,8 +223,7 @@ export class LoginSessionService {
         type: 'access',
       })
 
-      return {
-        kind: 'success' as const,
+      const res = {
         token,
         tokenExp,
         refreshToken: formatRefreshToken(newPrefix, newOpaque),
@@ -219,9 +231,17 @@ export class LoginSessionService {
         sessionId: newer.id,
         familyId: newer.family_id,
       }
+      await this.idempSave(old.id, res)
+      return {
+        kind: 'success' as const,
+        res,
+      }
     })
 
     if (outcome && outcome.kind && outcome.kind !== 'success') {
+      if (outcome.kind === 'idempotent') {
+        return outcome.res
+      }
       if (outcome.kind === 'reuse') {
         throw new ShionBizException(
           ShionBizCode.AUTH_REFRESH_TOKEN_REUSED,
@@ -243,14 +263,7 @@ export class LoginSessionService {
       }
     }
 
-    return {
-      token: outcome.token,
-      tokenExp: outcome.tokenExp,
-      refreshToken: outcome.refreshToken,
-      refreshTokenExp: outcome.refreshTokenExp,
-      sessionId: outcome.sessionId,
-      familyId: outcome.familyId,
-    }
+    return outcome.res
   }
 
   private calcRefreshExpiry(first: Date, now: Date) {
@@ -261,5 +274,41 @@ export class LoginSessionService {
       first.getTime() + Number(this.configService.get('refresh_token.longWindowSec')) * 1000,
     )
     return short < hard ? short : hard
+  }
+
+  private async idempSave(old_session_id: number, res: SignResInterface) {
+    const cacheKey = `rt:idemp:${old_session_id}`
+    await this.cacheService.set(
+      cacheKey,
+      res,
+      Number(this.configService.get('refresh_token.rotationGraceSec')) * 1000,
+    )
+  }
+
+  private async idempLoad(old_session_id: number): Promise<SignResInterface | null> {
+    const cacheKey = `rt:idemp:${old_session_id}`
+    return this.cacheService.get<SignResInterface>(cacheKey)
+  }
+
+  private async idempWaitAndLoad(old_session_id: number): Promise<SignResInterface | null> {
+    const ttlMs = Number(this.configService.get('refresh_token.rotationGraceSec')) * 1000
+    const spinLimit = Math.min(ttlMs, 150) // max 150ms to avoid long blocking
+    let left = spinLimit
+    while (left > 0) {
+      const hit = await this.idempLoad(old_session_id)
+      if (hit) return hit
+      await new Promise(r => setTimeout(r, 20))
+      left -= 20
+    }
+    return null
+  }
+
+  private async blockAllSessions(family_id: string) {
+    const cacheKey = `auth:family:blocked:${family_id}`
+    await this.cacheService.set(
+      cacheKey,
+      true,
+      Number(this.configService.get('refresh_token.longWindowSec')) * 1000,
+    )
   }
 }
