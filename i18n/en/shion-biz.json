@@ -3,6 +3,9 @@
 
   "AUTH_UNAUTHORIZED": "unauthorized",
   "AUTH_INVALID_TOKEN": "invalid token",
+  "AUTH_INVALID_REFRESH_TOKEN": "invalid refresh token",
+  "AUTH_REFRESH_TOKEN_EXPIRED": "refresh token expired",
+  "AUTH_REFRESH_TOKEN_REUSED": "refresh token reused",
 
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",

@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Req } from '@nestjs/common'
+import { Controller, Post, Body, Req, Res, Get, UseGuards } from '@nestjs/common'
+import { Response } from 'express'
 import { UserService } from '../services/user.service'
 import { CreateUserDto } from '../dto/req/CreateUser.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { LoginDto } from '../dto/req/Login.req.dto'
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 
 @Controller('user')
 export class UserController {
@@ -14,7 +16,26 @@ export class UserController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return await this.userService.login(loginDto)
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { token, refresh_token } = await this.userService.login(loginDto, request)
+
+    response.setHeader('Set-Cookie', [
+      `shionlib_access_token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/`,
+    ])
+
+    return {
+      token,
+      refresh_token,
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('test')
+  async test(@Req() request: RequestWithUser) {
+    return request.user
   }
 }

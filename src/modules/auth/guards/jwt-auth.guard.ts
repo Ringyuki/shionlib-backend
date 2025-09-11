@@ -28,7 +28,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     try {
       const payload = (await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get('jwt.secret'),
+        secret: this.configService.get('token.secret'),
       })) as RequestWithUser['user']
       request.user = payload
       return true

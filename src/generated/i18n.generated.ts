@@ -20,6 +20,9 @@ export type I18nTranslations = {
         "COMMON_VALIDATION_FAILED": string;
         "AUTH_UNAUTHORIZED": string;
         "AUTH_INVALID_TOKEN": string;
+        "AUTH_INVALID_REFRESH_TOKEN": string;
+        "AUTH_REFRESH_TOKEN_EXPIRED": string;
+        "AUTH_REFRESH_TOKEN_REUSED": string;
         "USER_NOT_FOUND": string;
         "USER_EMAIL_ALREADY_EXISTS": string;
         "USER_NAME_ALREADY_EXISTS": string;

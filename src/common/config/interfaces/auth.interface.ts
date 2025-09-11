@@ -1,8 +1,11 @@
 export interface AuthConfig {
-  jwt: {
+  token: {
     secret: string
-    refreshSecret: string
     expiresIn: string
-    refreshExpiresIn: string
+  }
+  refresh_token: {
+    shortWindowSec: string
+    longWindowSec: string
+    pepper: string
   }
 }

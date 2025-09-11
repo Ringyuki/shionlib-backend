@@ -1,5 +1,4 @@
 import { HttpStatus, Injectable } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { PrismaService } from '../../../prisma.service'
 import argon2 from 'argon2'
@@ -13,15 +12,14 @@ import { LoginDto } from '../dto/req/Login.req.dto'
 import { LoginResDto } from '../dto/res/Login.res.dto'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { verifyPassword } from '../utils/verify-password.util'
-import { TokenHandler } from '../utils/token-handler.util'
-import { TokenPayloadInterface } from '../interfaces/token-payload.interface'
+import { LoginSessionService } from '../../auth/services/login-session.service'
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ShionConfigService,
-    private readonly jwtService: JwtService,
+    private readonly loginSessionService: LoginSessionService,
   ) {}
   async create(user: CreateUserDto, request: RequestWithUser): Promise<CreateUserResDto> {
     const lang = getPreferredLang(request.headers['accept-language'])
@@ -66,8 +64,11 @@ export class UserService {
     return createdUser
   }
 
-  async login(user: LoginDto): Promise<LoginResDto> {
+  async login(user: LoginDto, req: RequestWithUser): Promise<LoginResDto> {
     const { identifier, password } = user
+    const ip = req.ip
+    const user_agent = req.headers['user-agent']
+    const device = { ip, user_agent }
 
     const foundUser = await this.prisma.user.findFirst({
       where: {
@@ -111,8 +112,11 @@ export class UserService {
       )
     }
 
-    const tokenHandler = new TokenHandler(this.jwtService, this.configService)
-    const { token, refresh_token } = await tokenHandler.generateToken(foundUser)
+    const { token, refreshToken: refresh_token } = await this.loginSessionService.issueOnLogin(
+      foundUser.id,
+      device,
+      foundUser.role,
+    )
 
     return {
       token,
@@ -120,35 +124,17 @@ export class UserService {
     }
   }
 
-  async refreshToken(refresh_token: string) {
-    const tokenHandler = new TokenHandler(this.jwtService, this.configService)
+  async refreshToken(refresh_token: string, req: RequestWithUser) {
+    const ip = req.ip
+    const user_agent = req.headers['user-agent']
+    const device = { ip, user_agent }
 
-    const decoded = tokenHandler.verifyRefreshToken(refresh_token)
-    const user = await this.prisma.user.findUnique({
-      where: { id: decoded.sub },
-      select: {
-        id: true,
-        role: true,
-        status: true,
-      },
-    })
+    const { token: new_token, refreshToken: new_refresh_token } =
+      await this.loginSessionService.refresh(refresh_token, device)
 
-    if (!user) {
-      throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
-    }
-    if (user.status === UserStatus.BANNED) {
-      throw new ShionBizException(ShionBizCode.USER_BANNED, 'shion-biz.USER_BANNED')
-    }
-
-    const token_payload: TokenPayloadInterface = {
-      sub: user.id,
-      role: user.role,
-      type: 'access',
-    }
-
-    const token = await tokenHandler.refreshToken(token_payload)
     return {
-      token,
+      token: new_token,
+      refresh_token: new_refresh_token,
     }
   }
 }

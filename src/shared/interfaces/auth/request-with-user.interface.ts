@@ -1,6 +1,6 @@
 import { Request } from 'express'
-import { UserInterface } from '../../../modules/user/interfaces/user.interface'
+import { TokenPayloadInterface } from '../../../modules/auth/interfaces/token-payload.interface'
 
 export interface RequestWithUser extends Request {
-  user: UserInterface
+  user: TokenPayloadInterface
 }

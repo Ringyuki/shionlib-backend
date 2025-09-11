@@ -3,6 +3,9 @@
 
   "AUTH_UNAUTHORIZED": "認証されていません",
   "AUTH_INVALID_TOKEN": "無効なトークン",
+  "AUTH_INVALID_REFRESH_TOKEN": "無効なリフレッシュトークン",
+  "AUTH_REFRESH_TOKEN_EXPIRED": "リフレッシュトークンが期限切れです",
+  "AUTH_REFRESH_TOKEN_REUSED": "リフレッシュトークンが再利用されました",
 
   "USER_NOT_FOUND": "ユーザーが見つかりません",
   "USER_EMAIL_ALREADY_EXISTS": "メールアドレスがすでに存在します",
