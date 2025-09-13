@@ -25,15 +25,16 @@ export const verifyOpaque = async (hash: string, opaque: string, pepper: string)
   return argon2.verify(hash, opaque + pepper)
 }
 
-export const formatRefreshToken = (prefix: string, opaque: string): string => {
-  return `slrt1.${prefix}.${opaque}`
+export const formatRefreshToken = (prefix: string, opaque: string, version: string): string => {
+  return `${version}.${prefix}.${opaque}`
 }
 
 export const parseRefreshToken = (
   token: string,
+  version: string,
 ): { version: string; prefix: string; opaque: string } => {
   const parts = token.split('.')
-  if (parts.length !== 3 || parts[0] !== 'slrt1')
+  if (parts.length !== 3 || parts[0] !== version)
     throw new ShionBizException(
       ShionBizCode.AUTH_INVALID_REFRESH_TOKEN,
       'shion-biz.AUTH_INVALID_REFRESH_TOKEN',

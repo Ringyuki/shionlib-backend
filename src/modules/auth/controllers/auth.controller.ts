@@ -1,12 +1,17 @@
-import { Controller, Post, Req, Body, Res } from '@nestjs/common'
+import { Controller, Post, Req, Body, Res, HttpCode } from '@nestjs/common'
 import { Response } from 'express'
 import { UserService } from '../../user/services/user.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { RefreshTokenDto } from '../../user/dto/req/RefreshToken.req.dto'
+import { LogoutDto } from '../dto/req/Logout.req.dto'
+import { LoginSessionService } from '../services/login-session.service'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly loginSessionService: LoginSessionService,
+  ) {}
 
   @Post('token/refresh')
   async refreshToken(
@@ -27,5 +32,11 @@ export class AuthController {
       token,
       refresh_token,
     }
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(@Body() logoutDto: LogoutDto) {
+    await this.loginSessionService.logout(logoutDto.token)
   }
 }

@@ -8,5 +8,6 @@ export interface AuthConfig {
     longWindowSec: string
     pepper: string
     rotationGraceSec: string
+    algorithmVersion: string
   }
 }

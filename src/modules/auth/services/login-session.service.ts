@@ -67,7 +67,11 @@ export class LoginSessionService {
     return {
       token,
       tokenExp,
-      refreshToken: formatRefreshToken(prefix, opaque),
+      refreshToken: formatRefreshToken(
+        prefix,
+        opaque,
+        this.configService.get('refresh_token.algorithmVersion'),
+      ),
       refreshTokenExp,
       sessionId: session.id,
       familyId: fid,
@@ -76,7 +80,10 @@ export class LoginSessionService {
 
   async refresh(incoming: string, device: DeviceSignals): Promise<SignResInterface> {
     const now = new Date()
-    const { prefix, opaque } = parseRefreshToken(incoming)
+    const { prefix, opaque } = parseRefreshToken(
+      incoming,
+      this.configService.get('refresh_token.algorithmVersion'),
+    )
 
     const outcome = await this.prisma.$transaction(async tx => {
       const old = await tx.userLoginSession.findUnique({
@@ -114,6 +121,15 @@ export class LoginSessionService {
           HttpStatus.UNAUTHORIZED,
         )
 
+      if (old.status === UserLoginSessionStatus.BLOCKED) {
+        throw new ShionBizException(
+          ShionBizCode.AUTH_FAMILY_BLOCKED,
+          'shion-biz.AUTH_FAMILY_BLOCKED',
+          undefined,
+          HttpStatus.FORBIDDEN,
+        )
+      }
+
       if (old.status !== UserLoginSessionStatus.ACTIVE) {
         if (old.status === UserLoginSessionStatus.ROTATED) {
           const idemp = await this.idempWaitAndLoad(old.id)
@@ -143,7 +159,7 @@ export class LoginSessionService {
             blocked_reason: 'refresh_token_reuse_detected',
           },
         })
-        await this.blockAllSessions(old.family_id)
+        await this.blockAllSessions(old.family_id, old.expires_at)
         return { kind: 'reuse' as const }
       }
 
@@ -163,7 +179,7 @@ export class LoginSessionService {
             blocked_reason: 'user_not_found',
           },
         })
-        await this.blockAllSessions(old.family_id)
+        await this.blockAllSessions(old.family_id, old.expires_at)
         return { kind: 'user_not_found' as const }
       }
 
@@ -179,14 +195,26 @@ export class LoginSessionService {
             blocked_reason: 'user_banned',
           },
         })
-        await this.blockAllSessions(old.family_id)
+        await this.blockAllSessions(old.family_id, old.expires_at)
         return { kind: 'user_banned' as const }
       }
+
+      const firstSession = await tx.userLoginSession.findFirst({
+        where: {
+          family_id: old.family_id,
+        },
+        orderBy: {
+          created: 'asc',
+        },
+        select: {
+          created: true,
+        },
+      })
 
       const newOpaque = generateOpaque()
       const newPrefix = calcPrefix(newOpaque)
       const newHash = await hashOpaque(newOpaque, this.configService.get('refresh_token.pepper'))
-      const newRefreshTokenExp = this.calcRefreshExpiry(now, now)
+      const newRefreshTokenExp = this.calcRefreshExpiry(firstSession?.created ?? now, now)
 
       const newer = await tx.userLoginSession.create({
         data: {
@@ -226,7 +254,11 @@ export class LoginSessionService {
       const res = {
         token,
         tokenExp,
-        refreshToken: formatRefreshToken(newPrefix, newOpaque),
+        refreshToken: formatRefreshToken(
+          newPrefix,
+          newOpaque,
+          this.configService.get('refresh_token.algorithmVersion'),
+        ),
         refreshTokenExp: newRefreshTokenExp,
         sessionId: newer.id,
         familyId: newer.family_id,
@@ -266,6 +298,41 @@ export class LoginSessionService {
     return outcome.res
   }
 
+  async logout(refreshToken?: string) {
+    if (refreshToken) {
+      const now = new Date()
+      const { prefix } = parseRefreshToken(
+        refreshToken,
+        this.configService.get('refresh_token.algorithmVersion'),
+      )
+      const session = await this.prisma.userLoginSession.findUnique({
+        where: {
+          refresh_token_prefix: prefix,
+        },
+      })
+      if (!session) {
+        throw new ShionBizException(
+          ShionBizCode.AUTH_INVALID_REFRESH_TOKEN,
+          'shion-biz.AUTH_INVALID_REFRESH_TOKEN',
+          undefined,
+          HttpStatus.UNAUTHORIZED,
+        )
+      }
+      await this.prisma.userLoginSession.updateMany({
+        where: {
+          user_id: session.user_id,
+          family_id: session.family_id,
+        },
+        data: {
+          status: UserLoginSessionStatus.BLOCKED,
+          blocked_at: now,
+          blocked_reason: 'user_logout',
+        },
+      })
+      await this.blockAllSessions(session.family_id, session.expires_at)
+    }
+  }
+
   private calcRefreshExpiry(first: Date, now: Date) {
     const short = new Date(
       now.getTime() + Number(this.configService.get('refresh_token.shortWindowSec')) * 1000,
@@ -303,12 +370,8 @@ export class LoginSessionService {
     return null
   }
 
-  private async blockAllSessions(family_id: string) {
+  private async blockAllSessions(family_id: string, expires_at: Date) {
     const cacheKey = `auth:family:blocked:${family_id}`
-    await this.cacheService.set(
-      cacheKey,
-      true,
-      Number(this.configService.get('refresh_token.longWindowSec')) * 1000,
-    )
+    await this.cacheService.set(cacheKey, true, Math.max(expires_at.getTime() - Date.now(), 1000))
   }
 }
