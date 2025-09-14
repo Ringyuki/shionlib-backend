@@ -90,9 +90,11 @@ model UserLoginSession {
 // extra_info: Array<Record<key, value>>
 model Game {
   id         Int      @id @default(autoincrement())
-  title_jp   String[] @default([])
-  title_zh   String[] @default([])
-  title_en   String[] @default([])
+  v_id       String?
+  b_id       String?
+  title_jp   String   @default("") @db.VarChar(255)
+  title_zh   String   @default("") @db.VarChar(255)
+  title_en   String   @default("") @db.VarChar(255)
   aliases    String[] @default([])
   intro_jp   String   @default("") @db.VarChar(2000)
   intro_zh   String   @default("") @db.VarChar(2000)
@@ -131,7 +133,8 @@ model GameDeveloper {
   id         Int      @id @default(autoincrement())
   b_id       String?
   v_id       String?
-  name       String[] @default([])
+  name       String   @default("") @db.VarChar(255)
+  aliases    String[] @default([])
   logo       String?
   intro_jp   String   @default("") @db.VarChar(2000)
   intro_zh   String   @default("") @db.VarChar(2000)
@@ -191,6 +194,7 @@ model GameCharacterRelation {
   id         Int     @id @default(autoincrement())
   image      String?
   actor      String?
+  role       String?
   extra_info Json?   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   game_id      Int

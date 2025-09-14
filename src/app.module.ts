@@ -11,6 +11,8 @@ import { join } from 'path'
 
 import { CacheUtilModule } from './modules/cache/cache-util.module'
 import { UserModule } from './modules/user/user.module'
+import { BangumiModule } from './modules/bangumi/bangumi.module'
+import { GameModule } from './modules/game/game.module'
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { UserModule } from './modules/user/user.module'
     CacheUtilModule,
     AuthModule,
     UserModule,
+    BangumiModule,
+    GameModule,
   ],
   controllers: [],
   providers: [],
