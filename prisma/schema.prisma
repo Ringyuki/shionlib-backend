@@ -93,12 +93,12 @@ model Game {
   title_jp   String[] @default([])
   title_zh   String[] @default([])
   title_en   String[] @default([])
-  intro_jp   String   @default("") @db.VarChar(2000)
   aliases    String[] @default([])
+  intro_jp   String   @default("") @db.VarChar(2000)
   intro_zh   String   @default("") @db.VarChar(2000)
   intro_en   String   @default("") @db.VarChar(2000)
   covers     String[] @default([])
-  cgs        String[] @default([])
+  images     String[] @default([])
   extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   tags       String[]                @default([])
@@ -129,6 +129,8 @@ model Game {
 // extra_info: Array<Record<key, value>>
 model GameDeveloper {
   id         Int      @id @default(autoincrement())
+  b_id       String?
+  v_id       String?
   name       String[] @default([])
   logo       String?
   intro_jp   String   @default("") @db.VarChar(2000)
@@ -163,10 +165,17 @@ model GameDeveloperRelation {
 // extra_info: Array<Record<key, value>>
 model GameCharacter {
   id         Int      @id @default(autoincrement())
-  name_jp    String
+  b_id       String?
+  v_id       String?
+  image      String?
+  name_jp    String   @default("")
   name_zh    String?
   name_en    String?
   aliases    String[] @default([])
+  intro_jp   String   @default("") @db.VarChar(2000)
+  intro_zh   String   @default("") @db.VarChar(2000)
+  intro_en   String   @default("") @db.VarChar(2000)
+  gender     String?
   extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   games GameCharacterRelation[] @relation("game_appear_on")
