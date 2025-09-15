@@ -1,4 +1,6 @@
 export interface GameData {
+  creator_id: number
+
   b_id?: string
   v_id?: string
 
@@ -9,7 +11,7 @@ export interface GameData {
   intro_jp: string
   intro_zh: string
   intro_en: string
-  covers: string[]
+  covers?: GameCover[]
   images: string[]
   extra_info: Record<string, string>[]
 
@@ -71,4 +73,16 @@ export interface GameCharacterRelation {
 
   game_id: number
   character_id: number
+}
+
+export interface GameCover {
+  language: string
+  url: string
+  type: string
+  dims: number[]
+}
+
+export interface GameCoverRelation {
+  game_id: number
+  cover_id: number
 }

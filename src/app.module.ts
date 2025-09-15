@@ -12,6 +12,7 @@ import { join } from 'path'
 import { CacheUtilModule } from './modules/cache/cache-util.module'
 import { UserModule } from './modules/user/user.module'
 import { BangumiModule } from './modules/bangumi/bangumi.module'
+import { VNDBModule } from './modules/vndb/vnbd.module'
 import { GameModule } from './modules/game/game.module'
 
 @Module({
@@ -59,6 +60,7 @@ import { GameModule } from './modules/game/game.module'
     AuthModule,
     UserModule,
     BangumiModule,
+    VNDBModule,
     GameModule,
   ],
   controllers: [],

@@ -16,6 +16,10 @@
   "USER_INVALID_PASSWORD": "無効なパスワード",
 
   "GAME_NOT_FOUND": "ゲームが見つかりません",
+  "GAME_INVALID_VNDB_ID": "無効なvndb id",
+  "GAME_BANGUMI_REQUEST_FAILED": "bangumiリクエストに失敗しました。メッセージ: {message}",
+  "GAME_VNDB_REQUEST_FAILED": "vndbリクエストに失敗しました。メッセージ: {message}",
+  "GAME_ALREADY_EXISTS": "ゲームがすでに存在します",
 
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
 

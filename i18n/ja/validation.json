@@ -12,7 +12,8 @@
     "IS_ARRAY": "{property} は配列である必要があります",
     "IS_OBJECT": "{property} はオブジェクトである必要があります",
     "IS_DATE": "{property} は日付である必要があります",
-    "IS_URL": "{property} は有効なURLである必要があります"
+    "IS_URL": "{property} は有効なURLである必要があります",
+    "IS_ENUM": "{property} は以下の値のいずれかである必要があります: {allowed}"
   },
   "user": {
     "PASSWORD_MATCHES": "パスワードには少なくとも1つの大文字、1つの小文字、そして1つの数字が含まれている必要があります"

@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common'
-import { UserRole } from '../../../shared/enums/auth/user-role.enum'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 export const ROLES_KEY = 'roles'
-export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles)
+export const Roles = (...roles: ShionlibUserRoles[]) => SetMetadata(ROLES_KEY, roles)

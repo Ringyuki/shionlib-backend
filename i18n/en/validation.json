@@ -12,7 +12,8 @@
     "IS_ARRAY": "{property} must be an array",
     "IS_OBJECT": "{property} must be an object",
     "IS_DATE": "{property} must be a date",
-    "IS_URL": "{property} must be a valid URL"
+    "IS_URL": "{property} must be a valid URL",
+    "IS_ENUM": "{property} must be one of the following values: {allowed}"
   },
   "user": {
     "PASSWORD_MATCHES": "password must contain at least one uppercase letter, one lowercase letter, and one number"

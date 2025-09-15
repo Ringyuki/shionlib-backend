@@ -6,6 +6,8 @@ import { join } from 'path'
 import { firstValueFrom } from 'rxjs'
 import { OAuthConfig } from '../interfaces/oauth-config.interface'
 import { BangumiTokens } from '../interfaces/bangumi-tokens.interface'
+import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 
 @Injectable()
 export class BangumiAuthService implements OnModuleInit {
@@ -200,7 +202,11 @@ export class BangumiAuthService implements OnModuleInit {
       return res.data as T
     } catch (error) {
       this.logger.error(`Error making Bangumi request: ${error.message}`)
-      throw error
+      throw new ShionBizException(
+        ShionBizCode.GAME_BANGUMI_REQUEST_FAILED,
+        'shion-biz.GAME_BANGUMI_REQUEST_FAILED',
+        { message: error.message },
+      )
     }
   }
 }

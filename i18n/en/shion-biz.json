@@ -16,6 +16,10 @@
   "USER_INVALID_PASSWORD": "invalid password",
 
   "GAME_NOT_FOUND": "game not found",
+  "GAME_INVALID_VNDB_ID": "invalid vndb id",
+  "GAME_BANGUMI_REQUEST_FAILED": "bangumi request failed, message: {message}",
+  "GAME_VNDB_REQUEST_FAILED": "vndb request failed, message: {message}",
+  "GAME_ALREADY_EXISTS": "game already exists",
 
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
 

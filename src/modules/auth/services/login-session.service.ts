@@ -13,7 +13,7 @@ import {
 import { DeviceSignals } from '../interfaces/device-signals.interface'
 import { randomUUID as nodeRandomUUID } from 'node:crypto'
 import { UserLoginSessionStatus } from '../../../shared/enums/auth/user-login-session-status.enum'
-import { UserRole } from '../../../shared/enums/auth/user-role.enum'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
@@ -31,7 +31,7 @@ export class LoginSessionService {
   async issueOnLogin(
     userId: number,
     device: DeviceSignals,
-    role: UserRole,
+    role: ShionlibUserRoles,
   ): Promise<SignResInterface> {
     const now = new Date()
     const fid = globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID()

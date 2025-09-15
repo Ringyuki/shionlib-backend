@@ -31,6 +31,10 @@ export type I18nTranslations = {
         "USER_BANNED": string;
         "USER_INVALID_PASSWORD": string;
         "GAME_NOT_FOUND": string;
+        "GAME_INVALID_VNDB_ID": string;
+        "GAME_BANGUMI_REQUEST_FAILED": string;
+        "GAME_VNDB_REQUEST_FAILED": string;
+        "GAME_ALREADY_EXISTS": string;
         "GAME_DEVELOPER_NOT_FOUND": string;
         "GAME_CHARACTER_NOT_FOUND": string;
         "GAME_RESOURCE_NOT_FOUND": string;
@@ -51,6 +55,7 @@ export type I18nTranslations = {
             "IS_OBJECT": string;
             "IS_DATE": string;
             "IS_URL": string;
+            "IS_ENUM": string;
         };
         "user": {
             "PASSWORD_MATCHES": string;

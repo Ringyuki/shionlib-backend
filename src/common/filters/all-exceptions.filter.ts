@@ -47,8 +47,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = exception.getStatus()
       code = exception.code
       messageKey = exception.messageKey ?? (`shion-biz.${ShionBizCode[exception.code]}` as I18nPath)
-      const rawErrors = exception.args?.errors ?? []
+      const baseArgs = exception.args ?? {}
+      const rawErrors = baseArgs?.errors ?? []
       args = {
+        ...baseArgs,
         errors: rawErrors.map(
           (e: any): FieldError => ({
             field: e.field ?? '',
