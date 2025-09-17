@@ -19,7 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const lang = i18nCtx?.lang ?? 'en'
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR
-    let code = ShionBizCode.COMMON_VALIDATION_FAILED
+    let code: number = ShionBizCode.COMMON_VALIDATION_FAILED
     let messageKey: I18nPath = 'common.error'
     let args: Record<string, any> | undefined
 
@@ -62,7 +62,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     } else if (exception instanceof HttpException) {
       status = exception.getStatus()
-      code = ShionBizCode.COMMON_VALIDATION_FAILED
+      code = status
       messageKey = `http.${status}` as I18nPath
     }
 

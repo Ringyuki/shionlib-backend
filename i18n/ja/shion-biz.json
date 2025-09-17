@@ -22,8 +22,12 @@
   "GAME_ALREADY_EXISTS": "ゲームがすでに存在します",
 
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
+  "GAME_DEVELOPER_ALREADY_EXISTS": "開発者がすでに存在します",
 
   "GAME_CHARACTER_NOT_FOUND": "キャラクターが見つかりません",
+  "GAME_CHARACTER_ALREADY_EXISTS": "キャラクターがすでに存在します",
+
+  "GAME_COVER_ALREADY_EXISTS": "カバーがすでに存在します",
 
   "GAME_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
 

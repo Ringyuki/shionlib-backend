@@ -125,7 +125,10 @@ model Game {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@unique([b_id, v_id])
   @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
   @@map("games")
 }
 
@@ -141,7 +144,7 @@ model GameCover {
   updated DateTime @updatedAt
 
   game_id Int
-  game    Game? @relation("game_cover", fields: [game_id], references: [id])
+  game    Game @relation("game_cover", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("game_covers")
 }
@@ -164,7 +167,10 @@ model GameDeveloper {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@unique([b_id, v_id])
   @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
   @@map("game_developers")
 }
 
@@ -174,7 +180,7 @@ model GameDeveloperRelation {
   game_id      Int
   developer_id Int
 
-  game      Game          @relation("game_developer", fields: [game_id], references: [id])
+  game      Game          @relation("game_developer", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   developer GameDeveloper @relation("game_produce", fields: [developer_id], references: [id])
 
   created DateTime @default(now())
@@ -205,7 +211,10 @@ model GameCharacter {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@unique([b_id, v_id])
   @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
   @@map("game_characters")
 }
 
@@ -220,7 +229,7 @@ model GameCharacterRelation {
   game_id      Int
   character_id Int
 
-  game      Game          @relation("game_character", fields: [game_id], references: [id])
+  game      Game          @relation("game_character", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   character GameCharacter @relation("game_appear_on", fields: [character_id], references: [id])
 
   created DateTime @default(now())
@@ -233,7 +242,7 @@ model GameCharacterRelation {
 model GameDownloadResource {
   id      Int                        @id @default(autoincrement())
   game_id Int
-  game    Game                       @relation("game_download_resource", fields: [game_id], references: [id])
+  game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   files   GameDownloadResourceFile[] @relation("game_download_resource_files")
 
   creator_id Int
@@ -256,7 +265,7 @@ model GameDownloadResourceFile {
   file_hash String
 
   game_download_resource_id Int
-  game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id])
+  game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   creator_id Int
   creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
@@ -272,7 +281,7 @@ model GameFavoriteRelation {
   user_id Int
   game_id Int
 
-  user User @relation("user_favorite_game", fields: [user_id], references: [id])
+  user User @relation("user_favorite_game", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game Game @relation("game_favorite", fields: [game_id], references: [id])
 
   @@unique([user_id, game_id])
@@ -284,7 +293,7 @@ model Comment {
   content String
 
   game_id Int
-  game    Game @relation("game_comment", fields: [game_id], references: [id])
+  game    Game @relation("game_comment", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   creator_id Int
   creator    User @relation("user_create_comment", fields: [creator_id], references: [id])

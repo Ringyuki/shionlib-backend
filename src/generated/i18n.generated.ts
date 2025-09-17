@@ -36,7 +36,10 @@ export type I18nTranslations = {
         "GAME_VNDB_REQUEST_FAILED": string;
         "GAME_ALREADY_EXISTS": string;
         "GAME_DEVELOPER_NOT_FOUND": string;
+        "GAME_DEVELOPER_ALREADY_EXISTS": string;
         "GAME_CHARACTER_NOT_FOUND": string;
+        "GAME_CHARACTER_ALREADY_EXISTS": string;
+        "GAME_COVER_ALREADY_EXISTS": string;
         "GAME_RESOURCE_NOT_FOUND": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
@@ -47,6 +50,7 @@ export type I18nTranslations = {
             "MIN_LENGTH": string;
             "MAX_LENGTH": string;
             "PROPERTY_SHOULD_NOT_EXIST": string;
+            "CANNOT_ALL_BE_EMPTY": string;
             "IS_STRING": string;
             "IS_EMAIL": string;
             "IS_NUMBER": string;

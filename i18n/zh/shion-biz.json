@@ -21,9 +21,13 @@
   "GAME_VNDB_REQUEST_FAILED": "vndb请求失败, 返回信息: {message}",
   "GAME_ALREADY_EXISTS": "游戏已存在",
 
-  "GAME_DEVELOPER_NOT_FOUND": "制作组不存在",
+  "GAME_DEVELOPER_NOT_FOUND": "开发商不存在",
+  "GAME_DEVELOPER_ALREADY_EXISTS": "开发商已存在",
 
   "GAME_CHARACTER_NOT_FOUND": "角色不存在",
+  "GAME_CHARACTER_ALREADY_EXISTS": "角色已存在",
+
+  "GAME_COVER_ALREADY_EXISTS": "封面已存在",
 
   "GAME_RESOURCE_NOT_FOUND": "下载资源不存在",
 

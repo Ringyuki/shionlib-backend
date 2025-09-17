@@ -22,8 +22,12 @@
   "GAME_ALREADY_EXISTS": "game already exists",
 
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
+  "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
 
   "GAME_CHARACTER_NOT_FOUND": "character not found",
+  "GAME_CHARACTER_ALREADY_EXISTS": "character already exists",
+
+  "GAME_COVER_ALREADY_EXISTS": "cover already exists",
 
   "GAME_RESOURCE_NOT_FOUND": "download resource not found",
 

@@ -4,6 +4,7 @@
     "PROPERTY_SHOULD_NOT_EXIST": "{property} 不应该存在",
     "MIN_LENGTH": "{property} 必须大于 {min} 个字符",
     "MAX_LENGTH": "{property} 必须小于 {max} 个字符",
+    "CANNOT_ALL_BE_EMPTY": "{property} 不能全部为空",
 
     "IS_STRING": "{property} 必须是字符串",
     "IS_EMAIL": "{property} 必须是有效的邮箱地址",
