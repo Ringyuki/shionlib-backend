@@ -114,6 +114,8 @@ model Game {
 
   download_resources GameDownloadResource[] @relation("game_download_resource")
 
+  views Int @default(0)
+
   creator_id Int
   creator    User @relation("user_create_game", fields: [creator_id], references: [id])
 
@@ -244,6 +246,8 @@ model GameDownloadResource {
   game_id Int
   game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   files   GameDownloadResourceFile[] @relation("game_download_resource_files")
+
+  downloads Int @default(0)
 
   creator_id Int
   creator    User @relation("user_create_game_download_resource", fields: [creator_id], references: [id])

@@ -125,6 +125,14 @@ export class UserService {
   }
 
   async refreshToken(refresh_token: string, req: RequestWithUser) {
+    if (!refresh_token) {
+      throw new ShionBizException(
+        ShionBizCode.AUTH_INVALID_REFRESH_TOKEN,
+        'shion-biz.AUTH_INVALID_REFRESH_TOKEN',
+        undefined,
+        HttpStatus.UNAUTHORIZED,
+      )
+    }
     const ip = req.ip
     const user_agent = req.headers['user-agent']
     const device = { ip, user_agent }
@@ -136,5 +144,26 @@ export class UserService {
       token: new_token,
       refresh_token: new_refresh_token,
     }
+  }
+
+  async getMe(req: RequestWithUser) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
+        cover: true,
+        role: true,
+        lang: true,
+      },
+    })
+
+    if (!user) {
+      throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
+    }
+
+    return user
   }
 }

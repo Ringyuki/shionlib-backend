@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
+import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
 
 @Injectable()
 export class GameService {
@@ -11,13 +14,20 @@ export class GameService {
       where: {
         id,
       },
+      select: {
+        views: true,
+      },
     })
     if (!exist) {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
-    const game = await this.prisma.game.findUnique({
+
+    const game = await this.prisma.game.update({
       where: {
         id,
+      },
+      data: {
+        views: { increment: 1 },
       },
       select: {
         id: true,
@@ -104,5 +114,41 @@ export class GameService {
         id,
       },
     })
+  }
+
+  async getList(getGameListReqDto: GetGameListReqDto): Promise<PaginatedResult<GetGameListResDto>> {
+    const { page = 1, pageSize = 10 } = getGameListReqDto
+
+    const total = await this.prisma.game.count()
+    const games = await this.prisma.game.findMany({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: {
+        id: true,
+        title_jp: true,
+        title_zh: true,
+        title_en: true,
+        covers: {
+          select: {
+            language: true,
+            type: true,
+            dims: true,
+            url: true,
+          },
+        },
+        views: true,
+      },
+    })
+
+    return {
+      items: games,
+      meta: {
+        totalItems: total,
+        itemCount: games.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
   }
 }
