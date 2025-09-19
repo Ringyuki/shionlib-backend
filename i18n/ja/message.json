@@ -1,0 +1,6 @@
+{
+  "EMAIL_VERIFICATION_CODE_SUBJECT": "Shionlib 検証コード",
+  "EMAIL_VERIFICATION_CODE_PREFIX": "あなたの検証コードは: ",
+  "EMAIL_VERIFICATION_CODE_SUFFIX": "です。10分以内に使用してください。",
+  "EMAIL_VERIFICATION_CODE_IGNORE": "この検証コードをリクエストしていない場合は、このメールを無視してください。"
+}

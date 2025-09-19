@@ -14,6 +14,7 @@ import { UserModule } from './modules/user/user.module'
 import { BangumiModule } from './modules/bangumi/bangumi.module'
 import { VNDBModule } from './modules/vndb/vnbd.module'
 import { GameModule } from './modules/game/game.module'
+import { EmailModule } from './modules/email/email.module'
 
 @Module({
   imports: [
@@ -51,8 +52,8 @@ import { GameModule } from './modules/game/game.module'
       },
       typesOutputPath: join(__dirname, '../src/generated/i18n.generated.ts'),
       resolvers: [
+        new CookieResolver(['shionlib_locale']),
         { use: QueryResolver, options: ['lang'] },
-        new CookieResolver(['lang']),
         new AcceptLanguageResolver(),
       ],
     }),
@@ -62,6 +63,7 @@ import { GameModule } from './modules/game/game.module'
     BangumiModule,
     VNDBModule,
     GameModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [],

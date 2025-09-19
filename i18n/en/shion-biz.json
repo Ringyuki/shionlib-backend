@@ -7,6 +7,8 @@
   "AUTH_REFRESH_TOKEN_EXPIRED": "refresh token expired",
   "AUTH_REFRESH_TOKEN_REUSED": "refresh token reused",
   "AUTH_FAMILY_BLOCKED": "token blocked",
+  "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "verification code not found or expired",
+  "AUTH_VERIFICATION_CODE_ERROR": "verification code error",
 
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",

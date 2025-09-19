@@ -1,8 +1,7 @@
-import { Controller, Post, Req, Body, Res, HttpCode } from '@nestjs/common'
+import { Controller, Post, Req, Res, HttpCode } from '@nestjs/common'
 import { Response } from 'express'
 import { UserService } from '../../user/services/user.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
-import { LogoutDto } from '../dto/req/Logout.req.dto'
 import { LoginSessionService } from '../services/login-session.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 
@@ -32,7 +31,12 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
-  async logout(@Body() logoutDto: LogoutDto) {
-    await this.loginSessionService.logout(logoutDto.token)
+  async logout(@Req() request: RequestWithUser, @Res({ passthrough: true }) response: Response) {
+    await this.loginSessionService.logout(request.cookies['shionlib_refresh_token'])
+
+    response.setHeader('Set-Cookie', [
+      'shionlib_access_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
+      'shionlib_refresh_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
+    ])
   }
 }

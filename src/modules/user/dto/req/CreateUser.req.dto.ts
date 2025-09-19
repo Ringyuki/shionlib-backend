@@ -1,4 +1,12 @@
-import { IsString, IsEmail, IsNotEmpty, MinLength, MaxLength, Matches } from 'class-validator'
+import {
+  IsString,
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsUUID,
+} from 'class-validator'
 import { ivm } from '../../../../common/validation/i18n'
 
 export class CreateUserDto {
@@ -42,4 +50,12 @@ export class CreateUserDto {
     message: ivm('validation.user.PASSWORD_MATCHES'),
   })
   password: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'code' }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'code' }) })
+  code: string
+
+  @IsUUID(4, { message: ivm('validation.common.IS_UUID', { property: 'uuid' }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'uuid' }) })
+  uuid: string
 }

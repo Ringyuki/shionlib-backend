@@ -38,4 +38,9 @@ export class UserController {
   async getProfile(@Req() request: RequestWithUser) {
     return await this.userService.getMe(request)
   }
+
+  @Post('check-name')
+  async checkName(@Body() body: { name: string }) {
+    return await this.userService.checkName(body.name)
+  }
 }

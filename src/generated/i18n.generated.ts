@@ -16,6 +16,12 @@ export type I18nTranslations = {
         "404": string;
         "500": string;
     };
+    "message": {
+        "EMAIL_VERIFICATION_CODE_SUBJECT": string;
+        "EMAIL_VERIFICATION_CODE_PREFIX": string;
+        "EMAIL_VERIFICATION_CODE_SUFFIX": string;
+        "EMAIL_VERIFICATION_CODE_IGNORE": string;
+    };
     "shion-biz": {
         "COMMON_VALIDATION_FAILED": string;
         "AUTH_UNAUTHORIZED": string;
@@ -24,6 +30,8 @@ export type I18nTranslations = {
         "AUTH_REFRESH_TOKEN_EXPIRED": string;
         "AUTH_REFRESH_TOKEN_REUSED": string;
         "AUTH_FAMILY_BLOCKED": string;
+        "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": string;
+        "AUTH_VERIFICATION_CODE_ERROR": string;
         "USER_NOT_FOUND": string;
         "USER_EMAIL_ALREADY_EXISTS": string;
         "USER_NAME_ALREADY_EXISTS": string;
@@ -60,6 +68,7 @@ export type I18nTranslations = {
             "IS_DATE": string;
             "IS_URL": string;
             "IS_ENUM": string;
+            "IS_UUID": string;
         };
         "user": {
             "PASSWORD_MATCHES": string;

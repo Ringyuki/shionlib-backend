@@ -13,6 +13,7 @@ import { LoginResDto } from '../dto/res/Login.res.dto'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { verifyPassword } from '../utils/verify-password.util'
 import { LoginSessionService } from '../../auth/services/login-session.service'
+import { VerificationCodeService } from '../../auth/services/vrification-code.service'
 
 @Injectable()
 export class UserService {
@@ -20,8 +21,22 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly configService: ShionConfigService,
     private readonly loginSessionService: LoginSessionService,
+    private readonly verificationCodeService: VerificationCodeService,
   ) {}
   async create(user: CreateUserDto, request: RequestWithUser): Promise<CreateUserResDto> {
+    const { code, uuid } = user
+    const { verified } = await this.verificationCodeService.verify({
+      uuid,
+      code,
+      email: user.email,
+    })
+    if (!verified) {
+      throw new ShionBizException(
+        ShionBizCode.AUTH_VERIFICATION_CODE_ERROR,
+        'shion-biz.AUTH_VERIFICATION_CODE_ERROR',
+      )
+    }
+
     const lang = getPreferredLang(request.headers['accept-language'])
 
     if (!this.configService.get('allowRegister')) {
@@ -165,5 +180,12 @@ export class UserService {
     }
 
     return user
+  }
+
+  async checkName(name: string) {
+    const exists = await this.prisma.user.findUnique({ where: { name } })
+    return {
+      exists: !!exists,
+    }
   }
 }
