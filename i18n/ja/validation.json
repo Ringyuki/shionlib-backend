@@ -3,6 +3,8 @@
     "IS_NOT_EMPTY": "{property} は必須です",
     "MIN_LENGTH": "{property} は {min} 文字以上である必要があります",
     "MAX_LENGTH": "{property} は {max} 文字以下である必要があります",
+    "MIN": "{property} は {min} 以上である必要があります",
+    "MAX": "{property} は {max} 以下である必要があります",
     "PROPERTY_SHOULD_NOT_EXIST": "{property} は存在してはいけません",
     "CANNOT_ALL_BE_EMPTY": "{property} は全部空ではいけません",
 

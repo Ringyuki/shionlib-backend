@@ -36,5 +36,19 @@
 
   "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
 
-  "COMMENT_NOT_FOUND": "コメントが見つかりません"
+  "COMMENT_NOT_FOUND": "コメントが見つかりません",
+
+  "GAME_UPLOAD_INVALID_TOTAL_SIZE": "無効な総サイズ",
+  "GAME_UPLOAD_TOO_MANY_CHUNKS": "分片数が多すぎます",
+  "GAME_UPLOAD_TOO_LARGE": "アップロードファイルサイズが制限を超えています",
+  "GAME_UPLOAD_SESSION_NOT_FOUND": "アップロードセッションが見つかりません",
+  "GAME_UPLOAD_INVALID_SESSION_STATUS": "無効なアップロードセッション状態",
+  "GAME_UPLOAD_UNEXPECTED_CONTENT_LENGTH": "予期しないコンテンツの長さ、予想: {expected}、実際: {actual}",
+  "GAME_UPLOAD_INVALID_CHUNK_SHA256": "無効なチャンクSHA256",
+  "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": "チャンクSHA256が一致しません",
+  "GAME_UPLOAD_INCOMPLETE": "すべてのチャンクがアップロードされていません",
+  "GAME_UPLOAD_FILE_SHA256_MISMATCH": "ファイルSHA256が一致しません",
+  "GAME_UPLOAD_INVALID_CHUNK_INDEX": "無効なチャンクインデックス",
+  "GAME_UPLOAD_SESSION_EXPIRED": "アップロードセッションが期限切れです",
+  "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません"
 }

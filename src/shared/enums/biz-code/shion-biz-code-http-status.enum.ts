@@ -52,4 +52,19 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 46
   [ShionBizCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
+
+  // 47
+  [ShionBizCode.GAME_UPLOAD_INVALID_TOTAL_SIZE]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_UPLOAD_TOO_MANY_CHUNKS]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_UPLOAD_TOO_LARGE]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_UPLOAD_SESSION_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.GAME_UPLOAD_INVALID_SESSION_STATUS]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_UNEXPECTED_CONTENT_LENGTH]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_SHA256]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_CHUNK_SHA256_MISMATCH]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_INCOMPLETE]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_FILE_SHA256_MISMATCH]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_INDEX]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED]: HttpStatus.GONE,
+  [ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER]: HttpStatus.FORBIDDEN,
 } as const satisfies Record<ShionBizCode, HttpStatus>

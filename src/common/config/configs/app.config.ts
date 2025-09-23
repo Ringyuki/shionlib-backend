@@ -21,12 +21,14 @@ export default () => ({
     image: {
       bucket: process.env.S3_IMAGE_BUCKET,
       region: process.env.S3_IMAGE_REGION,
+      endpoint: process.env.S3_IMAGE_ENDPOINT,
       accessKeyId: process.env.S3_IMAGE_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_IMAGE_SECRET_ACCESS_KEY,
     },
     game: {
       bucket: process.env.S3_FILE_BUCKET,
       region: process.env.S3_FILE_REGION,
+      endpoint: process.env.S3_FILE_ENDPOINT,
       accessKeyId: process.env.S3_FILE_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_FILE_SECRET_ACCESS_KEY,
     },
@@ -35,5 +37,14 @@ export default () => ({
   bangumi: {
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
+  },
+
+  file_upload: {
+    upload_large_file_transfer_limit: process.env.UPLOAD_LARGE_FILE_TRANSFER_LIMIT || '100mb',
+    upload_large_file_max_size: process.env.UPLOAD_LARGE_FILE_MAX_SIZE || 1024 * 1024 * 1024 * 10, // 10GB
+    upload_large_file_max_chunks: process.env.UPLOAD_LARGE_FILE_MAX_CHUNKS || 10000,
+    upload_root_dir: process.env.FILE_UPLOAD_ROOT_DIR || '/tmp/shionlib-upload/',
+    chunk_size: process.env.FILE_UPLOAD_CHUNK_SIZE || 1024 * 1024 * 50, // 50MB
+    upload_session_expires_in: process.env.FILE_UPLOAD_SESSION_EXPIRES_IN || 1000 * 60 * 60 * 24, // 1 day
   },
 })

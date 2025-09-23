@@ -54,12 +54,27 @@ export type I18nTranslations = {
         "GAME_RESOURCE_NOT_FOUND": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
+        "GAME_UPLOAD_INVALID_TOTAL_SIZE": string;
+        "GAME_UPLOAD_TOO_MANY_CHUNKS": string;
+        "GAME_UPLOAD_TOO_LARGE": string;
+        "GAME_UPLOAD_SESSION_NOT_FOUND": string;
+        "GAME_UPLOAD_INVALID_SESSION_STATUS": string;
+        "GAME_UPLOAD_UNEXPECTED_CONTENT_LENGTH": string;
+        "GAME_UPLOAD_INVALID_CHUNK_SHA256": string;
+        "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": string;
+        "GAME_UPLOAD_INCOMPLETE": string;
+        "GAME_UPLOAD_FILE_SHA256_MISMATCH": string;
+        "GAME_UPLOAD_INVALID_CHUNK_INDEX": string;
+        "GAME_UPLOAD_SESSION_EXPIRED": string;
+        "GAME_UPLOAD_SESSION_NOT_OWNER": string;
     };
     "validation": {
         "common": {
             "IS_NOT_EMPTY": string;
             "MIN_LENGTH": string;
             "MAX_LENGTH": string;
+            "MIN": string;
+            "MAX": string;
             "PROPERTY_SHOULD_NOT_EXIST": string;
             "CANNOT_ALL_BE_EMPTY": string;
             "IS_STRING": string;

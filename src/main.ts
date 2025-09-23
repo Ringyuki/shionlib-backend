@@ -12,6 +12,7 @@ import { ShionBizCode } from './shared/enums/biz-code/shion-biz-code.enum'
 import { flattenValidationErrors } from './common/validation/flatten-validation.util'
 import { HttpStatus } from '@nestjs/common'
 import cookieParser from 'cookie-parser'
+import * as express from 'express'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -19,6 +20,13 @@ async function bootstrap() {
   app.use(requestId())
   app.use(cookieParser())
   const configService = app.get(ShionConfigService)
+  app.use(
+    '/uploads/large',
+    express.raw({
+      type: 'application/octet-stream',
+      limit: configService.get('file_upload.upload_large_file_transfer_limit'),
+    }),
+  )
 
   app.enableCors({
     origin: configService.get('cors.origin'),

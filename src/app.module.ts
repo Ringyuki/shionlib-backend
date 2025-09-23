@@ -17,6 +17,7 @@ import { BangumiModule } from './modules/bangumi/bangumi.module'
 import { VNDBModule } from './modules/vndb/vnbd.module'
 import { GameModule } from './modules/game/game.module'
 import { EmailModule } from './modules/email/email.module'
+import { UploadModule } from './modules/upload/upload.module'
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { EmailModule } from './modules/email/email.module'
     VNDBModule,
     GameModule,
     EmailModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [

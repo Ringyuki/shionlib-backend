@@ -36,5 +36,19 @@
 
   "FAVORITE_ALREADY_EXISTS": "already in favorites",
 
-  "COMMENT_NOT_FOUND": "comment not found"
+  "COMMENT_NOT_FOUND": "comment not found",
+
+  "GAME_UPLOAD_INVALID_TOTAL_SIZE": "invalid total size",
+  "GAME_UPLOAD_TOO_MANY_CHUNKS": "too many chunks",
+  "GAME_UPLOAD_TOO_LARGE": "upload file size exceeds limit",
+  "GAME_UPLOAD_SESSION_NOT_FOUND": "upload session not found",
+  "GAME_UPLOAD_INVALID_SESSION_STATUS": "invalid upload session status",
+  "GAME_UPLOAD_UNEXPECTED_CONTENT_LENGTH": "unexpected content length, expected: {expected}, actual: {actual}",
+  "GAME_UPLOAD_INVALID_CHUNK_SHA256": "invalid chunk sha256",
+  "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": "chunk sha256 mismatch",
+  "GAME_UPLOAD_INCOMPLETE": "not all chunks uploaded",
+  "GAME_UPLOAD_FILE_SHA256_MISMATCH": "file sha256 mismatch",
+  "GAME_UPLOAD_INVALID_CHUNK_INDEX": "invalid chunk index",
+  "GAME_UPLOAD_SESSION_EXPIRED": "upload session expired",
+  "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner"
 }

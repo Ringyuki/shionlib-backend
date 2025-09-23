@@ -3,6 +3,8 @@
     "IS_NOT_EMPTY": "{property} is required",
     "MIN_LENGTH": "{property} must be longer than {min} characters",
     "MAX_LENGTH": "{property} must be shorter than {max} characters",
+    "MIN": "{property} must be greater than {min}",
+    "MAX": "{property} must be less than {max}",
     "PROPERTY_SHOULD_NOT_EXIST": "{property} should not exist",
     "CANNOT_ALL_BE_EMPTY": "{property} should not all be empty",
 

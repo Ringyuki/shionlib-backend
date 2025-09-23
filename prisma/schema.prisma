@@ -39,9 +39,10 @@ model User {
   last_login_at      DateTime?
   two_factor_enabled Boolean   @default(false)
 
-  created  DateTime           @default(now())
-  updated  DateTime           @updatedAt
-  sessions UserLoginSession[] @relation("user_login_session")
+  created              DateTime            @default(now())
+  updated              DateTime            @updatedAt
+  sessions             UserLoginSession[]  @relation("user_login_session")
+  game_upload_sessions GameUploadSession[] @relation("user_create_game_upload_session")
 
   @@index([email])
   @@index([name])
@@ -369,4 +370,60 @@ model Comment {
   updated DateTime @updatedAt
 
   @@map("comments")
+}
+
+enum GameUploadSessionStatus {
+  INITIATED
+  UPLOADING
+  COMPLETED
+  ABORTED
+  EXPIRED
+}
+
+model GameUploadSession {
+  id Int @id @default(autoincrement())
+
+  file_name    String
+  mime_type    String?
+  total_size   BigInt
+  chunk_size   Int
+  total_chunks Int
+
+  uploaded_chunks Int[] @default([])
+
+  file_sha256  String
+  status       GameUploadSessionStatus
+  storage_path String
+
+  expires_at DateTime
+
+  game_upload_chunks GameUploadChunk[] @relation("game_upload_session_chunks")
+
+  creator_id Int
+  creator    User @relation("user_create_game_upload_session", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([expires_at])
+  @@index([status])
+  @@map("game_upload_sessions")
+}
+
+model GameUploadChunk {
+  id Int @id @default(autoincrement())
+
+  game_upload_session_id Int
+  game_upload_session    GameUploadSession @relation("game_upload_session_chunks", fields: [game_upload_session_id], references: [id])
+
+  index  Int
+  size   Int
+  sha256 String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_upload_session_id, index])
+  @@index([game_upload_session_id])
+  @@map("game_upload_chunks")
 }
