@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common'
+import { APP_GUARD } from '@nestjs/core'
 import { I18nModule, AcceptLanguageResolver, QueryResolver, CookieResolver } from 'nestjs-i18n'
 import { PrismaModule } from './prisma.module'
 import { CacheModule } from '@nestjs/cache-manager'
 import { redisStore } from 'cache-manager-redis-yet'
 import { KeyvAdapter } from 'cache-manager'
 import { AuthModule } from './modules/auth/auth.module'
+import { OptionalJwtAuthGuard } from './modules/auth/guards/optional-jwt-auth.guard'
 import { ShionConfigModule } from './common/config/config.module'
 import { ShionConfigService } from './common/config/services/config.service'
 import { join } from 'path'
@@ -66,6 +68,11 @@ import { EmailModule } from './modules/email/email.module'
     EmailModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: OptionalJwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

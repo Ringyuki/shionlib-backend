@@ -18,7 +18,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>()
-    const token = this.extractTokenFromHeader(request) || this.extractTokenFromCookie(request)
+    const headerToken = this.extractTokenFromHeader(request)
+    const cookieToken = this.extractTokenFromCookie(request)
+    const token = headerToken ?? cookieToken
     if (!token) {
       throw new ShionBizException(
         ShionBizCode.AUTH_UNAUTHORIZED,
@@ -66,8 +68,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   private extractTokenFromHeader(request: RequestWithUser): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? []
-    return type === 'Bearer' ? token : undefined
+    const auth = request.headers.authorization?.trim()
+    if (!auth) return undefined
+    const [type, raw] = auth.split(' ')
+    const candidate = raw?.trim()
+    return type === 'Bearer' && candidate && candidate !== 'undefined' && candidate !== 'null'
+      ? candidate
+      : undefined
   }
 
   private extractTokenFromCookie(request: RequestWithUser): string | undefined {
