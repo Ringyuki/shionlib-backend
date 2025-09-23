@@ -25,6 +25,7 @@ export class GetGameResDto {
   developers: GameDeveloper[]
   characters: GameCharacter[]
   creator: Creator
+  is_favorite: boolean
 }
 
 export class GameCover {

@@ -10,7 +10,7 @@ import { GetGameResDto } from '../dto/res/get-game.res.dto'
 @Injectable()
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
-  async getById(id: number): Promise<GetGameResDto> {
+  async getById(id: number, user_id?: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
       where: {
         id,
@@ -136,7 +136,22 @@ export class GameService {
       },
     })
 
-    return game as unknown as GetGameResDto
+    const isFavorite = await this.prisma.gameFavoriteRelation.findFirst({
+      where: {
+        game_id: id,
+        user_id,
+      },
+    })
+
+    const data = {
+      ...game,
+    } as unknown as GetGameResDto
+
+    if (user_id) {
+      data.is_favorite = !!isFavorite
+    }
+
+    return data
   }
 
   async deleteById(id: number) {
@@ -190,6 +205,29 @@ export class GameService {
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
       },
+    }
+  }
+
+  async favoriteGame(game_id: number, user_id: number) {
+    const exist = await this.prisma.gameFavoriteRelation.findFirst({
+      where: {
+        game_id,
+        user_id,
+      },
+    })
+    if (exist) {
+      await this.prisma.gameFavoriteRelation.delete({
+        where: {
+          id: exist.id,
+        },
+      })
+    } else {
+      await this.prisma.gameFavoriteRelation.create({
+        data: {
+          game_id,
+          user_id,
+        },
+      })
     }
   }
 }

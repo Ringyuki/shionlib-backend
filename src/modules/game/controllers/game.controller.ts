@@ -1,4 +1,5 @@
-import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common'
+import { Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameService } from '../services/game.service'
 import { GetGameReqDto } from '../dto/req/get-game.req.dto'
 import { DeleteGameReqDto } from '../dto/req/delete-game.req.dto'
@@ -18,8 +19,8 @@ export class GameController {
   }
 
   @Get(':id')
-  async getGame(@Param() getGameReqDto: GetGameReqDto) {
-    return await this.gameService.getById(getGameReqDto.id)
+  async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
+    return await this.gameService.getById(getGameReqDto.id, req.user?.sub)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,5 +28,11 @@ export class GameController {
   @Delete(':id')
   async deleteGame(@Param() deleteGameReqDto: DeleteGameReqDto) {
     return await this.gameService.deleteById(deleteGameReqDto.id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/favorite')
+  async favoriteGame(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return await this.gameService.favoriteGame(Number(id), req.user?.sub)
   }
 }
