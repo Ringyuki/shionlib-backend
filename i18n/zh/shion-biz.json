@@ -22,6 +22,7 @@
   "GAME_BANGUMI_REQUEST_FAILED": "bangumi请求失败, 返回信息: {message}",
   "GAME_VNDB_REQUEST_FAILED": "vndb请求失败, 返回信息: {message}",
   "GAME_ALREADY_EXISTS": "游戏已存在",
+  "GAME_DATA_CONSISTENCY_CHECK_FAILED": "游戏数据一致性检查失败",
 
   "GAME_DEVELOPER_NOT_FOUND": "开发商不存在",
   "GAME_DEVELOPER_ALREADY_EXISTS": "开发商已存在",

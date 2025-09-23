@@ -45,6 +45,7 @@ export class VNDBService {
         return response.data.results as T[]
       }
     } catch (error) {
+      console.error(error)
       throw new ShionBizException(
         ShionBizCode.GAME_VNDB_REQUEST_FAILED,
         'shion-biz.GAME_VNDB_REQUEST_FAILED',

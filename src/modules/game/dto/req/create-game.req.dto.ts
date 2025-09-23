@@ -129,9 +129,17 @@ class ExtraInfo {
 }
 
 enum GameCharacterGender {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
+  MALE = 'm',
+  FEMALE = 'f',
+  NON_BINARY = 'o',
+  AMBIGUOUS = 'a',
+}
+
+enum GameCharacterRole {
+  MAIN = 'main',
+  PRIMARY = 'primary',
+  SIDE = 'side',
+  APPEARS = 'appears',
 }
 
 export class CreateGameCharacterReqDto {
@@ -194,9 +202,13 @@ export class GameCharacter {
   @IsOptional()
   intro_en?: string
 
-  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'role' }) })
+  @IsEnum(GameCharacterRole, {
+    message: ivmEnum('validation.common.IS_ENUM', GameCharacterRole, {
+      property: 'role',
+    }),
+  })
   @IsOptional()
-  role?: string
+  role?: GameCharacterRole
 
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'actor' }) })
   @IsOptional()

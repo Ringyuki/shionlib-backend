@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from
 import { I18nService, I18nContext, I18nValidationException } from 'nestjs-i18n'
 import { I18nPath } from '../../generated/i18n.generated'
 import { ShionBizCode } from '../../shared/enums/biz-code/shion-biz-code.enum'
+import { ShionBizCodeHttpStatus } from '../../shared/enums/biz-code/shion-biz-code-http-status.enum'
 import { ShionBizException } from '../../common/exceptions/shion-business.exception'
 import { ResponseInterface } from '../../shared/interfaces/response/response.interface'
 import { formattingValidationMessage } from '../validation/formatting-validation-message.utl'
@@ -19,13 +20,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const lang = i18nCtx?.lang ?? 'en'
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR
-    let code: number = ShionBizCode.COMMON_VALIDATION_FAILED
+    let code: number = HttpStatus.INTERNAL_SERVER_ERROR
     let messageKey: I18nPath = 'common.error'
     let args: Record<string, any> | undefined
 
     if (exception instanceof I18nValidationException) {
-      status = HttpStatus.BAD_REQUEST
       code = ShionBizCode.COMMON_VALIDATION_FAILED
+      status = ShionBizCodeHttpStatus[code] ?? HttpStatus.BAD_REQUEST
       messageKey = 'shion-biz.COMMON_VALIDATION_FAILED' as I18nPath
 
       const rawErrors =
@@ -44,8 +45,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         }),
       }
     } else if (exception instanceof ShionBizException) {
-      status = exception.getStatus()
       code = exception.code
+      status = ShionBizCodeHttpStatus[code] ?? exception.getStatus() ?? HttpStatus.BAD_REQUEST
       messageKey = exception.messageKey ?? (`shion-biz.${ShionBizCode[exception.code]}` as I18nPath)
       const baseArgs = exception.args ?? {}
       const rawErrors = baseArgs?.errors ?? []
@@ -69,6 +70,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const message = this.i18n.t(messageKey, { lang, args }) as string
     let data =
       code === ShionBizCode.COMMON_VALIDATION_FAILED ? { errors: args?.errors ?? [] } : null
+    if (exception instanceof ShionBizException && exception.customErrors) {
+      data = { errors: exception.customErrors ?? [] }
+    }
     if (data && data.errors.length === 0) {
       data = null
     }
@@ -77,7 +81,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       data,
       requestId: req.id,
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
     }
 
     res.status(status).json(body)

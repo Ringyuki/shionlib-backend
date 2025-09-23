@@ -115,7 +115,7 @@ export class BangumiAuthService implements OnModuleInit {
           },
           {
             headers: {
-              'User-Agent': 'Mozilla/5.0',
+              'User-Agent': 'Mozilla/5.0 (compatible; ShionLib/1.0)',
               Accept: 'application/json',
               'Content-Type': 'application/x-www-form-urlencoded',
             },

@@ -15,6 +15,7 @@ import { VNDBGameItemRes } from '../interfaces/vndb/game-item.res'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { VNDBReleaseItemRes } from '../interfaces/vndb/release-item.res'
+import { createCharacterMatcher } from '../utils/character-match.util'
 
 @Injectable()
 export class GameDataFetcherService {
@@ -108,7 +109,6 @@ export class GameDataFetcherService {
           name_jp: character.name,
           name_zh: character.name,
           actor: character.actors.map(a => a.name).join(', '),
-          role: character.relation,
           image: character.images.large,
         })
       }
@@ -119,7 +119,6 @@ export class GameDataFetcherService {
         if (rawFullCharacterData) {
           character.name_zh = rawFullCharacterData.infobox.find(i => i.key === '简体中文名')
             ?.value as string
-          character.gender = rawFullCharacterData.gender
           if ((await detectLanguage(rawFullCharacterData.summary)) === 'zh')
             character.intro_zh = rawFullCharacterData.summary
           else character.intro_jp = rawFullCharacterData.summary
@@ -131,12 +130,6 @@ export class GameDataFetcherService {
             else
               for (const a of rawAliases.value as InfoboxValueArray[]) character.aliases.push(a.v)
           }
-          character.extra_info = rawFullCharacterData.infobox
-            .filter(i => !['简体中文名', '别名'].includes(i.key))
-            .map(i => ({
-              key: i.key,
-              value: typeof i.value === 'string' ? i.value : i.value.map(v => v.v).join(', '),
-            }))
         }
       }
 
@@ -174,7 +167,13 @@ export class GameDataFetcherService {
     }
 
     if (v_id) {
-      return this.fetchDataFromVNDB(v_id, finalGameData, finalCharactersData, finalProducersData)
+      return this.fetchDataFromVNDB(
+        v_id,
+        finalGameData,
+        finalCharactersData,
+        finalProducersData,
+        rawGameData,
+      )
     }
     return { finalGameData, finalCharactersData, finalProducersData }
   }
@@ -209,6 +208,7 @@ export class GameDataFetcherService {
     finalGameData: GameData,
     finalCharactersData: GameCharacter[],
     finalProducersData: GameDeveloper[],
+    bangumiRawGameData?: BangumiGameItemRes,
   ) {
     const [rawGameData, rawReleasesData] = await Promise.all([
       await this.vndbService.vndbRequest<VNDBGameItemRes>(
@@ -218,24 +218,33 @@ export class GameDataFetcherService {
           'id',
           'titles{title,lang,latin,main}',
           'aliases',
+          'released',
           'description',
           'olang',
           'platforms',
-          'image{url}',
-          'screenshots{url}',
-          'va.character{id,aliases,description,name,original,image{url},gender,vns{role}}',
+          'screenshots{url,dims,sexual,violence}',
+          'va.character{id,aliases,description,name,original,blood_type,height,weight,bust,waist,hips,cup,age,birthday,gender,image{url,sexual,violence},vns{role,id}}',
           'developers{id,name,original,aliases,type,description,extlinks{url,label,name}}',
+          'extlinks{url,label,name}',
         ],
         'vn',
       ),
       await this.vndbService.vndbRequest<VNDBReleaseItemRes>(
         'multiple',
         ['vn', '=', ['id', '=', v_id]],
-        ['images{type,photo,id,url,dims}', 'languages{lang,title,latin,mtl}', 'platforms'],
+        [
+          'images{type,photo,id,url,dims,sexual,violence}',
+          'languages{lang,title,latin,mtl}',
+          'platforms',
+          'extlinks{url,label,name}',
+        ],
         'release',
         100,
       ),
     ])
+    if (bangumiRawGameData) {
+      this.consistencyCheck(bangumiRawGameData, rawGameData)
+    }
 
     const finalCoversData: GameCover[] = []
     try {
@@ -246,23 +255,28 @@ export class GameDataFetcherService {
         if (title.lang === 'en') finalGameData.title_en = title.title
       }
       finalGameData.aliases = rawGameData.aliases
+      finalGameData.release_date = new Date(rawGameData.released)
       if ((await detectLanguage(rawGameData.description)) === 'en')
         finalGameData.intro_en = rawGameData.description
-      finalGameData.images = rawGameData.screenshots.map(s => s.url)
+      finalGameData.images = rawGameData.screenshots.map(s => ({
+        url: s.url,
+        dims: s.dims,
+        sexual: s.sexual,
+        violence: s.violence,
+      }))
       finalGameData.platform = rawGameData.platforms
+      finalGameData.links = rawGameData.extlinks
+      for (const release of rawReleasesData) {
+        finalGameData.links.push(...release.extlinks)
+      }
+      finalGameData.links = finalGameData.links.slice(0, 5)
 
+      const match = createCharacterMatcher(finalCharactersData)
       for (const character of rawGameData.va) {
         const characterNameOri = character.character.original
         const characterName = character.character.name
-        const existingCharacter = finalCharactersData.find(
-          c =>
-            this.formatString(c.name_jp) === this.formatString(characterNameOri) ||
-            this.formatString(c.name_zh) === this.formatString(characterNameOri) ||
-            this.formatString(c.name_en) === this.formatString(characterNameOri) ||
-            this.formatString(c.name_jp) === this.formatString(characterName) ||
-            this.formatString(c.name_zh) === this.formatString(characterName) ||
-            this.formatString(c.name_en) === this.formatString(characterName),
-        )
+        const existingCharacter = match(character.character)
+
         if (existingCharacter) {
           existingCharacter.v_id = character.character.id
           existingCharacter.name_en = characterName
@@ -273,12 +287,44 @@ export class GameDataFetcherService {
           existingCharacter.aliases = existingCharacter.aliases.filter(
             (alias, index, self) => self.indexOf(alias) === index,
           )
+          existingCharacter.role = character.character.vns.find(
+            v => v.id === finalGameData.v_id,
+          )?.role
+          existingCharacter.blood_type = character.character.blood_type
+          existingCharacter.height = character.character.height
+          existingCharacter.weight = character.character.weight
+          existingCharacter.bust = character.character.bust
+          existingCharacter.waist = character.character.waist
+          existingCharacter.hips = character.character.hips
+          existingCharacter.cup = character.character.cup
+          existingCharacter.age = character.character.age
+          existingCharacter.birthday = character.character.birthday
+          existingCharacter.gender = character.character.gender
+          if (!existingCharacter.image) existingCharacter.image = character.character.image.url
         } else {
+          const name_jp =
+            (await detectLanguage(characterNameOri)) === 'jp' ? characterNameOri : undefined
+          const name_zh =
+            (await detectLanguage(characterNameOri)) === 'zh' ? characterNameOri : undefined
           finalCharactersData.push({
             v_id: character.character.id,
             name_en: characterName,
-            name_jp: characterNameOri,
-            name_zh: characterNameOri,
+            name_jp,
+            name_zh,
+            aliases: character.character.aliases,
+            intro_en: character.character.description,
+            role: character.character.vns.find(v => v.id === finalGameData.v_id)?.role,
+            blood_type: character.character.blood_type,
+            height: character.character.height,
+            weight: character.character.weight,
+            bust: character.character.bust,
+            waist: character.character.waist,
+            hips: character.character.hips,
+            cup: character.character.cup,
+            age: character.character.age,
+            birthday: character.character.birthday,
+            gender: character.character.gender,
+            image: character.character.image?.url,
           })
         }
       }
@@ -289,11 +335,12 @@ export class GameDataFetcherService {
         const existingProducer = finalProducersData.find(
           p =>
             this.formatString(p.name) === this.formatString(producerNameOri) ||
-            this.formatString(p.name) === this.formatString(producerName),
+            this.formatString(p.name) === this.formatString(producerName) ||
+            (p.aliases && p.aliases.some(a => producer.aliases.includes(a))),
         )
         if (existingProducer) {
           existingProducer.v_id = producer.id
-          existingProducer.name = producerNameOri || producerName
+          existingProducer.name = producerNameOri || producerName || producer.aliases[0]
           existingProducer.intro_en = producer.description
           if (existingProducer.aliases) existingProducer.aliases.push(...producer.aliases)
           else existingProducer.aliases = producer.aliases
@@ -326,6 +373,8 @@ export class GameDataFetcherService {
               type: image.type,
               url: image.url,
               dims: image.dims,
+              sexual: image.sexual,
+              violence: image.violence,
             })
           else
             digs.push({
@@ -333,6 +382,8 @@ export class GameDataFetcherService {
               type: image.type,
               url: image.url,
               dims: image.dims,
+              sexual: image.sexual,
+              violence: image.violence,
             })
         }
       }
@@ -460,5 +511,72 @@ export class GameDataFetcherService {
       .replace(/\s*/g, '')
       .trim()
       .toLowerCase()
+  }
+
+  private consistencyCheck(b_data: BangumiGameItemRes, v_data: VNDBGameItemRes) {
+    const bTitles = this.collectBangumiTitles(b_data)
+    const vTitles = this.collectVNDBTitles(v_data)
+
+    const yearClose = this.isReleaseYearClose(b_data.date, v_data.released, 1)
+
+    if (yearClose) return
+
+    throw new ShionBizException(
+      ShionBizCode.GAME_DATA_CONSISTENCY_CHECK_FAILED,
+      undefined,
+      undefined,
+      undefined,
+      {
+        bangumiTitles: bTitles.slice(0, 10),
+        vndbTitles: vTitles.slice(0, 10),
+        yearClose,
+      },
+    )
+  }
+
+  private collectBangumiTitles(b_data: BangumiGameItemRes) {
+    const titles: string[] = []
+    if (b_data.name) titles.push(b_data.name)
+    if (b_data.name_cn) titles.push(b_data.name_cn)
+    const zhName = b_data.infobox.find(i => i.key === '中文名')?.value
+    if (zhName) {
+      if (typeof zhName === 'string') titles.push(zhName)
+      else for (const v of zhName) titles.push(v.v)
+    }
+    const aliases = b_data.infobox.find(i => i.key === '别名')?.value
+    if (aliases) {
+      if (typeof aliases === 'string') titles.push(aliases)
+      else for (const v of aliases) titles.push(v.v)
+    }
+    return titles.filter(Boolean)
+  }
+
+  private collectVNDBTitles(v_data: VNDBGameItemRes) {
+    const titles: string[] = []
+    for (const t of v_data.titles || []) {
+      if (t.title) titles.push(t.title)
+      if (t.latin) titles.push(t.latin)
+    }
+    if (Array.isArray(v_data.aliases)) titles.push(...v_data.aliases)
+    return titles.filter(Boolean)
+  }
+
+  private isReleaseYearClose(
+    bangumiDate: string | undefined,
+    vndbReleased: string | undefined,
+    diff = 1,
+  ) {
+    const by = this.safeParseYear(bangumiDate)
+    const vy = this.safeParseYear(vndbReleased)
+    if (!by || !vy) return false
+    return Math.abs(by - vy) <= diff
+  }
+
+  private safeParseYear(str?: string) {
+    if (!str) return undefined
+    const match = String(str).match(/(19|20)\d{2}/)
+    if (!match) return undefined
+    const year = parseInt(match[0], 10)
+    return isNaN(year) ? undefined : year
   }
 }

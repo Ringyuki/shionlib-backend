@@ -37,7 +37,7 @@ export class UserService {
       )
     }
 
-    const lang = getPreferredLang(request.headers['accept-language'])
+    const lang = user.lang || getPreferredLang(request.headers['accept-language'])
 
     if (!this.configService.get('allowRegister')) {
       throw new ShionBizException(

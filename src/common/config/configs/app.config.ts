@@ -1,5 +1,6 @@
 export default () => ({
   port: process.env.PORT || 5000,
+  environment: process.env.ENVIRONMENT || 'production',
 
   allowRegister: process.env.ALLOW_REGISTER === 'true',
 

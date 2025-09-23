@@ -89,24 +89,26 @@ model UserLoginSession {
 // game staffs: Array<Record<name, role>>
 // extra_info: Array<Record<key, value>>
 model Game {
-  id         Int         @id @default(autoincrement())
-  v_id       String?
-  b_id       String?
-  title_jp   String      @default("") @db.VarChar(255)
-  title_zh   String      @default("") @db.VarChar(255)
-  title_en   String      @default("") @db.VarChar(255)
-  aliases    String[]    @default([])
-  intro_jp   String      @default("") @db.VarChar(2000)
-  intro_zh   String      @default("") @db.VarChar(2000)
-  intro_en   String      @default("") @db.VarChar(2000)
-  covers     GameCover[] @relation("game_cover")
-  images     String[]    @default([])
-  extra_info Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  id           Int         @id @default(autoincrement())
+  v_id         String?
+  b_id         String?
+  title_jp     String      @default("") @db.VarChar(255)
+  title_zh     String      @default("") @db.VarChar(255)
+  title_en     String      @default("") @db.VarChar(255)
+  aliases      String[]    @default([])
+  intro_jp     String      @default("") @db.VarChar(2000)
+  intro_zh     String      @default("") @db.VarChar(2000)
+  intro_en     String      @default("") @db.VarChar(2000)
+  covers       GameCover[] @relation("game_cover")
+  images       GameImage[] @relation("game_image")
+  release_date DateTime?
+  extra_info   Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   tags       String[]                @default([])
   developers GameDeveloperRelation[] @relation("game_developer")
   characters GameCharacterRelation[] @relation("game_character")
   staffs     Json?                   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  link       GameLink[]              @relation("game_link")
 
   nsfw     Boolean  @default(false)
   type     String?
@@ -134,6 +136,21 @@ model Game {
   @@map("games")
 }
 
+model GameLink {
+  id    Int    @id @default(autoincrement())
+  url   String
+  label String
+  name  String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  game_id Int
+  game    Game @relation("game_link", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("game_links")
+}
+
 model GameCover {
   id Int @id @default(autoincrement())
 
@@ -141,6 +158,8 @@ model GameCover {
   url      String
   type     String
   dims     Int[]
+  sexual   Int
+  violence Int
 
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -149,6 +168,23 @@ model GameCover {
   game    Game @relation("game_cover", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("game_covers")
+}
+
+model GameImage {
+  id Int @id @default(autoincrement())
+
+  url      String
+  dims     Int[]
+  sexual   Int
+  violence Int
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  game_id Int
+  game    Game @relation("game_image", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("game_images")
 }
 
 // extra_info: Array<Record<key, value>>
@@ -192,21 +228,49 @@ model GameDeveloperRelation {
   @@map("game_developer_relations")
 }
 
-// extra_info: Array<Record<key, value>>
+enum GameCharacterBloodType {
+  a
+  b
+  ab
+  o
+}
+
+enum GameCharacterGender {
+  m
+  f
+  o
+  a
+}
+
+enum GameCharacterRole {
+  main
+  primary
+  side
+  appears
+}
+
 model GameCharacter {
-  id         Int      @id @default(autoincrement())
+  id         Int                     @id @default(autoincrement())
   b_id       String?
   v_id       String?
   image      String?
-  name_jp    String   @default("")
+  name_jp    String                  @default("")
   name_zh    String?
   name_en    String?
-  aliases    String[] @default([])
-  intro_jp   String   @default("") @db.VarChar(2000)
-  intro_zh   String   @default("") @db.VarChar(2000)
-  intro_en   String   @default("") @db.VarChar(2000)
-  gender     String?
-  extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  aliases    String[]                @default([])
+  intro_jp   String                  @default("") @db.VarChar(2000)
+  intro_zh   String                  @default("") @db.VarChar(2000)
+  intro_en   String                  @default("") @db.VarChar(2000)
+  blood_type GameCharacterBloodType?
+  height     Int?
+  weight     Int?
+  bust       Int?
+  waist      Int?
+  hips       Int?
+  cup        String?
+  age        Int?
+  birthday   Int[] // [month, day]
+  gender     GameCharacterGender[]   @default([])
 
   games GameCharacterRelation[] @relation("game_appear_on")
 
@@ -222,11 +286,10 @@ model GameCharacter {
 
 // extra_info: Array<Record<key, value>>
 model GameCharacterRelation {
-  id         Int     @id @default(autoincrement())
-  image      String?
-  actor      String?
-  role       String?
-  extra_info Json?   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  id    Int                @id @default(autoincrement())
+  image String?
+  actor String?
+  role  GameCharacterRole?
 
   game_id      Int
   character_id Int

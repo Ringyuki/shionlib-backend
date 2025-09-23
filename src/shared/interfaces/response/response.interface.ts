@@ -3,7 +3,7 @@ export interface ResponseInterface<T> {
   message: string
   data: T | null
   requestId: string
-  timestamp: number
+  timestamp: string
 }
 
 export interface PaginatedResult<T> {

@@ -14,6 +14,8 @@ export type I18nTranslations = {
         "401": string;
         "403": string;
         "404": string;
+        "409": string;
+        "429": string;
         "500": string;
     };
     "message": {
@@ -43,6 +45,7 @@ export type I18nTranslations = {
         "GAME_BANGUMI_REQUEST_FAILED": string;
         "GAME_VNDB_REQUEST_FAILED": string;
         "GAME_ALREADY_EXISTS": string;
+        "GAME_DATA_CONSISTENCY_CHECK_FAILED": string;
         "GAME_DEVELOPER_NOT_FOUND": string;
         "GAME_DEVELOPER_ALREADY_EXISTS": string;
         "GAME_CHARACTER_NOT_FOUND": string;

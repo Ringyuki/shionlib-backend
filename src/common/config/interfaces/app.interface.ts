@@ -1,5 +1,6 @@
 export interface AppConfig {
   port: number
+  environment: string
   allowRegister: boolean
   cors: {
     origin: string

@@ -22,6 +22,7 @@
   "GAME_BANGUMI_REQUEST_FAILED": "bangumiリクエストに失敗しました。メッセージ: {message}",
   "GAME_VNDB_REQUEST_FAILED": "vndbリクエストに失敗しました。メッセージ: {message}",
   "GAME_ALREADY_EXISTS": "ゲームがすでに存在します",
+  "GAME_DATA_CONSISTENCY_CHECK_FAILED": "ゲームデータの一貫性チェックに失敗しました",
 
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
   "GAME_DEVELOPER_ALREADY_EXISTS": "開発者がすでに存在します",

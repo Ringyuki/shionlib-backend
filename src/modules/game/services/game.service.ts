@@ -5,11 +5,12 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
+import { GetGameResDto } from '../dto/res/get-game.res.dto'
 
 @Injectable()
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
-  async getById(id: number) {
+  async getById(id: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
       where: {
         id,
@@ -38,7 +39,20 @@ export class GameService {
         intro_jp: true,
         intro_zh: true,
         intro_en: true,
-        images: true,
+        images: {
+          select: {
+            url: true,
+            dims: true,
+            sexual: true,
+            violence: true,
+          },
+          where: {
+            sexual: {
+              not: 2,
+            },
+          },
+        },
+        release_date: true,
         extra_info: true,
         tags: true,
         staffs: true,
@@ -51,6 +65,13 @@ export class GameService {
             type: true,
             url: true,
             dims: true,
+            sexual: true,
+            violence: true,
+          },
+          where: {
+            sexual: {
+              not: 2,
+            },
           },
         },
         developers: {
@@ -77,12 +98,30 @@ export class GameService {
                 name_jp: true,
                 name_zh: true,
                 name_en: true,
+                aliases: true,
                 intro_jp: true,
                 intro_zh: true,
                 intro_en: true,
                 gender: true,
+                blood_type: true,
+                height: true,
+                weight: true,
+                bust: true,
+                waist: true,
+                hips: true,
+                cup: true,
+                age: true,
+                birthday: true,
               },
             },
+          },
+        },
+        link: {
+          select: {
+            id: true,
+            url: true,
+            label: true,
+            name: true,
           },
         },
         download_resources: true,
@@ -97,7 +136,7 @@ export class GameService {
       },
     })
 
-    return game
+    return game as unknown as GetGameResDto
   }
 
   async deleteById(id: number) {
@@ -133,6 +172,8 @@ export class GameService {
             language: true,
             type: true,
             dims: true,
+            sexual: true,
+            violence: true,
             url: true,
           },
         },

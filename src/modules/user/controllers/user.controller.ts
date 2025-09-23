@@ -28,8 +28,8 @@ export class UserController {
     const { token, refresh_token } = await this.userService.login(loginDto, request)
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+      `shionlib_access_token=${token}; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''} ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
   }
 

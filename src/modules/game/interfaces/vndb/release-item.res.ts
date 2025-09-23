@@ -1,8 +1,11 @@
+import { GameLink } from '../../interfaces/game.interface'
+
 export interface VNDBReleaseItemRes {
   id: string
   languages: Language[]
   platforms: string[]
   images: Image[]
+  extlinks: GameLink[]
 }
 
 interface Language {
@@ -19,4 +22,6 @@ interface Image {
   id: string
   url: string
   dims: number[]
+  sexual: number
+  violence: number
 }

@@ -29,7 +29,7 @@ export class SuccessResponseInterceptor implements NestInterceptor {
             : (this.i18n.t('common.success', { lang: i18nCtx?.lang }) as string),
           data,
           requestId: req.id,
-          timestamp: Date.now(),
+          timestamp: new Date().toISOString(),
         }),
       ),
     )

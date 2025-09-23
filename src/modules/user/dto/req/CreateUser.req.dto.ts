@@ -6,8 +6,16 @@ import {
   MaxLength,
   Matches,
   IsUUID,
+  IsOptional,
+  IsEnum,
 } from 'class-validator'
-import { ivm } from '../../../../common/validation/i18n'
+import { ivm, ivmEnum } from '../../../../common/validation/i18n'
+
+enum UserLang {
+  EN = 'en',
+  ZH = 'zh',
+  JA = 'ja',
+}
 
 export class CreateUserDto {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'name' }) })
@@ -50,6 +58,12 @@ export class CreateUserDto {
     message: ivm('validation.user.PASSWORD_MATCHES'),
   })
   password: string
+
+  @IsEnum(UserLang, {
+    message: ivmEnum('validation.common.IS_ENUM', UserLang, { property: 'lang' }),
+  })
+  @IsOptional()
+  lang?: UserLang
 
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'code' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'code' }) })

@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { GameDataFetcherService } from './game-data-fetcher.service'
 import { PrismaService } from '../../../prisma.service'
-import { GameCharacter, GameCover, GameDeveloper } from '../interfaces/game.interface'
+import {
+  GameCharacter,
+  GameCover,
+  GameDeveloper,
+  GameImage,
+  GameLink,
+} from '../interfaces/game.interface'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { Prisma } from '@prisma/client'
@@ -36,56 +42,62 @@ export class GameCreateService {
     const { finalGameData, finalCharactersData, finalProducersData, finalCoversData } =
       await this.gameDataFetcherService.fetchData(b_id, v_id)
 
-    const gameId = await this.prisma.$transaction(async tx => {
-      const gameCreateData: any = {
-        b_id: finalGameData.b_id,
-        v_id: finalGameData.v_id,
-        title_jp: this.dataOrEmpty(finalGameData.title_jp, ''),
-        title_zh: this.dataOrEmpty(finalGameData.title_zh, ''),
-        title_en: this.dataOrEmpty(finalGameData.title_en, ''),
-        aliases: this.dataOrEmpty(finalGameData.aliases, []),
-        intro_jp: this.dataOrEmpty(finalGameData.intro_jp, ''),
-        intro_zh: this.dataOrEmpty(finalGameData.intro_zh, ''),
-        intro_en: this.dataOrEmpty(finalGameData.intro_en, ''),
-        images: this.dataOrEmpty(finalGameData.images, []),
-        extra_info: this.dataOrEmpty(finalGameData.extra_info, []),
-        tags: this.dataOrEmpty(finalGameData.tags, []),
-        staffs: this.dataOrEmpty(finalGameData.staffs, []),
-        nsfw: this.dataOrEmpty(finalGameData.nsfw, false),
-        type: finalGameData.type,
-        platform: this.dataOrEmpty(finalGameData.platform, []),
-        creator_id,
-      }
-      const game = await tx.game.create({ data: gameCreateData })
+    let gameId = 0
+    try {
+      gameId = await this.prisma.$transaction(async tx => {
+        const gameCreateData: any = {
+          b_id: finalGameData.b_id,
+          v_id: finalGameData.v_id,
+          title_jp: this.dataOrEmpty(finalGameData.title_jp, ''),
+          title_zh: this.dataOrEmpty(finalGameData.title_zh, ''),
+          title_en: this.dataOrEmpty(finalGameData.title_en, ''),
+          aliases: this.dataOrEmpty(finalGameData.aliases, []),
+          intro_jp: this.dataOrEmpty(finalGameData.intro_jp, ''),
+          intro_zh: this.dataOrEmpty(finalGameData.intro_zh, ''),
+          intro_en: this.dataOrEmpty(finalGameData.intro_en, ''),
+          extra_info: this.dataOrEmpty(finalGameData.extra_info, []),
+          tags: this.dataOrEmpty(finalGameData.tags, []),
+          staffs: this.dataOrEmpty(finalGameData.staffs, []),
+          nsfw: this.dataOrEmpty(finalGameData.nsfw, false),
+          type: finalGameData.type,
+          platform: this.dataOrEmpty(finalGameData.platform, []),
+          release_date: finalGameData.release_date,
+          creator_id,
+        }
+        const game = await tx.game.create({ data: gameCreateData })
 
-      await this._createGameCover(tx, finalCoversData || [], game.id)
+        await this._createGameCover(tx, finalCoversData || [], game.id)
+        await this._createGameImages(tx, finalGameData.images || [], game.id)
+        await this._createGameLink(tx, finalGameData.links || [], game.id)
 
-      for (const d of finalProducersData || []) {
-        const dev = await this.findOrCreateDeveloper(tx, d)
-        await tx.gameDeveloperRelation
-          .create({
-            data: { game_id: game.id, developer_id: dev.id, role: '开发' },
-          })
-          .catch(() => {})
-      }
+        for (const d of finalProducersData || []) {
+          const dev = await this.findOrCreateDeveloper(tx, d)
+          await tx.gameDeveloperRelation
+            .create({
+              data: { game_id: game.id, developer_id: dev.id, role: '开发' },
+            })
+            .catch(() => {})
+        }
 
-      for (const c of finalCharactersData || []) {
-        const ch = await this.findOrCreateCharacter(tx, c)
-        await tx.gameCharacterRelation
-          .create({
-            data: {
-              game_id: game.id,
-              character_id: ch.id,
-              image: c.image,
-              actor: c.actor,
-              role: c.role,
-              extra_info: this.dataOrEmpty(c.extra_info, []),
-            },
-          })
-          .catch(() => {})
-      }
-      return game.id
-    })
+        for (const c of finalCharactersData || []) {
+          const ch = await this.findOrCreateCharacter(tx, c)
+          await tx.gameCharacterRelation
+            .create({
+              data: {
+                game_id: game.id,
+                character_id: ch.id,
+                image: c.image,
+                actor: c.actor,
+                role: c.role,
+              },
+            })
+            .catch(() => {})
+        }
+        return game.id
+      })
+    } catch (e) {
+      console.error(e)
+    }
     return gameId
   }
 
@@ -134,10 +146,30 @@ export class GameCreateService {
       intro_jp: this.dataOrEmpty(c.intro_jp, ''),
       intro_zh: this.dataOrEmpty(c.intro_zh, ''),
       intro_en: this.dataOrEmpty(c.intro_en, ''),
-      gender: this.dataOrEmpty(c.gender, 'unknown'),
-      extra_info: this.dataOrEmpty(c.extra_info, []),
+      blood_type: c.blood_type,
+      height: c.height,
+      weight: c.weight,
+      bust: c.bust,
+      waist: c.waist,
+      hips: c.hips,
+      cup: c.cup,
+      age: c.age,
+      birthday: this.dataOrEmpty(c.birthday, []),
+      gender: this.dataOrEmpty(c.gender, []),
     }
     return tx.gameCharacter.create({ data: chCreateData })
+  }
+
+  private async _createGameLink(
+    tx: Prisma.TransactionClient,
+    linksData: GameLink[],
+    game_id: number,
+  ) {
+    if (linksData && linksData.length) {
+      await tx.gameLink.createMany({
+        data: linksData.map(l => ({ game_id, url: l.url, label: l.label, name: l.name })),
+      })
+    }
   }
 
   private async _createGameCover(
@@ -159,10 +191,30 @@ export class GameCreateService {
             type: c.type,
             url: c.url,
             dims: c.dims?.length ? c.dims : [0, 0],
+            sexual: c.sexual,
+            violence: c.violence,
           })),
           skipDuplicates: true,
         })
       }
+    }
+  }
+
+  private async _createGameImages(
+    tx: Prisma.TransactionClient,
+    imagesData: GameImage[],
+    game_id: number,
+  ) {
+    if (imagesData && imagesData.length) {
+      await tx.gameImage.createMany({
+        data: imagesData.map(i => ({
+          game_id,
+          url: i.url,
+          dims: i.dims?.length ? i.dims : [0, 0],
+          sexual: i.sexual,
+          violence: i.violence,
+        })),
+      })
     }
   }
 
@@ -253,8 +305,7 @@ export class GameCreateService {
             character_id: ch.id,
             image: c.image,
             actor: c.actor,
-            role: c.role || 'unknown',
-            extra_info: this.dataOrEmpty(c.extra_info, []) as any,
+            role: c.role || null,
           },
         })
       }
@@ -328,4 +379,16 @@ export class GameCreateService {
       await this._createGameCover(tx, createCoversData.covers as GameCover[], game_id)
     })
   }
+
+  // async createLink(createLinksData: CreateGameLinkReqDto, game_id: number) {
+  //   await this.prisma.$transaction(async tx => {
+  //     await this._createGameLink(tx, createLinksData.links as GameLink[], game_id)
+  //   })
+  // }
+
+  // async createImage(createImagesData: CreateGameImageReqDto, game_id: number) {
+  //   await this.prisma.$transaction(async tx => {
+  //     await this._createGameImages(tx, createImagesData.images as GameImage[], game_id)
+  //   })
+  // }
 }

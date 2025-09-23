@@ -22,6 +22,7 @@
   "GAME_BANGUMI_REQUEST_FAILED": "bangumi request failed, message: {message}",
   "GAME_VNDB_REQUEST_FAILED": "vndb request failed, message: {message}",
   "GAME_ALREADY_EXISTS": "game already exists",
+  "GAME_DATA_CONSISTENCY_CHECK_FAILED": "game data consistency check failed",
 
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
   "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
