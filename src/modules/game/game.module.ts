@@ -4,9 +4,16 @@ import { GameController } from './controllers/game.controller'
 import { GameDataFetcherService } from './services/game-data-fetcher.service'
 import { GameService } from './services/game.service'
 import { GameCreateService } from './services/game-create.service'
+import { GameDownloadSourceService } from './services/game-download-source.service'
 
 @Module({
   controllers: [GameCreateController, GameController],
-  providers: [GameDataFetcherService, GameService, GameController, GameCreateService],
+  providers: [
+    GameDataFetcherService,
+    GameService,
+    GameController,
+    GameCreateService,
+    GameDownloadSourceService,
+  ],
 })
 export class GameModule {}

@@ -311,7 +311,14 @@ model GameDownloadResource {
   game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   files   GameDownloadResourceFile[] @relation("game_download_resource_files")
 
+  platform String[] @default([])
+  language String[] @default([])
+  note     String?  @db.VarChar(255)
+
   downloads Int @default(0)
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_upload_session", fields: [upload_session_id], references: [id])
 
   creator_id Int
   creator    User @relation("user_create_game_download_resource", fields: [creator_id], references: [id])
@@ -323,14 +330,19 @@ model GameDownloadResource {
 }
 
 // file type: 1 -> s3 native, 2 -> direct link, 3 -> third party link
+// file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
 model GameDownloadResourceFile {
   id        Int     @id @default(autoincrement())
   type      Int     @default(1)
   file_name String
   file_path String?
-  file_size Int
+  file_size BigInt
   file_url  String?
   file_hash String
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_files_upload_session", fields: [upload_session_id], references: [id])
+  file_status       Int                @default(1)
 
   game_download_resource_id Int
   game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -341,6 +353,7 @@ model GameDownloadResourceFile {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@unique([upload_session_id])
   @@map("game_download_resource_files")
 }
 
@@ -397,7 +410,9 @@ model GameUploadSession {
 
   expires_at DateTime
 
-  game_upload_chunks GameUploadChunk[] @relation("game_upload_session_chunks")
+  game_download_resources      GameDownloadResource[]    @relation("game_download_resource_upload_session")
+  game_download_resource_files GameDownloadResourceFile? @relation("game_download_resource_files_upload_session")
+  game_upload_chunks           GameUploadChunk[]         @relation("game_upload_session_chunks")
 
   creator_id Int
   creator    User @relation("user_create_game_upload_session", fields: [creator_id], references: [id])

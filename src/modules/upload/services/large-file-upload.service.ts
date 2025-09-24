@@ -160,8 +160,8 @@ export class LargeFileUploadService {
       } finally {
         await fd.close()
       }
-      const chunk_sha256 = hash.digest('hex')
-      if (chunk_sha256 !== chunk_sha256)
+      const actualSha = hash.digest('hex')
+      if (actualSha !== chunk_sha256)
         throw new ShionBizException(
           ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_SHA256,
           'shion-biz.GAME_UPLOAD_INVALID_CHUNK_SHA256',
@@ -169,16 +169,32 @@ export class LargeFileUploadService {
     } else {
       const hash = createHash('sha256')
       const ws = fs.createWriteStream(storage_path, { flags: 'r+', start: offset })
-      const { Transform } = await import('node:stream')
-      const hasher = new Transform({
-        transform(chunk, _enc, cb) {
-          hash.update(chunk as Buffer)
-          this.push(chunk)
-          cb()
-        },
-      })
+      const rawBody = (req as any).body as Buffer | undefined
+      if (rawBody && Buffer.isBuffer(rawBody)) {
+        // for express.raw has already parsed the body, hash and write from the buffer
+        // ref: https://expressjs.com/en/resources/middleware/body-parser.html#bodyparserrawoptions
+        // ref: @/main.ts
+        hash.update(rawBody)
+        await new Promise<void>((resolve, reject) => {
+          ws.write(rawBody, err => {
+            if (err) reject(err)
+            else {
+              ws.end(() => resolve())
+            }
+          })
+        })
+      } else {
+        const { Transform } = await import('node:stream')
+        const hasher = new Transform({
+          transform(chunk, _enc, cb) {
+            hash.update(chunk as Buffer)
+            this.push(chunk)
+            cb()
+          },
+        })
 
-      await pipeline(req, hasher, ws)
+        await pipeline(req, hasher, ws)
+      }
       const actualSha = hash.digest('hex')
       if (actualSha !== chunk_sha256)
         throw new ShionBizException(
@@ -231,7 +247,7 @@ export class LargeFileUploadService {
       status: session.status,
       uploaded_chunks: session.uploaded_chunks.sort((a, b) => a - b),
       file_sha256: session.file_sha256,
-      total_size: session.total_size,
+      total_size: Number(session.total_size),
       chunk_size: session.chunk_size,
       total_chunks: session.total_chunks,
       expires_at: session.expires_at,

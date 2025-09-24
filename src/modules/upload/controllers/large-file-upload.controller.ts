@@ -1,4 +1,15 @@
-import { Controller, Post, Put, Patch, Delete, Body, Req, Param, UseGuards } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Req,
+  Param,
+  UseGuards,
+  Get,
+} from '@nestjs/common'
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { LargeFileUploadService } from '../services/large-file-upload.service'
@@ -31,7 +42,7 @@ export class LargeFileUploadController {
     )
   }
 
-  @Post(':id/status')
+  @Get(':id/status')
   async getStatus(@Param('id') id: string, @Req() req: RequestWithUser) {
     return await this.largeFileUploadService.status(Number(id), req)
   }
