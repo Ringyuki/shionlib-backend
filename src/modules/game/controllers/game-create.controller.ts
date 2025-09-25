@@ -1,4 +1,14 @@
-import { Controller, Get, Query, Post, Body, Req, UseGuards, Param } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Query,
+  Post,
+  Body,
+  Req,
+  UseGuards,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../auth/guards/roles.guard'
 import { Roles } from '../../auth/decorators/roles.decorator'
@@ -53,24 +63,24 @@ export class GameCreateController {
   @Post('/:game_id/cover')
   async createGameCover(
     @Body() createGameCoverReqDto: CreateGameCoverReqDto,
-    @Param('game_id') game_id: string,
+    @Param('game_id', ParseIntPipe) game_id: number,
   ) {
-    return await this.gameService.createCover(createGameCoverReqDto, Number(game_id))
+    return await this.gameService.createCover(createGameCoverReqDto, game_id)
   }
 
   @Post('/:game_id/character')
   async createGameCharacter(
     @Body() createGameCharacterReqDto: CreateGameCharacterReqDto,
-    @Param('game_id') game_id: string,
+    @Param('game_id', ParseIntPipe) game_id: number,
   ) {
-    return await this.gameService.createCharacter(createGameCharacterReqDto, Number(game_id))
+    return await this.gameService.createCharacter(createGameCharacterReqDto, game_id)
   }
 
   @Post('/:game_id/developer')
   async createGameDeveloper(
     @Body() createGameDeveloperReqDto: CreateGameDeveloperReqDto,
-    @Param('game_id') game_id: string,
+    @Param('game_id', ParseIntPipe) game_id: number,
   ) {
-    return await this.gameService.createDeveloper(createGameDeveloperReqDto, Number(game_id))
+    return await this.gameService.createDeveloper(createGameDeveloperReqDto, game_id)
   }
 }

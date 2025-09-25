@@ -50,5 +50,9 @@
   "GAME_UPLOAD_FILE_SHA256_MISMATCH": "file sha256 mismatch",
   "GAME_UPLOAD_INVALID_CHUNK_INDEX": "invalid chunk index",
   "GAME_UPLOAD_SESSION_EXPIRED": "upload session expired",
-  "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner"
+  "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner",
+
+  "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "upload file size exceeds limit",
+  "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "no file provided",
+  "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": "unsupported file type"
 }

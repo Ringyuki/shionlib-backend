@@ -50,5 +50,9 @@
   "GAME_UPLOAD_FILE_SHA256_MISMATCH": "ファイルSHA256が一致しません",
   "GAME_UPLOAD_INVALID_CHUNK_INDEX": "無効なチャンクインデックス",
   "GAME_UPLOAD_SESSION_EXPIRED": "アップロードセッションが期限切れです",
-  "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません"
+  "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません",
+
+  "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "アップロードファイルサイズが制限を超えています",
+  "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "ファイルが提供されていません",
+  "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": "サポートされていないファイルタイプ"
 }

@@ -1,4 +1,15 @@
-import { Controller, Delete, Get, Param, Post, Query, Req, UseGuards, Body } from '@nestjs/common'
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameService } from '../services/game.service'
 import { GetGameReqDto } from '../dto/req/get-game.req.dto'
@@ -37,20 +48,20 @@ export class GameController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/favorite')
-  async favoriteGame(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return await this.gameService.favoriteGame(Number(id), req.user?.sub)
+  async favoriteGame(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return await this.gameService.favoriteGame(id, req.user?.sub)
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/download-source')
   async createDownloadSource(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() createGameDownloadSourceReqDto: CreateGameDownloadSourceReqDto,
     @Req() req: RequestWithUser,
   ) {
     return await this.gameDownloadSourceService.create(
       createGameDownloadSourceReqDto,
-      Number(id),
+      id,
       req.user?.sub,
     )
   }

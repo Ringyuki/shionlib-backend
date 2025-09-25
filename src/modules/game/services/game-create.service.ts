@@ -98,6 +98,9 @@ export class GameCreateService {
     } catch (e) {
       console.error(e)
     }
+    if (gameId === 0) {
+      throw new Error('Game creation failed')
+    }
     return gameId
   }
 

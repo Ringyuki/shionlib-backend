@@ -299,8 +299,13 @@ export class GameDataFetcherService {
           existingCharacter.cup = character.character.cup
           existingCharacter.age = character.character.age
           existingCharacter.birthday = character.character.birthday
+          if (!character.character.gender[0] || !character.character.gender[1])
+            character.character.gender = Array(2).fill(
+              character.character.gender[0] ?? character.character.gender[1],
+            )
           existingCharacter.gender = character.character.gender
-          if (!existingCharacter.image) existingCharacter.image = character.character.image.url
+          if (!existingCharacter.image && character.character.image)
+            existingCharacter.image = character.character.image.url
         } else {
           const name_jp =
             (await detectLanguage(characterNameOri)) === 'jp' ? characterNameOri : undefined

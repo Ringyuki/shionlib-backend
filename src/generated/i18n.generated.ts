@@ -15,6 +15,7 @@ export type I18nTranslations = {
         "403": string;
         "404": string;
         "409": string;
+        "413": string;
         "429": string;
         "500": string;
     };
@@ -67,6 +68,9 @@ export type I18nTranslations = {
         "GAME_UPLOAD_INVALID_CHUNK_INDEX": string;
         "GAME_UPLOAD_SESSION_EXPIRED": string;
         "GAME_UPLOAD_SESSION_NOT_OWNER": string;
+        "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": string;
+        "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": string;
+        "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": string;
     };
     "validation": {
         "common": {

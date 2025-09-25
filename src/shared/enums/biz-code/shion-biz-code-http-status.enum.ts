@@ -67,4 +67,9 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_INDEX]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED]: HttpStatus.GONE,
   [ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER]: HttpStatus.FORBIDDEN,
+
+  // 48
+  [ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT]: HttpStatus.PAYLOAD_TOO_LARGE,
+  [ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE]: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
 } as const satisfies Record<ShionBizCode, HttpStatus>

@@ -18,6 +18,8 @@ import { VNDBModule } from './modules/vndb/vnbd.module'
 import { GameModule } from './modules/game/game.module'
 import { EmailModule } from './modules/email/email.module'
 import { UploadModule } from './modules/upload/upload.module'
+import { SecurityModule } from './modules/security/security.module'
+import { ImageModule } from './modules/image/image.module'
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { UploadModule } from './modules/upload/upload.module'
     GameModule,
     EmailModule,
     UploadModule,
+    SecurityModule,
+    ImageModule,
   ],
   controllers: [],
   providers: [

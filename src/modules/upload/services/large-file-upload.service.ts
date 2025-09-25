@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { S3Service } from '../../s3/services/s3.service'
+import { GAME_STORAGE } from '../../s3/constants/s3.constants'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
@@ -16,6 +17,7 @@ import { GameUploadSession } from '@prisma/client'
 @Injectable()
 export class LargeFileUploadService {
   constructor(
+    @Inject(GAME_STORAGE)
     private readonly s3Service: S3Service,
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,

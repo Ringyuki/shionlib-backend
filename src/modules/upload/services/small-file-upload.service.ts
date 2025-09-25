@@ -1,7 +1,75 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { S3Service } from '../../s3/services/s3.service'
+import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
+import { randomUUID as nodeRandomUUID } from 'node:crypto'
+import { ImageProcessService } from '../../image/services/image-process.service'
+import { TargetFormatEnum } from '../../image/dto/req/image-process.req.dto'
+import { ImageProcessResDto } from '../../image/dto/res/image-process.res.dto'
+import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { PrismaService } from '../../../prisma.service'
 
 @Injectable()
 export class SmallFileUploadService {
-  constructor(private readonly s3Service: S3Service) {}
+  private readonly logger: Logger
+  constructor(
+    @Inject(IMAGE_STORAGE) private readonly s3Service: S3Service,
+    private readonly imageProcessService: ImageProcessService,
+    private readonly prismaService: PrismaService,
+  ) {
+    this.logger = new Logger(SmallFileUploadService.name)
+  }
+
+  async uploadGameCover(game_id: number, file: Express.Multer.File) {
+    const game = await this.prismaService.game.findUnique({
+      where: {
+        id: game_id,
+      },
+    })
+    if (!game) {
+      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND, 'shion-biz.GAME_NOT_FOUND')
+    }
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
+      )
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
+      )
+    }
+
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `game/cover/${game_id}/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key)
+    return {
+      key,
+    }
+  }
+
+  async uploadGameImage(game_id: number, file: Express.Multer.File) {
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `game/image/${game_id}/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key)
+    return {
+      key,
+    }
+  }
+
+  private async _upload(dto: ImageProcessResDto, key: string) {
+    try {
+      const buffer = Buffer.from(dto.data)
+      await this.s3Service.uploadFile(key, buffer, dto.mime)
+    } catch (error) {
+      this.logger.error(error)
+      throw error
+    }
+  }
 }
