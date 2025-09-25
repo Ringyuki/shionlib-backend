@@ -68,11 +68,11 @@ export class GameService {
             sexual: true,
             violence: true,
           },
-          where: {
-            sexual: {
-              not: 2,
-            },
-          },
+          // where: {
+          //   sexual: {
+          //     not: 2,
+          //   },
+          // },
         },
         developers: {
           select: {

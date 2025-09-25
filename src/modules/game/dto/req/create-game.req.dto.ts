@@ -6,7 +6,6 @@ import {
   IsNotEmpty,
   IsOptional,
   ValidateIf,
-  IsUrl,
   IsEnum,
   IsNumber,
 } from 'class-validator'
@@ -75,7 +74,7 @@ export class CreateGameReqDto {
   intro_en?: string
 
   @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'images' }) })
-  @IsUrl({}, { each: true, message: ivm('validation.common.IS_URL', { property: 'images' }) })
+  @IsString({ each: true, message: ivm('validation.common.IS_STRING', { property: 'images' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'images' }) })
   images: string[]
 
@@ -222,7 +221,7 @@ export class GameCharacter {
   @IsOptional()
   gender?: GameCharacterGender
 
-  @IsUrl({}, { message: ivm('validation.common.IS_URL', { property: 'image' }) })
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'image' }) })
   @IsOptional()
   image?: string
 
@@ -253,7 +252,7 @@ export class GameDeveloper {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'name' }) })
   name: string
 
-  @IsUrl({}, { message: ivm('validation.common.IS_URL', { property: 'logo' }) })
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'logo' }) })
   @IsOptional()
   logo?: string
 
@@ -320,7 +319,7 @@ export class GameCover {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'type' }) })
   type: GameCoverType
 
-  @IsUrl({}, { message: ivm('validation.common.IS_URL', { property: 'url' }) })
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'url' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'url' }) })
   url: string
 

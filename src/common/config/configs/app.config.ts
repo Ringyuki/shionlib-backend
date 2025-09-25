@@ -47,4 +47,10 @@ export default () => ({
     chunk_size: process.env.FILE_UPLOAD_CHUNK_SIZE || 1024 * 1024 * 50, // 50MB
     upload_session_expires_in: process.env.FILE_UPLOAD_SESSION_EXPIRES_IN || 1000 * 60 * 60 * 24, // 1 day
   },
+
+  file_scan: {
+    clamscan_binary_path:
+      process.env.CLAMSCAN_BINARY_PATH || '/opt/homebrew/opt/clamav/bin/clamscan',
+    clamscan_db_path: process.env.CLAMSCAN_DB_PATH || '/opt/homebrew/var/lib/clamav',
+  },
 })

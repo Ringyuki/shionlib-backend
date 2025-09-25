@@ -41,4 +41,8 @@ export interface AppConfig {
     chunk_size: number
     upload_session_expires_in: number
   }
+  file_scan: {
+    clamscan_binary_path: string
+    clamscan_db_path: string
+  }
 }

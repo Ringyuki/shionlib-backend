@@ -20,11 +20,13 @@ import { EmailModule } from './modules/email/email.module'
 import { UploadModule } from './modules/upload/upload.module'
 import { SecurityModule } from './modules/security/security.module'
 import { ImageModule } from './modules/image/image.module'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
     ShionConfigModule,
     PrismaModule,
+    ScheduleModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ShionConfigService],

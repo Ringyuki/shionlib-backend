@@ -40,6 +40,12 @@ export class GameDownloadSourceService {
         'shion-biz.GAME_UPLOAD_INVALID_SESSION_STATUS',
       )
     }
+    if (session.creator_id !== creator_id) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER,
+        'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
+      )
+    }
 
     await this.prismaService.$transaction(async tx => {
       const gameDownloadResource = await tx.gameDownloadResource.create({
@@ -61,7 +67,7 @@ export class GameDownloadSourceService {
           file_size: session.total_size,
           file_hash: session.file_sha256,
           creator_id,
-          file_status: 1,
+          file_status: 2,
           type: 1,
         },
       })
