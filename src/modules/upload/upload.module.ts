@@ -7,10 +7,21 @@ import { S3Module } from '../s3/s3.module'
 import { UploadProcessor } from './queues/upload.processor'
 import { LARGE_FILE_UPLOAD_QUEUE } from './constants/upload.constants'
 import { BullModule } from '@nestjs/bull'
+import { UploadQuotaService } from './services/upload-quota.service'
+import { UploadQuotaController } from './controllers/upload-quota.controller'
+import { FileCleanService } from './services/file-clean.service'
+import { FileCleanTask } from './tasks/file-clean.task'
 
 @Module({
-  controllers: [LargeFileUploadController, SmallFileUploadController],
-  providers: [LargeFileUploadService, SmallFileUploadService, UploadProcessor],
+  controllers: [LargeFileUploadController, SmallFileUploadController, UploadQuotaController],
+  providers: [
+    LargeFileUploadService,
+    SmallFileUploadService,
+    UploadProcessor,
+    UploadQuotaService,
+    FileCleanService,
+    FileCleanTask,
+  ],
   imports: [S3Module, BullModule.registerQueue({ name: LARGE_FILE_UPLOAD_QUEUE })],
   exports: [BullModule],
 })

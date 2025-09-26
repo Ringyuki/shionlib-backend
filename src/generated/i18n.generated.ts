@@ -72,6 +72,10 @@ export type I18nTranslations = {
         "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": string;
         "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": string;
         "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": string;
+        "USER_UPLOAD_QUOTA_NOT_FOUND": string;
+        "USER_UPLOAD_QUOTA_EXCEEDED": string;
+        "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE": string;
+        "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND": string;
     };
     "validation": {
         "common": {

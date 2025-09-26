@@ -74,6 +74,7 @@ export class GameDownloadSourceService {
           file_size: session.total_size,
           file_hash: session.file_sha256,
           file_content_type: session.mime_type,
+          upload_session_id: dto.upload_session_id,
           creator_id,
           file_status: 2,
           type: 1,

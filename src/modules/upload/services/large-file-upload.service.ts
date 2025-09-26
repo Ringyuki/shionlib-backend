@@ -12,12 +12,15 @@ import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 import { GameUploadSessionResDto } from '../dto/res/game-upload-session.res.dto'
 import { GameUploadSession } from '@prisma/client'
 import mime from 'mime-types'
+import { UploadQuotaService } from './upload-quota.service'
+import { UserUploadQuotaUsedAmountRecordAction } from '../dto/req/adjust-quota.req.dto'
 
 @Injectable()
 export class LargeFileUploadService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
+    private readonly uploadQuotaService: UploadQuotaService,
   ) {}
 
   private get rootDir() {
@@ -32,6 +35,13 @@ export class LargeFileUploadService {
   }
 
   async init(dto: GameUploadReqDto, req: RequestWithUser): Promise<GameUploadSessionResDto> {
+    if (await this.uploadQuotaService.isExceeded(req.user.sub, dto.total_size)) {
+      throw new ShionBizException(
+        ShionBizCode.USER_UPLOAD_QUOTA_EXCEEDED,
+        'shion-biz.USER_UPLOAD_QUOTA_EXCEEDED',
+      )
+    }
+
     try {
       const chunk_size = dto.chunk_size ?? this.configService.get('file_upload.chunk_size')
       const total_chunks = Math.ceil(dto.total_size / chunk_size)
@@ -88,6 +98,13 @@ export class LargeFileUploadService {
       } finally {
         await fd.close()
       }
+
+      await this.uploadQuotaService.adjustUploadQuotaUsedAmount(req.user.sub, {
+        amount: dto.total_size,
+        action: UserUploadQuotaUsedAmountRecordAction.USE,
+        action_reason: 'GAME_UPLOAD',
+        upload_session_id: session.id,
+      })
 
       return {
         upload_session_id: session.id,
@@ -362,11 +379,26 @@ export class LargeFileUploadService {
         status: 'ABORTED',
       },
     })
+    await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(req.user.sub, session.id)
 
     await fs.promises.rm(session.storage_path, { force: true })
   }
 
   private isSessionExpired(session: GameUploadSession) {
     return session.expires_at < new Date()
+  }
+
+  async getOngoingSessions(req: RequestWithUser) {
+    const sessions = await this.prismaService.gameUploadSession.findMany({
+      where: { creator_id: req.user.sub, status: 'UPLOADING' },
+      select: {
+        id: true,
+        file_name: true,
+        uploaded_chunks: true,
+        total_chunks: true,
+        expires_at: true,
+      },
+    })
+    return sessions
   }
 }

@@ -67,6 +67,12 @@ export class UserService {
         email,
         password: passwordHash,
         lang,
+        upload_quota: {
+          create: {
+            size: 0n,
+            used: 0n,
+          },
+        },
       },
       select: {
         id: true,

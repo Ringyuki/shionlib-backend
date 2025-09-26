@@ -8,6 +8,7 @@ import { ArchiveStatus } from '../enums/archive-status.enum'
 import { Queue } from 'bull'
 import { InjectQueue } from '@nestjs/bull'
 import { LARGE_FILE_UPLOAD_QUEUE, S3_UPLOAD_JOB } from '../../upload/constants/upload.constants'
+import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -17,6 +18,7 @@ export class FileScanService implements OnModuleInit {
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
     @InjectQueue(LARGE_FILE_UPLOAD_QUEUE) private readonly uploadQueue: Queue,
+    private readonly uploadQuotaService: UploadQuotaService,
   ) {}
 
   async onModuleInit() {
@@ -52,22 +54,25 @@ export class FileScanService implements OnModuleInit {
       },
       select: {
         file_path: true,
+        creator_id: true,
+        upload_session_id: true,
       },
     })
     for (const file of allFiles) {
-      await this.scanFile(file.file_path!)
+      await this.scanFile(file.file_path!, file.creator_id, file.upload_session_id!)
     }
 
     return allFiles.length
   }
 
-  private async scanFile(filePath: string) {
+  private async scanFile(filePath: string, creator_id: number, upload_session_id: number) {
     const status = await this.inspectArchive(filePath)
     if (status !== ArchiveStatus.OK) {
       await this.prismaService.gameDownloadResourceFile.update({
         where: { file_path: filePath },
         data: { file_check_status: status },
       })
+      await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(creator_id, upload_session_id)
       return
     }
     const result = await this.clam.scanFile(filePath)

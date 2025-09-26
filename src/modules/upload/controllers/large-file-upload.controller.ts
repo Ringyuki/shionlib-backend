@@ -21,6 +21,11 @@ import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 export class LargeFileUploadController {
   constructor(private readonly largeFileUploadService: LargeFileUploadService) {}
 
+  @Get('ongoing')
+  async getOngoingSessions(@Req() req: RequestWithUser) {
+    return await this.largeFileUploadService.getOngoingSessions(req)
+  }
+
   @Post('init')
   async init(@Body() body: GameUploadReqDto, @Req() req: RequestWithUser) {
     return await this.largeFileUploadService.init(body, req)

@@ -73,4 +73,10 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT]: HttpStatus.PAYLOAD_TOO_LARGE,
   [ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE]: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+
+  // 49
+  [ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.USER_UPLOAD_QUOTA_EXCEEDED]: HttpStatus.CONFLICT,
+  [ShionBizCode.USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE]: HttpStatus.CONFLICT,
+  [ShionBizCode.USER_UPLOAD_QUOTA_RECORD_NOT_FOUND]: HttpStatus.NOT_FOUND,
 } as const satisfies Record<ShionBizCode, HttpStatus>

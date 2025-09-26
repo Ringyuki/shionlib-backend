@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { UploadQuotaService } from './upload-quota.service'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -9,6 +10,7 @@ export class FileCleanService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
+    private readonly uploadQuotaService: UploadQuotaService,
   ) {}
 
   async clean() {
@@ -27,6 +29,7 @@ export class FileCleanService {
       select: {
         id: true,
         storage_path: true,
+        creator_id: true,
       },
     })
     for (const s of sessions) {
@@ -42,6 +45,7 @@ export class FileCleanService {
           where: { id: s.id },
           data: { status: 'EXPIRED' },
         })
+        await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(s.creator_id, s.id)
       }
     }
 
@@ -59,6 +63,40 @@ export class FileCleanService {
         await this.prismaService.gameDownloadResourceFile.update({
           where: { id: f.id },
           data: { file_path: null },
+        })
+      }
+    }
+
+    const rejectedFiles = await this.prismaService.gameDownloadResourceFile.findMany({
+      where: { type: 1, file_status: 2, file_check_status: { in: [2, 3, 4, 5] } },
+      select: {
+        id: true,
+        file_path: true,
+        upload_session_id: true,
+        creator_id: true,
+        game_download_resource_id: true,
+      },
+    })
+    for (const f of rejectedFiles) {
+      if (f.file_path?.startsWith(root)) {
+        try {
+          await fs.promises.rm(f.file_path, { force: true })
+        } catch {
+          /* empty */
+        }
+      }
+      if (f.creator_id && f.upload_session_id) {
+        await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(
+          f.creator_id,
+          f.upload_session_id,
+        )
+      }
+      await this.prismaService.gameDownloadResourceFile.delete({
+        where: { id: f.id },
+      })
+      if (f.game_download_resource_id) {
+        await this.prismaService.gameDownloadResource.delete({
+          where: { id: f.game_download_resource_id },
         })
       }
     }
