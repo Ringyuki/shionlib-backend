@@ -4,7 +4,10 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   ListObjectsV2Command,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
+import { Readable } from 'node:stream'
 
 @Injectable()
 export class S3Service implements OnModuleInit {
@@ -39,10 +42,55 @@ export class S3Service implements OnModuleInit {
     return result
   }
 
+  async uploadFileStream(
+    key: string,
+    stream: Readable,
+    contentType: string,
+    game_id: number,
+    uploader_id: number,
+    file_hash: string,
+  ) {
+    const uploader = new Upload({
+      client: this.s3Client,
+      params: {
+        Bucket: this.bucket,
+        Key: key,
+        Body: stream,
+        ContentType: contentType,
+        Metadata: {
+          'game-id': game_id.toString(),
+          'uploader-id': uploader_id.toString(),
+          scan: 'ok',
+          'file-sha256': file_hash,
+        },
+      },
+      queueSize: 4,
+      partSize: 1024 * 1024 * 32,
+      leavePartsOnError: false,
+    })
+    return uploader.done()
+  }
+
   async getFile(key: string) {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
+    })
+    const result = await this.s3Client.send(command)
+    return result
+  }
+
+  async deleteFile(key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    })
+    await this.s3Client.send(command)
+  }
+
+  async getFileList() {
+    const command = new ListObjectsV2Command({
+      Bucket: this.bucket,
     })
     const result = await this.s3Client.send(command)
     return result

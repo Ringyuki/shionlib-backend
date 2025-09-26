@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, Global } from '@nestjs/common'
 import { S3Client } from '@aws-sdk/client-s3'
 import { ShionConfigService } from '../../common/config/services/config.service'
 import { S3Service } from './services/s3.service'
@@ -8,8 +8,11 @@ import {
   S3_GAME_CLIENT,
   S3_IMAGE_CLIENT,
 } from './constants/s3.constants'
+import { AdminTestController } from './controllers/admin-test.controller'
 
+@Global()
 @Module({
+  controllers: [AdminTestController],
   providers: [
     {
       provide: S3_IMAGE_CLIENT,

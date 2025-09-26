@@ -4,7 +4,10 @@ import NodeClam from 'clamscan'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { ArchiveStatus } from '../enums/ArchiveStatus.enum'
+import { ArchiveStatus } from '../enums/archive-status.enum'
+import { Queue } from 'bull'
+import { InjectQueue } from '@nestjs/bull'
+import { LARGE_FILE_UPLOAD_QUEUE, S3_UPLOAD_JOB } from '../../upload/constants/upload.constants'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -13,9 +16,17 @@ export class FileScanService implements OnModuleInit {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
+    @InjectQueue(LARGE_FILE_UPLOAD_QUEUE) private readonly uploadQueue: Queue,
   ) {}
 
   async onModuleInit() {
+    if (
+      !this.configService.get('file_scan.clamscan_binary_path') ||
+      !this.configService.get('file_scan.clamscan_db_path')
+    ) {
+      throw new Error('Clamscan binary path or database path is not set')
+    }
+
     try {
       this.clam = await new NodeClam().init({
         clamscan: {
@@ -28,6 +39,7 @@ export class FileScanService implements OnModuleInit {
       this.logger.log('Clam initialized successfully')
     } catch (error) {
       this.logger.error(error)
+      throw error
     }
   }
 
@@ -49,14 +61,14 @@ export class FileScanService implements OnModuleInit {
     return allFiles.length
   }
 
-  private async scanFile(filePath: string): Promise<{ file: string; isInfected: boolean }> {
+  private async scanFile(filePath: string) {
     const status = await this.inspectArchive(filePath)
     if (status !== ArchiveStatus.OK) {
       await this.prismaService.gameDownloadResourceFile.update({
         where: { file_path: filePath },
         data: { file_check_status: status },
       })
-      return { file: filePath, isInfected: true }
+      return
     }
     const result = await this.clam.scanFile(filePath)
     if (result.isInfected) {
@@ -64,12 +76,24 @@ export class FileScanService implements OnModuleInit {
         where: { file_path: filePath },
         data: { file_check_status: ArchiveStatus.HARMFUL },
       })
+      return
     }
-    await this.prismaService.gameDownloadResourceFile.update({
+    const file = await this.prismaService.gameDownloadResourceFile.update({
       where: { file_path: filePath },
       data: { file_check_status: ArchiveStatus.OK },
     })
-    return result
+    await this.uploadQueue.add(
+      S3_UPLOAD_JOB,
+      {
+        resourceFileId: file.id,
+      },
+      {
+        jobId: `s3-upload:${file.id.toString()}`,
+        attempts: 5,
+        backoff: { type: 'exponential', delay: 60_000 },
+        removeOnComplete: true,
+      },
+    )
   }
 
   private async inspectArchive(filePath: string) {
@@ -118,8 +142,17 @@ export class FileScanService implements OnModuleInit {
       }
     } catch (error: any) {
       const testOut: string = error?.stdout || ''
-      if (/Headers Error|Data Error|Unexpected end of file/i.test(testOut)) {
+      const testErr: string = error?.stderr || ''
+      const hasCritical =
+        /Headers Error|Data Error|Unexpected end of file/i.test(testOut) ||
+        /Headers Error|Data Error|Unexpected end of file/i.test(testErr)
+      const hasUnsupportedMethod =
+        /Unsupported Method/i.test(testOut) || /Unsupported Method/i.test(testErr)
+
+      if (hasCritical) {
         status = ArchiveStatus.BROKEN_OR_TRUNCATED
+      } else if (hasUnsupportedMethod) {
+        status = ArchiveStatus.OK
       } else {
         status = ArchiveStatus.BROKEN_OR_UNSUPPORTED
       }

@@ -65,4 +65,13 @@ export class GameController {
       req.user?.sub,
     )
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('download-source/:downloadSourceId')
+  async deleteDownloadSource(
+    @Param('downloadSourceId', ParseIntPipe) downloadSourceId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.gameDownloadSourceService.delete(downloadSourceId, req)
+  }
 }

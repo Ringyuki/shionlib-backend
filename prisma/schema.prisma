@@ -333,13 +333,15 @@ model GameDownloadResource {
 // file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
 // file check status: 0 -> pending, 1 -> ok, 2 -> broken or truncated, 3 -> broken or unsupported, 4 -> encrypted, 5 -> harmful
 model GameDownloadResourceFile {
-  id        Int     @id @default(autoincrement())
-  type      Int
-  file_name String
-  file_path String?
-  file_size BigInt
-  file_url  String?
-  file_hash String
+  id                Int     @id @default(autoincrement())
+  type              Int
+  file_name         String
+  file_path         String? // for file type 1, local file path
+  file_size         BigInt
+  file_url          String? // for file type 2 and 3
+  s3_file_key       String? // for file type 1
+  file_content_type String? // for file type 1
+  file_hash         String
 
   upload_session_id Int?
   upload_session    GameUploadSession? @relation("game_download_resource_files_upload_session", fields: [upload_session_id], references: [id])
@@ -443,6 +445,7 @@ model GameUploadChunk {
   updated DateTime @updatedAt
 
   @@unique([game_upload_session_id, index])
+  @@index([game_upload_session_id, index])
   @@index([game_upload_session_id])
   @@map("game_upload_chunks")
 }

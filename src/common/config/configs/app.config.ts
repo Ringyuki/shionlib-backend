@@ -46,6 +46,7 @@ export default () => ({
     upload_root_dir: process.env.FILE_UPLOAD_ROOT_DIR || '/tmp/shionlib-upload/',
     chunk_size: process.env.FILE_UPLOAD_CHUNK_SIZE || 1024 * 1024 * 50, // 50MB
     upload_session_expires_in: process.env.FILE_UPLOAD_SESSION_EXPIRES_IN || 1000 * 60 * 60 * 24, // 1 day
+    upload_temp_file_suffix: process.env.FILE_UPLOAD_TEMP_FILE_SUFFIX || '.sltf', // shionlib temp file
   },
 
   file_scan: {

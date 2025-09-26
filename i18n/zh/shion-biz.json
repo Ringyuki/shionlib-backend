@@ -32,7 +32,8 @@
 
   "GAME_COVER_ALREADY_EXISTS": "封面已存在",
 
-  "GAME_RESOURCE_NOT_FOUND": "下载资源不存在",
+  "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "下载资源不存在",
+  "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "下载资源不属于当前用户",
 
   "FAVORITE_ALREADY_EXISTS": "已收藏该游戏",
 

@@ -32,7 +32,8 @@
 
   "GAME_COVER_ALREADY_EXISTS": "カバーがすでに存在します",
 
-  "GAME_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
+  "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
+  "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "ダウンロードリソースが現在のユーザーに属していません",
 
   "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
 

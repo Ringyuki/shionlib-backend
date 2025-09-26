@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { S3Service } from '../../s3/services/s3.service'
-import { GAME_STORAGE } from '../../s3/constants/s3.constants'
+import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
@@ -13,12 +11,11 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 import { GameUploadSessionResDto } from '../dto/res/game-upload-session.res.dto'
 import { GameUploadSession } from '@prisma/client'
+import mime from 'mime-types'
 
 @Injectable()
 export class LargeFileUploadService {
   constructor(
-    @Inject(GAME_STORAGE)
-    private readonly s3Service: S3Service,
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
   ) {}
@@ -28,71 +25,79 @@ export class LargeFileUploadService {
   }
 
   private destPath(id: string) {
-    return path.join(this.rootDir, `${id}.bin`)
+    return path.join(
+      this.rootDir,
+      `${id}${this.configService.get('file_upload.upload_temp_file_suffix')}`,
+    )
   }
 
   async init(dto: GameUploadReqDto, req: RequestWithUser): Promise<GameUploadSessionResDto> {
-    const chunk_size = dto.chunk_size ?? this.configService.get('file_upload.chunk_size')
-    const total_chunks = Math.ceil(dto.total_size / chunk_size)
-    if (total_chunks <= 0) {
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_INVALID_TOTAL_SIZE,
-        'shion-biz.GAME_UPLOAD_INVALID_TOTAL_SIZE',
-      )
-    }
-    if (total_chunks > this.configService.get('file_upload.upload_large_file_max_chunks')) {
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_TOO_MANY_CHUNKS,
-        'shion-biz.GAME_UPLOAD_TOO_MANY_CHUNKS',
-      )
-    }
-    if (dto.total_size > this.configService.get('file_upload.upload_large_file_max_size')) {
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_TOO_LARGE,
-        'shion-biz.GAME_UPLOAD_TOO_LARGE',
-      )
-    }
+    try {
+      const chunk_size = dto.chunk_size ?? this.configService.get('file_upload.chunk_size')
+      const total_chunks = Math.ceil(dto.total_size / chunk_size)
+      if (total_chunks <= 0) {
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_INVALID_TOTAL_SIZE,
+          'shion-biz.GAME_UPLOAD_INVALID_TOTAL_SIZE',
+        )
+      }
+      if (total_chunks > this.configService.get('file_upload.upload_large_file_max_chunks')) {
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_TOO_MANY_CHUNKS,
+          'shion-biz.GAME_UPLOAD_TOO_MANY_CHUNKS',
+        )
+      }
+      if (dto.total_size > this.configService.get('file_upload.upload_large_file_max_size')) {
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_TOO_LARGE,
+          'shion-biz.GAME_UPLOAD_TOO_LARGE',
+        )
+      }
 
-    const session = await this.prismaService.gameUploadSession.create({
-      data: {
-        file_name: dto.file_name,
-        total_size: dto.total_size,
+      const session = await this.prismaService.gameUploadSession.create({
+        data: {
+          file_name: dto.file_name,
+          total_size: dto.total_size,
+          chunk_size,
+          total_chunks,
+          uploaded_chunks: [],
+          file_sha256: dto.file_sha256,
+          status: 'UPLOADING',
+          storage_path: this.destPath('PENDING'),
+          expires_at: new Date(
+            Date.now() + this.configService.get('file_upload.upload_session_expires_in'),
+          ),
+          creator_id: req.user.sub,
+        },
+      })
+
+      const storage_path = this.destPath(session.id.toString())
+      await this.prismaService.gameUploadSession.update({
+        where: {
+          id: session.id,
+        },
+        data: {
+          storage_path,
+        },
+      })
+
+      await fs.promises.mkdir(this.rootDir, { recursive: true })
+      const fd = await fs.promises.open(storage_path, 'w')
+      try {
+        await fd.truncate(Number(dto.total_size))
+      } finally {
+        await fd.close()
+      }
+
+      return {
+        upload_session_id: session.id,
         chunk_size,
         total_chunks,
-        uploaded_chunks: [],
-        file_sha256: dto.file_sha256,
-        status: 'UPLOADING',
-        storage_path: this.destPath('PENDING'),
-        expires_at: new Date(
-          Date.now() + this.configService.get('file_upload.upload_session_expires_in'),
-        ),
-        creator_id: req.user.sub,
-      },
-    })
-
-    const storage_path = this.destPath(session.id.toString())
-    await this.prismaService.gameUploadSession.update({
-      where: {
-        id: session.id,
-      },
-      data: {
-        storage_path,
-      },
-    })
-
-    await fs.promises.mkdir(this.rootDir, { recursive: true })
-    const fd = await fs.promises.open(storage_path, 'w')
-    try {
-      await fd.truncate(Number(dto.total_size))
-    } finally {
-      await fd.close()
-    }
-
-    return {
-      upload_session_id: session.id,
-      chunk_size,
-      total_chunks,
-      expires_at: session.expires_at,
+        expires_at: session.expires_at,
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 
@@ -302,12 +307,15 @@ export class LargeFileUploadService {
       )
     }
 
+    const mime_type = mime.lookup(session.storage_path) || 'application/octet-stream'
+
     await this.prismaService.gameUploadSession.update({
       where: {
         id: session.id,
       },
       data: {
         status: 'COMPLETED',
+        mime_type,
       },
     })
 

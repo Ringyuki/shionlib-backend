@@ -21,12 +21,16 @@ import { UploadModule } from './modules/upload/upload.module'
 import { SecurityModule } from './modules/security/security.module'
 import { ImageModule } from './modules/image/image.module'
 import { ScheduleModule } from '@nestjs/schedule'
+import { BullModule } from './modules/bull/bull.module'
+import { S3Module } from './modules/s3/s3.module'
 
 @Module({
   imports: [
     ShionConfigModule,
     PrismaModule,
     ScheduleModule.forRoot(),
+    BullModule,
+    S3Module,
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ShionConfigService],

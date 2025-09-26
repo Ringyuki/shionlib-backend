@@ -40,6 +40,7 @@ export interface AppConfig {
     upload_root_dir: string
     chunk_size: number
     upload_session_expires_in: number
+    upload_temp_file_suffix: string
   }
   file_scan: {
     clamscan_binary_path: string
