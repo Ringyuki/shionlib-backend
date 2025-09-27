@@ -120,6 +120,9 @@ export class UploadQuotaService {
           user_upload_quota: { user_id },
           upload_session_id: session_id,
           action: { in: ['USE', 'ADD'] },
+          status: {
+            not: 'WITHDRAWN',
+          },
           field: 'USED',
         },
         orderBy: { created: 'asc' },

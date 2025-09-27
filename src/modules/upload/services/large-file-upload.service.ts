@@ -399,6 +399,8 @@ export class LargeFileUploadService {
       select: {
         id: true,
         file_name: true,
+        file_sha256: true,
+        total_size: true,
         uploaded_chunks: true,
         total_chunks: true,
         expires_at: true,
@@ -407,6 +409,8 @@ export class LargeFileUploadService {
     return sessions.map(s => ({
       upload_session_id: s.id,
       file_name: s.file_name,
+      file_sha256: s.file_sha256,
+      total_size: Number(s.total_size),
       uploaded_chunks: s.uploaded_chunks,
       total_chunks: s.total_chunks,
       expires_at: s.expires_at,
