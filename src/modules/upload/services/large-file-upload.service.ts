@@ -343,52 +343,57 @@ export class LargeFileUploadService {
   }
 
   async abort(id: number, req: RequestWithUser) {
-    const session = await this.prismaService.gameUploadSession.findUnique({
-      where: {
-        id,
-      },
-    })
-    if (!session)
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_SESSION_NOT_FOUND,
-        'shion-biz.GAME_UPLOAD_SESSION_NOT_FOUND',
-      )
+    try {
+      const session = await this.prismaService.gameUploadSession.findUnique({
+        where: {
+          id,
+        },
+      })
+      if (!session)
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_SESSION_NOT_FOUND,
+          'shion-biz.GAME_UPLOAD_SESSION_NOT_FOUND',
+        )
 
-    if (session.status !== 'UPLOADING')
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_INVALID_SESSION_STATUS,
-        'shion-biz.GAME_UPLOAD_INVALID_SESSION_STATUS',
-      )
-    if (this.isSessionExpired(session))
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED,
-        'shion-biz.GAME_UPLOAD_SESSION_EXPIRED',
-      )
+      if (session.status !== 'UPLOADING')
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_INVALID_SESSION_STATUS,
+          'shion-biz.GAME_UPLOAD_INVALID_SESSION_STATUS',
+        )
+      if (this.isSessionExpired(session))
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED,
+          'shion-biz.GAME_UPLOAD_SESSION_EXPIRED',
+        )
 
-    if (session.creator_id !== req.user.sub)
-      throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER,
-        'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
-      )
+      if (session.creator_id !== req.user.sub)
+        throw new ShionBizException(
+          ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER,
+          'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
+        )
 
-    await this.prismaService.gameUploadSession.update({
-      where: {
-        id: session.id,
-      },
-      data: {
-        status: 'ABORTED',
-      },
-    })
-    await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(req.user.sub, session.id)
+      await this.prismaService.gameUploadSession.update({
+        where: {
+          id: session.id,
+        },
+        data: {
+          status: 'ABORTED',
+        },
+      })
+      await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(req.user.sub, session.id)
 
-    await fs.promises.rm(session.storage_path, { force: true })
+      await fs.promises.rm(session.storage_path, { force: true })
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
   }
 
   private isSessionExpired(session: GameUploadSession) {
     return session.expires_at < new Date()
   }
 
-  async getOngoingSessions(req: RequestWithUser) {
+  async getOngoingSessions(req: RequestWithUser): Promise<GameUploadSessionResDto[]> {
     const sessions = await this.prismaService.gameUploadSession.findMany({
       where: { creator_id: req.user.sub, status: 'UPLOADING' },
       select: {
@@ -399,6 +404,12 @@ export class LargeFileUploadService {
         expires_at: true,
       },
     })
-    return sessions
+    return sessions.map(s => ({
+      upload_session_id: s.id,
+      file_name: s.file_name,
+      uploaded_chunks: s.uploaded_chunks,
+      total_chunks: s.total_chunks,
+      expires_at: s.expires_at,
+    }))
   }
 }

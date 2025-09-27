@@ -128,15 +128,9 @@ export class UploadQuotaService {
 
       const delta = record.action === 'USE' ? record.amount : -record.amount
 
-      await tx.userUploadQuotaRecord.create({
-        data: {
-          field: 'USED',
-          amount: delta,
-          action: 'SUB',
-          action_reason: 'WITHDRAW_UPLOAD_QUOTA_USE_ADJUSTMENT',
-          upload_session_id: session_id,
-          user_upload_quota_id: record.user_upload_quota_id,
-        },
+      await tx.userUploadQuotaRecord.update({
+        where: { id: record.id },
+        data: { status: 'WITHDRAWN' },
       })
       await tx.userUploadQuota.update({
         where: { id: record.user_upload_quota_id },

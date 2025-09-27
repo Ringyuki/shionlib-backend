@@ -479,6 +479,11 @@ enum UserUploadQuotaRecordField {
   USED
 }
 
+enum UserUploadQuotaRecordStatus {
+  COMPLETED
+  WITHDRAWN
+}
+
 model UserUploadQuotaRecord {
   id Int @id @default(autoincrement())
 
@@ -486,6 +491,7 @@ model UserUploadQuotaRecord {
   amount        BigInt
   action        UserUploadQuotaRecordAction
   action_reason String?                     @db.VarChar(255)
+  status        UserUploadQuotaRecordStatus @default(COMPLETED)
 
   upload_session_id Int?               @unique
   upload_session    GameUploadSession? @relation("user_upload_quota_records_upload_session", fields: [upload_session_id], references: [id])
@@ -496,6 +502,5 @@ model UserUploadQuotaRecord {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
-  @@unique([upload_session_id, action])
   @@map("user_upload_quota_records")
 }
