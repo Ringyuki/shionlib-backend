@@ -23,6 +23,7 @@ import { ImageModule } from './modules/image/image.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { BullModule } from './modules/bull/bull.module'
 import { S3Module } from './modules/s3/s3.module'
+import { B2Module } from './modules/b2/b2.module'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { S3Module } from './modules/s3/s3.module'
     ScheduleModule.forRoot(),
     BullModule,
     S3Module,
+    B2Module,
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ShionConfigService],

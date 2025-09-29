@@ -54,6 +54,7 @@ export type I18nTranslations = {
         "GAME_COVER_ALREADY_EXISTS": string;
         "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": string;
         "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": string;
+        "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
         "GAME_UPLOAD_INVALID_TOTAL_SIZE": string;

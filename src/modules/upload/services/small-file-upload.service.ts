@@ -8,6 +8,7 @@ import { ImageProcessResDto } from '../../image/dto/res/image-process.res.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PrismaService } from '../../../prisma.service'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
 export class SmallFileUploadService {
@@ -20,7 +21,7 @@ export class SmallFileUploadService {
     this.logger = new Logger(SmallFileUploadService.name)
   }
 
-  async uploadGameCover(game_id: number, file: Express.Multer.File) {
+  async uploadGameCover(game_id: number, file: Express.Multer.File, req: RequestWithUser) {
     const game = await this.prismaService.game.findUnique({
       where: {
         id: game_id,
@@ -46,7 +47,10 @@ export class SmallFileUploadService {
       format: TargetFormatEnum.WEBP,
     })
     const key = `game/cover/${game_id}/${nodeRandomUUID()}${data.filenameSuffix}`
-    await this._upload(data, key)
+    await this._upload(data, key, {
+      game_id: game_id.toString(),
+      uploader_id: req.user.sub.toString(),
+    })
     return {
       key,
     }
@@ -63,10 +67,10 @@ export class SmallFileUploadService {
     }
   }
 
-  private async _upload(dto: ImageProcessResDto, key: string) {
+  private async _upload(dto: ImageProcessResDto, key: string, metadata?: Record<string, string>) {
     try {
       const buffer = Buffer.from(dto.data)
-      await this.s3Service.uploadFile(key, buffer, dto.mime)
+      await this.s3Service.uploadFile(key, buffer, dto.mime, metadata)
     } catch (error) {
       this.logger.error(error)
       throw error

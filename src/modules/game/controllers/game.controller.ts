@@ -19,7 +19,7 @@ import { RolesGuard } from '../../auth/guards/roles.guard'
 import { Roles } from '../../auth/decorators/roles.decorator'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
-import { GameDownloadSourceService } from '../services/game-download-source.service'
+import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 
 @Controller('game')
@@ -37,6 +37,16 @@ export class GameController {
   @Get(':id')
   async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
     return await this.gameService.getById(getGameReqDto.id, req.user?.sub)
+  }
+
+  @Get(':id/download-source')
+  async getDownloadSource(@Param('id', ParseIntPipe) id: number) {
+    return await this.gameDownloadSourceService.getByGameId(id)
+  }
+
+  @Get('download/:id/link')
+  async getDownloadSourceLink(@Param('id', ParseIntPipe) id: number) {
+    return await this.gameDownloadSourceService.getDownloadLink(id)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

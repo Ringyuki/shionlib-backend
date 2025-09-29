@@ -6,6 +6,7 @@ import {
   UploadedFile,
   Param,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
@@ -14,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { memoryStorage } from 'multer'
 import type { Express } from 'express'
 import { SmallFileUploadService } from '../services/small-file-upload.service'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @UseGuards(JwtAuthGuard)
 @Controller('uploads/small')
@@ -42,7 +44,8 @@ export class SmallFileUploadController {
   async uploadGameCover(
     @Param('game_id', ParseIntPipe) game_id: number,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: RequestWithUser,
   ) {
-    return await this.smallFileUploadService.uploadGameCover(game_id, file)
+    return await this.smallFileUploadService.uploadGameCover(game_id, file, req)
   }
 }

@@ -49,12 +49,15 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER]: HttpStatus.FORBIDDEN,
 
   // 45
-  [ShionBizCode.FAVORITE_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND]: HttpStatus.NOT_FOUND,
 
   // 46
-  [ShionBizCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.FAVORITE_ALREADY_EXISTS]: HttpStatus.CONFLICT,
 
   // 47
+  [ShionBizCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
+
+  // 48
   [ShionBizCode.GAME_UPLOAD_INVALID_TOTAL_SIZE]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.GAME_UPLOAD_TOO_MANY_CHUNKS]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.GAME_UPLOAD_TOO_LARGE]: HttpStatus.BAD_REQUEST,
@@ -69,12 +72,12 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED]: HttpStatus.GONE,
   [ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER]: HttpStatus.FORBIDDEN,
 
-  // 48
+  // 49
   [ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT]: HttpStatus.PAYLOAD_TOO_LARGE,
   [ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE]: HttpStatus.UNSUPPORTED_MEDIA_TYPE,
 
-  // 49
+  // 50
   [ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.USER_UPLOAD_QUOTA_EXCEEDED]: HttpStatus.CONFLICT,
   [ShionBizCode.USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE]: HttpStatus.CONFLICT,

@@ -34,6 +34,11 @@ export default () => ({
     },
   },
 
+  b2: {
+    applicationKeyId: process.env.B2_APPLICATION_KEY_ID,
+    applicationKey: process.env.B2_APPLICATION_KEY,
+  },
+
   bangumi: {
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -53,5 +58,10 @@ export default () => ({
     clamscan_binary_path:
       process.env.CLAMSCAN_BINARY_PATH || '/opt/homebrew/opt/clamav/bin/clamscan',
     clamscan_db_path: process.env.CLAMSCAN_DB_PATH || '/opt/homebrew/var/lib/clamav',
+  },
+
+  file_download: {
+    download_cdn_host: process.env.FILE_DOWNLOAD_CDN_HOST || 'https://ft.hikarifallback.uk/',
+    download_expires_in: process.env.FILE_DOWNLOAD_EXPIRES_IN || 3600, // 1 hour
   },
 })

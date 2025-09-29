@@ -24,6 +24,11 @@ export class FileCleanService {
         OR: [
           { status: 'ABORTED' },
           { status: { not: 'COMPLETED' }, expires_at: { lt: new Date(now - graceMs) } },
+          {
+            status: 'COMPLETED',
+            updated: { lt: new Date(now - graceMs) },
+            game_download_resource_file: null,
+          },
         ],
       },
       select: {
@@ -113,6 +118,7 @@ export class FileCleanService {
     if (entries.length) {
       const refs = new Set<string>()
       const [sessionsRef, filesRef] = await Promise.all([
+        // TODO: findmany without any filter may cause performance issue, plan to add session clean task in the future(keep recent 30 days sessions)
         this.prismaService.gameUploadSession.findMany({ select: { storage_path: true } }),
         this.prismaService.gameDownloadResourceFile.findMany({ select: { file_path: true } }),
       ])

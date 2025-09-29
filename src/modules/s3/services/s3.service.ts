@@ -31,12 +31,18 @@ export class S3Service implements OnModuleInit {
     }
   }
 
-  async uploadFile(key: string, buffer: Buffer, contentType: string) {
+  async uploadFile(
+    key: string,
+    buffer: Buffer,
+    contentType: string,
+    metadata?: Record<string, string>,
+  ) {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
       Body: buffer,
       ContentType: contentType,
+      Metadata: metadata,
     })
     const result = await this.s3Client.send(command)
     return result

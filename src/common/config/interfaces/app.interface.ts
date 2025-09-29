@@ -29,6 +29,10 @@ export interface AppConfig {
       secretAccessKey: string
     }
   }
+  b2: {
+    applicationKeyId: string
+    applicationKey: string
+  }
   bangumi: {
     clientId: string
     clientSecret: string
@@ -45,5 +49,9 @@ export interface AppConfig {
   file_scan: {
     clamscan_binary_path: string
     clamscan_db_path: string
+  }
+  file_download: {
+    download_cdn_host: string
+    download_expires_in: number
   }
 }
