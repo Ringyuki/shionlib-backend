@@ -71,6 +71,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
+      express:
+        specifier: ^5.1.0
+        version: 5.1.0
       franc:
         specifier: ^6.2.0
         version: 6.2.0
