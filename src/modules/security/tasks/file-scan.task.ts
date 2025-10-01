@@ -9,10 +9,11 @@ export class FileScanTask {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
-    this.logger.log('Scanning files...')
     try {
       const count = await this.fileScanService.scanFiles()
-      this.logger.log(`${count} files scanned successfully`)
+      if (count > 0) {
+        this.logger.log(`${count} files scanned successfully`)
+      }
     } catch (error) {
       this.logger.error('Error scanning files', error)
     }

@@ -9,10 +9,8 @@ export class FileCleanTask {
 
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
-    this.logger.log('Cleaning files...')
     try {
       await this.fileCleanService.clean()
-      this.logger.log('Files cleaned successfully')
     } catch (error) {
       this.logger.error('Error cleaning files', error)
     }

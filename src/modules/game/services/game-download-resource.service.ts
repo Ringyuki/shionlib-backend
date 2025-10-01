@@ -20,7 +20,7 @@ export class GameDownloadSourceService {
     private readonly configService: ShionConfigService,
   ) {}
 
-  async getByGameId(id: number): Promise<GetGameDownloadResourceResDto[]> {
+  async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
     const game = await this.prismaService.game.findUnique({
       where: {
         id,
@@ -50,6 +50,7 @@ export class GameDownloadSourceService {
                 file_url: true,
                 s3_file_key: true,
                 file_hash: true,
+                file_status: true,
                 creator: {
                   select: {
                     id: true,
@@ -75,6 +76,12 @@ export class GameDownloadSourceService {
         } as any
       })
     })
+
+    game.download_resources.forEach(r => {
+      r.files = r.files.filter(f => f.file_status === 3 || f.creator.id === req.user?.sub)
+    })
+    game.download_resources = game.download_resources.filter(r => r.files.length > 0)
+
     return game.download_resources as unknown as GetGameDownloadResourceResDto[]
   }
 
@@ -190,6 +197,7 @@ export class GameDownloadSourceService {
         id,
       },
       select: {
+        game_download_resource_id: true,
         s3_file_key: true,
       },
     })
@@ -199,6 +207,15 @@ export class GameDownloadSourceService {
         'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND',
       )
     }
+
+    await this.prismaService.gameDownloadResource.update({
+      where: { id: file.game_download_resource_id },
+      data: {
+        downloads: {
+          increment: 1,
+        },
+      },
+    })
 
     return {
       file_url: await this.b2Service.getDownloadUrl(file.s3_file_key!),

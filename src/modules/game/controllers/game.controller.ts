@@ -40,8 +40,8 @@ export class GameController {
   }
 
   @Get(':id/download-source')
-  async getDownloadSource(@Param('id', ParseIntPipe) id: number) {
-    return await this.gameDownloadSourceService.getByGameId(id)
+  async getDownloadSource(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return await this.gameDownloadSourceService.getByGameId(id, req)
   }
 
   @Get('download/:id/link')

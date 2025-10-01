@@ -66,6 +66,7 @@ export class FileScanService implements OnModuleInit {
   }
 
   private async scanFile(filePath: string, creator_id: number, upload_session_id: number) {
+    console.log('scanning file', filePath)
     const status = await this.inspectArchive(filePath)
     if (status !== ArchiveStatus.OK) {
       await this.prismaService.gameDownloadResourceFile.update({
@@ -73,6 +74,7 @@ export class FileScanService implements OnModuleInit {
         data: { file_check_status: status },
       })
       await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(creator_id, upload_session_id)
+      console.log('file is not ok, reason: ', status)
       return
     }
     const result = await this.clam.scanFile(filePath)
@@ -81,6 +83,7 @@ export class FileScanService implements OnModuleInit {
         where: { file_path: filePath },
         data: { file_check_status: ArchiveStatus.HARMFUL },
       })
+      console.log('file is not ok, reason: ', result)
       return
     }
     const file = await this.prismaService.gameDownloadResourceFile.update({
