@@ -31,12 +31,14 @@ export class FileScanService implements OnModuleInit {
 
     try {
       this.clam = await new NodeClam().init({
+        clamdscan: { active: false },
         clamscan: {
           path: this.configService.get('file_scan.clamscan_binary_path'),
           db: this.configService.get('file_scan.clamscan_db_path'),
           scanArchives: true,
           active: true,
         },
+        preference: 'clamscan',
       })
       this.logger.log('Clam initialized successfully')
     } catch (error) {
