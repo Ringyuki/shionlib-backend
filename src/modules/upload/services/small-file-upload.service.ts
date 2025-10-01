@@ -46,7 +46,7 @@ export class SmallFileUploadService {
     const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
       format: TargetFormatEnum.WEBP,
     })
-    const key = `game/cover/${game_id}/${nodeRandomUUID()}${data.filenameSuffix}`
+    const key = `game/${game_id}/cover/${nodeRandomUUID()}${data.filenameSuffix}`
     await this._upload(data, key, {
       game_id: game_id.toString(),
       uploader_id: req.user.sub.toString(),
@@ -60,7 +60,7 @@ export class SmallFileUploadService {
     const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
       format: TargetFormatEnum.WEBP,
     })
-    const key = `game/image/${game_id}/${nodeRandomUUID()}${data.filenameSuffix}`
+    const key = `game/${game_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
     await this._upload(data, key)
     return {
       key,
@@ -74,6 +74,81 @@ export class SmallFileUploadService {
     } catch (error) {
       this.logger.error(error)
       throw error
+    }
+  }
+
+  async _uploadGameCover(game_id: number, url: string) {
+    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_buffer = Buffer.from(image_raw)
+    const data = await this.imageProcessService.process(image_buffer, {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `game/${game_id}/cover/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      game_id: game_id.toString(),
+    })
+    return {
+      key,
+    }
+  }
+
+  async _uploadGameImage(game_id: number, url: string) {
+    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_buffer = Buffer.from(image_raw)
+    const data = await this.imageProcessService.process(image_buffer, {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `game/${game_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      game_id: game_id.toString(),
+    })
+    return {
+      key,
+    }
+  }
+
+  async _uploadGameCharacterImage(character_id: number, url: string) {
+    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_buffer = Buffer.from(image_raw)
+    const data = await this.imageProcessService.process(image_buffer, {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `character/${character_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      character_id: character_id.toString(),
+    })
+    return {
+      key,
+    }
+  }
+
+  async _uploadGameCharacterRelationImage(character_id: number, url: string) {
+    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_buffer = Buffer.from(image_raw)
+    const data = await this.imageProcessService.process(image_buffer, {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `character/${character_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      character_id: character_id.toString(),
+    })
+    return {
+      key,
+    }
+  }
+
+  async _uploadGameDeveloperImage(developer_id: number, url: string) {
+    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_buffer = Buffer.from(image_raw)
+    const data = await this.imageProcessService.process(image_buffer, {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `developer/${developer_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      developer_id: developer_id.toString(),
+    })
+    return {
+      key,
     }
   }
 }
