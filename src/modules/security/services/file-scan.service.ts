@@ -106,30 +106,111 @@ export class FileScanService implements OnModuleInit {
     )
   }
 
+  // private async inspectArchive(filePath: string) {
+  //   const execFileAsync = promisify(execFile)
+  //   let listStdout = ''
+  //   let listStderr = ''
+  //   let status = ArchiveStatus.OK
+
+  //   try {
+  //     const { stdout, stderr } = await execFileAsync('7zz', ['l', '-slt', '-p-', filePath], {
+  //       timeout: 20_000,
+  //     })
+  //     listStdout = stdout || ''
+  //     listStderr = stderr || ''
+  //   } catch (error: any) {
+  //     listStdout = error?.stdout || ''
+  //     listStderr = error?.stderr || ''
+  //   }
+
+  //   const stdoutToInspect = listStdout || ''
+
+  //   // check if it is a multi-volume rar file and if it has headers error
+  //   const isRar = /\bType\s*=\s*Rar/i.test(stdoutToInspect)
+  //   const isMultiVolume =
+  //     /\bMultivolume\s*=\s*\+/i.test(stdoutToInspect) ||
+  //     /\bVolumes\s*=\s*\d+/i.test(stdoutToInspect)
+  //   const hasHeadersError =
+  //     /Headers Error/i.test(stdoutToInspect) || /Headers Error/i.test(listStderr)
+
+  //   if (isRar && isMultiVolume && hasHeadersError) {
+  //     return ArchiveStatus.BROKEN_OR_TRUNCATED
+  //   }
+
+  //   const encrypted =
+  //     /\bEncrypted\s*=\s*\+/.test(stdoutToInspect) || /\bMethod\s*=\s*AES/i.test(stdoutToInspect)
+  //   if (encrypted) {
+  //     status = ArchiveStatus.ENCRYPTED
+  //   }
+
+  //   try {
+  //     const { stdout: testOut } = await execFileAsync('7zz', ['t', '-p-', filePath], {
+  //       timeout: 60_000,
+  //     })
+  //     if (/Headers Error|Data Error|Unexpected end of file/i.test(testOut)) {
+  //       status = ArchiveStatus.BROKEN_OR_TRUNCATED
+  //     }
+  //   } catch (error: any) {
+  //     const testOut: string = error?.stdout || ''
+  //     const testErr: string = error?.stderr || ''
+  //     const hasCritical =
+  //       /Headers Error|Data Error|Unexpected end of file/i.test(testOut) ||
+  //       /Headers Error|Data Error|Unexpected end of file/i.test(testErr)
+  //     const hasUnsupportedMethod =
+  //       /Unsupported Method/i.test(testOut) || /Unsupported Method/i.test(testErr)
+
+  //     if (hasCritical) {
+  //       status = ArchiveStatus.BROKEN_OR_TRUNCATED
+  //     } else if (hasUnsupportedMethod) {
+  //       status = ArchiveStatus.OK
+  //     } else {
+  //       status = ArchiveStatus.BROKEN_OR_UNSUPPORTED
+  //     }
+  //   }
+
+  //   return status
+  // }
+
   private async inspectArchive(filePath: string) {
     const execFileAsync = promisify(execFile)
+    const execOptsList = { timeout: 30_000, maxBuffer: 64 * 1024 * 1024 }
+    const execOptsTest = { timeout: 10 * 60_000, maxBuffer: 64 * 1024 * 1024 }
+
     let listStdout = ''
     let listStderr = ''
     let status = ArchiveStatus.OK
 
     try {
-      const { stdout, stderr } = await execFileAsync('7zz', ['l', '-slt', '-p-', filePath], {
-        timeout: 20_000,
-      })
+      const { stdout, stderr } = await execFileAsync('7zz', ['l', '-slt', filePath], execOptsList)
       listStdout = stdout || ''
       listStderr = stderr || ''
     } catch (error: any) {
       listStdout = error?.stdout || ''
       listStderr = error?.stderr || ''
+      const blob = (listStdout + '\n' + listStderr + '\n' + (error?.message || '')).trim()
+      // do a quick check first
+      if (/Wrong password|Can not open encrypted archive|Can not decrypt/i.test(blob)) {
+        return ArchiveStatus.ENCRYPTED
+      }
+      if (
+        /Headers Error|Data Error|Unexpected end of (?:file|data)|CRC Failed|Data is corrupted|Can not open file as archive/i.test(
+          blob,
+        )
+      ) {
+        return ArchiveStatus.BROKEN_OR_TRUNCATED
+      }
+      return ArchiveStatus.BROKEN_OR_UNSUPPORTED
     }
 
     const stdoutToInspect = listStdout || ''
 
-    // check if it is a multi-volume rar file and if it has headers error
+    // multi-volume & headers error → corrupted
     const isRar = /\bType\s*=\s*Rar/i.test(stdoutToInspect)
-    const isMultiVolume =
-      /\bMultivolume\s*=\s*\+/i.test(stdoutToInspect) ||
-      /\bVolumes\s*=\s*\d+/i.test(stdoutToInspect)
+    const multivolumeFlag = /\bMultivolume\s*=\s*\+/i.test(stdoutToInspect)
+    const volumesMatch = stdoutToInspect.match(/\bVolumes\s*=\s*(\d+)/i)
+    const volumesGt1 = volumesMatch ? Number(volumesMatch[1]) > 1 : false
+    const isMultiVolume = multivolumeFlag || volumesGt1
+
     const hasHeadersError =
       /Headers Error/i.test(stdoutToInspect) || /Headers Error/i.test(listStderr)
 
@@ -137,31 +218,59 @@ export class FileScanService implements OnModuleInit {
       return ArchiveStatus.BROKEN_OR_TRUNCATED
     }
 
+    // encrypted → return
     const encrypted =
       /\bEncrypted\s*=\s*\+/.test(stdoutToInspect) || /\bMethod\s*=\s*AES/i.test(stdoutToInspect)
     if (encrypted) {
-      status = ArchiveStatus.ENCRYPTED
+      return ArchiveStatus.ENCRYPTED
     }
 
+    // t stage (don't pass -p-; reduce noise)
     try {
-      const { stdout: testOut } = await execFileAsync('7zz', ['t', '-p-', filePath], {
-        timeout: 60_000,
-      })
-      if (/Headers Error|Data Error|Unexpected end of file/i.test(testOut)) {
+      const { stdout: testOut } = await execFileAsync(
+        '7zz',
+        ['t', '-bb0', '-bd', '-y', filePath],
+        execOptsTest,
+      )
+      if (
+        /Headers Error|Data Error|Unexpected end of (?:file|data)|CRC Failed|Data is corrupted/i.test(
+          testOut,
+        )
+      ) {
         status = ArchiveStatus.BROKEN_OR_TRUNCATED
+      } else {
+        // no critical error → keep OK
+        status = ArchiveStatus.OK
       }
     } catch (error: any) {
       const testOut: string = error?.stdout || ''
       const testErr: string = error?.stderr || ''
-      const hasCritical =
-        /Headers Error|Data Error|Unexpected end of file/i.test(testOut) ||
-        /Headers Error|Data Error|Unexpected end of file/i.test(testErr)
-      const hasUnsupportedMethod =
-        /Unsupported Method/i.test(testOut) || /Unsupported Method/i.test(testErr)
+      const msg: string = error?.message || ''
+      const blob = `${testOut}\n${testErr}\n${msg}`
 
-      if (hasCritical) {
+      const hasCritical =
+        /Headers Error|Data Error|Unexpected end of (?:file|data)|CRC Failed|Data is corrupted|Can not open file as archive/i.test(
+          blob,
+        )
+      const hasUnsupported =
+        /Unsupported Method|Method not supported/i.test(testOut) ||
+        /Unsupported Method|Method not supported/i.test(testErr)
+
+      const wrongPwd = /Wrong password|Can not open encrypted archive|Can not decrypt/i.test(blob)
+
+      const looksBuffer = /maxBuffer|stdout maxBuffer exceeded/i.test(blob)
+      const looksTimeout = error?.killed || /ETIMEDOUT|timeout/i.test(blob)
+      const exitCode: number | undefined = typeof error?.code === 'number' ? error.code : undefined
+
+      if (wrongPwd) {
+        status = ArchiveStatus.ENCRYPTED
+      } else if (hasCritical) {
         status = ArchiveStatus.BROKEN_OR_TRUNCATED
-      } else if (hasUnsupportedMethod) {
+      } else if (hasUnsupported) {
+        // compression method not supported ≠ archive corrupted, keep OK
+        status = ArchiveStatus.OK
+      } else if (looksBuffer || looksTimeout || exitCode === 1) {
+        // host side problem/Warnings, just ignore
         status = ArchiveStatus.OK
       } else {
         status = ArchiveStatus.BROKEN_OR_UNSUPPORTED
