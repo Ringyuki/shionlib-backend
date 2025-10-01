@@ -102,6 +102,7 @@ export class GameDataFetcherService {
           name: typeof i.value === 'string' ? i.value : i.value.map(v => v.v).join(', '),
           role: i.key,
         }))
+      finalGameData.type = rawGameData.infobox.find(i => i.key === '游戏类型')?.value as string
 
       for (const character of rawCharacterData) {
         finalCharactersData.push({
