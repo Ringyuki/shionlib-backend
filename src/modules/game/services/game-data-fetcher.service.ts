@@ -16,6 +16,7 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { VNDBReleaseItemRes } from '../interfaces/vndb/release-item.res'
 import { createCharacterMatcher } from '../utils/character-match.util'
+import { dedupeCharactersInPlace, dedupeDevelopersInPlace } from '../helpers/dedupe'
 
 @Injectable()
 export class GameDataFetcherService {
@@ -134,6 +135,8 @@ export class GameDataFetcherService {
         }
       }
 
+      dedupeCharactersInPlace(finalCharactersData)
+
       for (const producer of rawPersonData.filter(p => p.relation === '开发')) {
         finalProducersData.push({
           b_id: producer.id.toString(),
@@ -162,6 +165,8 @@ export class GameDataFetcherService {
             }))
         }
       }
+
+      dedupeDevelopersInPlace(finalProducersData)
     } catch (error) {
       console.error(error)
       throw error
@@ -176,6 +181,8 @@ export class GameDataFetcherService {
         rawGameData,
       )
     }
+    dedupeCharactersInPlace(finalCharactersData)
+    dedupeDevelopersInPlace(finalProducersData)
     return { finalGameData, finalCharactersData, finalProducersData }
   }
 
@@ -507,6 +514,8 @@ export class GameDataFetcherService {
       throw error
     }
 
+    dedupeCharactersInPlace(finalCharactersData)
+    dedupeDevelopersInPlace(finalProducersData)
     return { finalGameData, finalCharactersData, finalProducersData, finalCoversData }
   }
 

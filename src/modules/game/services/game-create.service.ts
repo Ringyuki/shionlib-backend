@@ -76,7 +76,9 @@ export class GameCreateService {
             .create({
               data: { game_id: game.id, developer_id: dev.id, role: '开发' },
             })
-            .catch(() => {})
+            .catch(e => {
+              throw e
+            })
         }
 
         for (const c of finalCharactersData || []) {
@@ -91,12 +93,17 @@ export class GameCreateService {
                 role: c.role,
               },
             })
-            .catch(() => {})
+            .catch(e => {
+              throw e
+            })
         }
+        const check = await tx.game.findUnique({ where: { id: game.id }, select: { id: true } })
+        if (!check) throw new Error('Row not visible inside tx')
         return game.id
       })
     } catch (e) {
       console.error(e)
+      throw e
     }
     if (gameId === 0) {
       throw new Error('Game creation failed')
