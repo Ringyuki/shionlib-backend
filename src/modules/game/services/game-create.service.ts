@@ -88,7 +88,6 @@ export class GameCreateService {
               data: {
                 game_id: game.id,
                 character_id: ch.id,
-                image: c.image,
                 actor: c.actor,
                 role: c.role,
               },
@@ -260,7 +259,6 @@ export class GameCreateService {
         intro_jp: this.dataOrEmpty(createGameReqDto.intro_jp, ''),
         intro_zh: this.dataOrEmpty(createGameReqDto.intro_zh, ''),
         intro_en: this.dataOrEmpty(createGameReqDto.intro_en, ''),
-        images: this.dataOrEmpty(createGameReqDto.images, []),
         extra_info: this.dataOrEmpty(createGameReqDto.extra_info, []),
         tags: this.dataOrEmpty(createGameReqDto.tags, []),
         staffs: this.dataOrEmpty(createGameReqDto.staffs, []),

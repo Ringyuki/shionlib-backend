@@ -13,6 +13,8 @@
     "IS_NUMBER": "{property} 必须是数字",
     "IS_BOOLEAN": "{property} 必须是布尔值",
     "IS_ARRAY": "{property} 必须是数组",
+    "ARRAY_MAX_SIZE": "{property} 不能超过 {max} 个元素",
+    "ARRAY_MIN_SIZE": "{property} 不能少于 {min} 个元素",
     "IS_OBJECT": "{property} 必须是对象",
     "IS_DATE": "{property} 必须是日期",
     "IS_URL": "{property} 必须是有效的URL",

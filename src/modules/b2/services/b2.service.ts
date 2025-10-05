@@ -3,15 +3,27 @@ import { HttpService } from '@nestjs/axios'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { firstValueFrom } from 'rxjs'
 import { B2Auth, B2DownloadAuth } from '../interfaces/b2-auth.interface'
+import { CacheService } from '../../cache/services/cache.service'
 
 @Injectable()
 export class B2Service {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ShionConfigService,
+    private readonly cacheService: CacheService,
   ) {}
 
   private async getAuthorizationToken() {
+    const cacheKey = 'b2:authorizationToken'
+    const cachedToken = await this.cacheService.get<B2Auth>(cacheKey)
+    if (cachedToken) {
+      return {
+        authorizationToken: cachedToken.authorizationToken,
+        bucketId: cachedToken.apiInfo.storageApi.allowed.buckets[0].id,
+        apiUrl: cachedToken.apiInfo.storageApi.apiUrl,
+      }
+    }
+
     const response = await firstValueFrom(
       this.httpService.get<B2Auth>('https://api.backblazeb2.com/b2api/v4/b2_authorize_account', {
         headers: {
@@ -19,6 +31,8 @@ export class B2Service {
         },
       }),
     )
+
+    await this.cacheService.set(cacheKey, response.data, 3600 * 1000 * 21)
 
     return {
       authorizationToken: response.data.authorizationToken,

@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { BullModule } from './modules/bull/bull.module'
 import { S3Module } from './modules/s3/s3.module'
 import { B2Module } from './modules/b2/b2.module'
+import { EditModule } from './modules/edit/edit.module'
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { B2Module } from './modules/b2/b2.module'
     UploadModule,
     SecurityModule,
     ImageModule,
+    EditModule,
   ],
   controllers: [],
   providers: [

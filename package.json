@@ -46,6 +46,7 @@
     "express": "^5.1.0",
     "franc": "^6.2.0",
     "ioredis": "^5.7.0",
+    "microdiff": "^1.5.0",
     "mime-types": "^3.0.1",
     "multer": "^2.0.2",
     "nestjs-i18n": "^10.5.1",

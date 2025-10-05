@@ -13,6 +13,8 @@
     "IS_NUMBER": "{property} は数字である必要があります",
     "IS_BOOLEAN": "{property} は真偽値である必要があります",
     "IS_ARRAY": "{property} は配列である必要があります",
+    "ARRAY_MAX_SIZE": "{property} は {max} 個を超えてはいけません",
+    "ARRAY_MIN_SIZE": "{property} は {min} 個未満ではいけません",
     "IS_OBJECT": "{property} はオブジェクトである必要があります",
     "IS_DATE": "{property} は日付である必要があります",
     "IS_URL": "{property} は有効なURLである必要があります",

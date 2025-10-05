@@ -13,6 +13,8 @@
     "IS_NUMBER": "{property} must be a number",
     "IS_BOOLEAN": "{property} must be a boolean",
     "IS_ARRAY": "{property} must be an array",
+    "ARRAY_MAX_SIZE": "{property} must not exceed {max} elements",
+    "ARRAY_MIN_SIZE": "{property} must not be less than {min} elements",
     "IS_OBJECT": "{property} must be an object",
     "IS_DATE": "{property} must be a date",
     "IS_URL": "{property} must be a valid URL",

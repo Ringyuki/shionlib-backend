@@ -73,11 +73,6 @@ export class CreateGameReqDto {
   })
   intro_en?: string
 
-  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'images' }) })
-  @IsString({ each: true, message: ivm('validation.common.IS_STRING', { property: 'images' }) })
-  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'images' }) })
-  images: string[]
-
   @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'extra_info' }) })
   @ValidateNested({ each: true })
   @Type(() => ExtraInfo)
@@ -107,7 +102,7 @@ export class CreateGameReqDto {
   platform?: string[]
 }
 
-class Staff {
+export class Staff {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'name' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'name' }) })
   name: string
@@ -117,7 +112,7 @@ class Staff {
   role: string
 }
 
-class ExtraInfo {
+export class ExtraInfo {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'key' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'key' }) })
   key: string
@@ -284,13 +279,13 @@ export class GameDeveloper {
   extra_info?: ExtraInfo[]
 }
 
-enum GameCoverLanguage {
+export enum GameCoverLanguage {
   JA = 'ja',
   ZH = 'zh',
   EN = 'en',
 }
 
-enum GameCoverType {
+export enum GameCoverType {
   DIG = 'dig',
   PKGFRONT = 'pkgfront',
 }

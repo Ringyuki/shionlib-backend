@@ -77,6 +77,7 @@ export type I18nTranslations = {
         "USER_UPLOAD_QUOTA_EXCEEDED": string;
         "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE": string;
         "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND": string;
+        "EDIT_FIELD_PERMISSION_NOT_ENOUGH": string;
     };
     "validation": {
         "common": {
@@ -92,6 +93,8 @@ export type I18nTranslations = {
             "IS_NUMBER": string;
             "IS_BOOLEAN": string;
             "IS_ARRAY": string;
+            "ARRAY_MAX_SIZE": string;
+            "ARRAY_MIN_SIZE": string;
             "IS_OBJECT": string;
             "IS_DATE": string;
             "IS_URL": string;

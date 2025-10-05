@@ -31,8 +31,8 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     return this.cache.get(key) as T
   }
 
-  async set<T>(key: string, value: T, ttl: number): Promise<void> {
-    await this.cache.set(key, value, ttl)
+  async set<T>(key: string, value: T, ttlMs: number): Promise<void> {
+    await this.cache.set(key, value, ttlMs)
   }
 
   async setnx(

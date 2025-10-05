@@ -82,4 +82,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.USER_UPLOAD_QUOTA_EXCEEDED]: HttpStatus.CONFLICT,
   [ShionBizCode.USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE]: HttpStatus.CONFLICT,
   [ShionBizCode.USER_UPLOAD_QUOTA_RECORD_NOT_FOUND]: HttpStatus.NOT_FOUND,
+
+  // 51
+  [ShionBizCode.EDIT_FIELD_PERMISSION_NOT_ENOUGH]: HttpStatus.FORBIDDEN,
 } as const satisfies Record<ShionBizCode, HttpStatus>
