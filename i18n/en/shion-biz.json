@@ -40,6 +40,8 @@
   "FAVORITE_ALREADY_EXISTS": "already in favorites",
 
   "COMMENT_NOT_FOUND": "comment not found",
+  "COMMENT_NOT_OWNER": "comment not owner",
+  "COMMENT_TOO_DEEP": "comment too deep",
 
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "invalid total size",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "too many chunks",

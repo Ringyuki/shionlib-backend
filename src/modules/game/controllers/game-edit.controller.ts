@@ -23,7 +23,7 @@ import {
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
 import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
-import { gameRequiredBits, GamekeyToBit } from '../../edit/resolvers/game-resolver'
+import { gameRequiredBits, GamekeyToBit } from '../../edit/resolvers/permisson-resolver'
 import { GameFieldGroupBit } from '../../edit/enums/field-group.enum'
 
 @UseGuards(JwtAuthGuard)
@@ -33,12 +33,12 @@ export class GameEditController {
 
   @UseGuards(EditAuthGuard(PermissionEntity.GAME, gameRequiredBits, GamekeyToBit))
   @Patch(':id/edit/scalar')
-  async edit(
+  async editGameScalar(
     @Body() dto: EditGameReqDto,
     @Param('id', ParseIntPipe) id: number,
     @Req() req: RequestWithUser,
   ) {
-    return this.gameEditService.editScalar(id, dto, req)
+    return this.gameEditService.editGameScalar(id, dto, req)
   }
 
   @UseGuards(

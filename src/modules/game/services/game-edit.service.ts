@@ -14,13 +14,13 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { pickChanges } from '../helpers/pick-changes'
-import { gameRequiredBits } from '../../edit/resolvers/game-resolver'
+import { gameRequiredBits } from '../../edit/resolvers/permisson-resolver'
 
 @Injectable()
 export class GameEditService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async editScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
+  async editGameScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
     const game = await this.prisma.game.findUnique({
       where: { id },
       select: {

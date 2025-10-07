@@ -1,4 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common'
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common'
 import { I18nService, I18nContext, I18nValidationException } from 'nestjs-i18n'
 import { I18nPath } from '../../generated/i18n.generated'
 import { ShionBizCode } from '../../shared/enums/biz-code/shion-biz-code.enum'
@@ -10,7 +17,10 @@ import { FieldError } from '../../shared/interfaces/response/response.interface'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private readonly i18n: I18nService) {}
+  constructor(
+    private readonly i18n: I18nService,
+    private readonly logger: Logger,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
@@ -82,6 +92,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
       data,
       requestId: req.id,
       timestamp: new Date().toISOString(),
+    }
+
+    const meta = {
+      requestId: req?.id,
+      method: req?.method,
+      url: req?.originalUrl || req?.url,
+      ip: req?.ip,
+      userId: req?.user?.sub,
+      status,
+      code,
+      messageKey,
+    }
+    const msg = `[${meta.requestId}] ${meta.method} ${meta.url} code=${meta.code} status=${meta.status} user=${meta.userId ?? '-'} ip=${meta.ip ?? '-'}`
+
+    if (status >= 500) {
+      this.logger.error(msg, exception instanceof Error ? exception.stack : undefined)
+    } else {
+      this.logger.warn(msg)
     }
 
     res.status(status).json(body)

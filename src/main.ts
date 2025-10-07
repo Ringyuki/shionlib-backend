@@ -6,7 +6,7 @@ import { AppModule } from './app.module'
 import { requestId } from './common/middlewares/request-id.middleware'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor'
-import { ValidationPipe } from '@nestjs/common'
+import { ValidationPipe, Logger } from '@nestjs/common'
 import { ShionBizException } from './common/exceptions/shion-business.exception'
 import { ShionBizCode } from './shared/enums/biz-code/shion-biz-code.enum'
 import { flattenValidationErrors } from './common/validation/flatten-validation.util'
@@ -50,7 +50,7 @@ async function bootstrap() {
     }),
   )
 
-  app.useGlobalFilters(new AllExceptionsFilter(app.get(I18nService)))
+  app.useGlobalFilters(new AllExceptionsFilter(app.get(I18nService), app.get(Logger)))
   app.useGlobalInterceptors(
     new SuccessResponseInterceptor(app.get(Reflector), app.get(I18nService)),
   )

@@ -94,6 +94,15 @@ export class EditGameReqDto {
   )
   @IsOptional()
   views?: number
+
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'status' }) },
+  )
+  @Min(1, { message: ivm('validation.common.MIN', { property: 'status' }) })
+  @Max(2, { message: ivm('validation.common.MAX', { property: 'status' }) })
+  @IsOptional()
+  status?: number
 }
 
 export class GameLinkDto {

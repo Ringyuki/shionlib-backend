@@ -18,7 +18,9 @@
     "IS_OBJECT": "{property} 必须是对象",
     "IS_DATE": "{property} 必须是日期",
     "IS_URL": "{property} 必须是有效的URL",
-    "IS_ENUM": "{property} 必须是以下值之一: {allowed}"
+    "IS_ENUM": "{property} 必须是以下值之一: {allowed}",
+    "IS_UUID": "{property} 必须是有效的UUID",
+    "IS_JSON": "{property} 必须是有效的JSON"
   },
   "user": {
     "PASSWORD_MATCHES": "密码必须至少包含一个大写字母，一个小写字母和一个数字"

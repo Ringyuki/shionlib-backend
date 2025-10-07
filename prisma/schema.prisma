@@ -46,6 +46,7 @@ model User {
   upload_quota         UserUploadQuota?      @relation("user_upload_quota")
   field_permissions    UserFieldPermission[] @relation("user_field_permissions")
   edit_records         EditRecord[]          @relation("user_edit_record")
+  liked_comments       Comment[]             @relation("user_like_comment")
 
   @@index([email])
   @@index([name])
@@ -378,19 +379,35 @@ model GameFavoriteRelation {
   @@map("game_favorite_relations")
 }
 
+// comment status: 1 -> visible, 2 -> hidden, 3 -> deleted
 model Comment {
-  id      Int    @id @default(autoincrement())
-  content String
+  id      Int  @id @default(autoincrement())
+  content Json @db.JsonB
 
   game_id Int
-  game    Game @relation("game_comment", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game    Game @relation("game_comment", fields: [game_id], references: [id], onDelete: Cascade)
+
+  parent_id        Int?
+  parent           Comment?  @relation("comment_parent", fields: [parent_id], references: [id], onDelete: SetNull)
+  children         Comment[] @relation("comment_parent")
+  root_id          Int?
+  root             Comment?  @relation("comment_root", fields: [root_id], references: [id], onDelete: SetNull)
+  root_descendants Comment[] @relation("comment_root")
+  reply_count      Int       @default(0)
 
   creator_id Int
   creator    User @relation("user_create_comment", fields: [creator_id], references: [id])
 
+  liked_users User[] @relation("user_like_comment")
+
+  status Int @default(1)
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@index([game_id, created])
+  @@index([parent_id, created])
+  @@index([creator_id, created])
   @@map("comments")
 }
 

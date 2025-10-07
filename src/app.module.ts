@@ -25,6 +25,7 @@ import { BullModule } from './modules/bull/bull.module'
 import { S3Module } from './modules/s3/s3.module'
 import { B2Module } from './modules/b2/b2.module'
 import { EditModule } from './modules/edit/edit.module'
+import { CommentModule } from './modules/comment/comment.module'
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { EditModule } from './modules/edit/edit.module'
     SecurityModule,
     ImageModule,
     EditModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [

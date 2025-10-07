@@ -56,6 +56,8 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 47
   [ShionBizCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.COMMENT_NOT_OWNER]: HttpStatus.FORBIDDEN,
+  [ShionBizCode.COMMENT_TOO_DEEP]: HttpStatus.BAD_REQUEST,
 
   // 48
   [ShionBizCode.GAME_UPLOAD_INVALID_TOTAL_SIZE]: HttpStatus.BAD_REQUEST,

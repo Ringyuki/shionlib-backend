@@ -19,7 +19,8 @@
     "IS_DATE": "{property} must be a date",
     "IS_URL": "{property} must be a valid URL",
     "IS_ENUM": "{property} must be one of the following values: {allowed}",
-    "IS_UUID": "{property} must be a valid UUID"
+    "IS_UUID": "{property} must be a valid UUID",
+    "IS_JSON": "{property} must be a valid JSON"
   },
   "user": {
     "PASSWORD_MATCHES": "password must contain at least one uppercase letter, one lowercase letter, and one number"

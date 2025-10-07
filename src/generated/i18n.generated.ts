@@ -57,6 +57,8 @@ export type I18nTranslations = {
         "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
+        "COMMENT_NOT_OWNER": string;
+        "COMMENT_TOO_DEEP": string;
         "GAME_UPLOAD_INVALID_TOTAL_SIZE": string;
         "GAME_UPLOAD_TOO_MANY_CHUNKS": string;
         "GAME_UPLOAD_TOO_LARGE": string;
@@ -100,6 +102,7 @@ export type I18nTranslations = {
             "IS_URL": string;
             "IS_ENUM": string;
             "IS_UUID": string;
+            "IS_JSON": string;
         };
         "user": {
             "PASSWORD_MATCHES": string;

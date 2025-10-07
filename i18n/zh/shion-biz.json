@@ -40,6 +40,8 @@
   "FAVORITE_ALREADY_EXISTS": "已收藏该游戏",
 
   "COMMENT_NOT_FOUND": "评论不存在",
+  "COMMENT_NOT_OWNER": "评论不属于当前用户",
+  "COMMENT_TOO_DEEP": "评论层级过深",
 
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "上传文件大小无效",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "上传文件分片数过多",

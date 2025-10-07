@@ -1,5 +1,4 @@
 export class GameScalarResDto {
-  id: number
   b_id: string
   v_id: string
   title_jp: string

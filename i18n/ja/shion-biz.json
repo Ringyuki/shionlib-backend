@@ -40,6 +40,8 @@
   "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
 
   "COMMENT_NOT_FOUND": "コメントが見つかりません",
+  "COMMENT_NOT_OWNER": "コメントが現在のユーザーに属していません",
+  "COMMENT_TOO_DEEP": "コメントが深すぎます",
 
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "無効な総サイズ",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "分片数が多すぎます",
