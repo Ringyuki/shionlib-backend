@@ -26,6 +26,7 @@ import { S3Module } from './modules/s3/s3.module'
 import { B2Module } from './modules/b2/b2.module'
 import { EditModule } from './modules/edit/edit.module'
 import { CommentModule } from './modules/comment/comment.module'
+import { RenderModule } from './modules/render/render.module'
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { CommentModule } from './modules/comment/comment.module'
     ImageModule,
     EditModule,
     CommentModule,
+    RenderModule,
   ],
   controllers: [],
   providers: [

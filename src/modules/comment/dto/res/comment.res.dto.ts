@@ -1,6 +1,7 @@
 export class CommentResDto {
   id: number
   content: Record<string, any>
+  html: string | null
   parent_id: number | null
   root_id: number | null
   reply_count: number

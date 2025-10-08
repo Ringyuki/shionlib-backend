@@ -381,8 +381,9 @@ model GameFavoriteRelation {
 
 // comment status: 1 -> visible, 2 -> hidden, 3 -> deleted
 model Comment {
-  id      Int  @id @default(autoincrement())
-  content Json @db.JsonB
+  id      Int     @id @default(autoincrement())
+  content Json    @db.JsonB
+  html    String? @db.VarChar(100000)
 
   game_id Int
   game    Game @relation("game_comment", fields: [game_id], references: [id], onDelete: Cascade)

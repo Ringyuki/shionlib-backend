@@ -1,8 +1,10 @@
-import { IsJSON, IsNotEmpty } from 'class-validator'
+import { IsNotEmpty, IsObject } from 'class-validator'
 import { ivm } from '../../../../common/validation/i18n'
+import { Type } from 'class-transformer'
 
 export class EditCommentReqDto {
-  @IsJSON({ message: ivm('validation.common.IS_JSON', { property: 'content' }) })
+  @IsObject({ message: ivm('validation.common.IS_OBJECT', { property: 'content' }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'content' }) })
-  content: string
+  @Type(() => Object)
+  content: Record<string, any>
 }

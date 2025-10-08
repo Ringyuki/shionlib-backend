@@ -9,16 +9,19 @@ import {
   Query,
   Patch,
   Delete,
+  UseGuards,
 } from '@nestjs/common'
 import { CommentServices } from '../services/comment.services'
 import { CreateCommentReqDto } from '../dto/req/create-comment.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditCommentReqDto } from '../dto/req/edit-comment.req.dto'
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 
 @Controller('comment')
 export class CommentController {
   constructor(private readonly commentServices: CommentServices) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('game/:game_id')
   async createComment(
     @Body() dto: CreateCommentReqDto,
@@ -28,6 +31,7 @@ export class CommentController {
     return this.commentServices.createGameComment(game_id, dto, req)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('game/:game_id/:comment_id')
   async editComment(
     @Body() dto: EditCommentReqDto,
@@ -37,6 +41,7 @@ export class CommentController {
     return this.commentServices.editComment(comment_id, dto, req)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('game/:game_id/:comment_id')
   async deleteComment(
     @Param('comment_id', ParseIntPipe) comment_id: number,

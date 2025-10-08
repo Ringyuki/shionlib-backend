@@ -8,10 +8,15 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { CommentResDto } from '../dto/res/comment.res.dto'
+import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
+import { SerializedEditorState } from 'lexical'
 
 @Injectable()
 export class CommentServices {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly renderService: LexicalRendererService,
+  ) {}
 
   async createGameComment(game_id: number, dto: CreateCommentReqDto, req: RequestWithUser) {
     const { content, parent_id } = dto
@@ -29,9 +34,12 @@ export class CommentServices {
         root_id = parent.root_id ?? parent.id
       }
 
+      const html = this.renderService.toHtml(content as SerializedEditorState)
+
       const comment = await tx.comment.create({
         data: {
           content,
+          html,
           game_id,
           creator_id: req.user.sub,
           parent_id,
@@ -40,6 +48,7 @@ export class CommentServices {
         select: {
           id: true,
           content: true,
+          html: true,
           parent_id: true,
           root_id: true,
           creator: {
@@ -94,12 +103,15 @@ export class CommentServices {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_OWNER)
     }
 
+    const html = this.renderService.toHtml(content as SerializedEditorState)
+
     return await this.prismaService.comment.update({
       where: { id },
-      data: { content },
+      data: { content, html },
       select: {
         id: true,
         content: true,
+        html: true,
         parent_id: true,
         root_id: true,
         creator: {
@@ -167,6 +179,7 @@ export class CommentServices {
       select: {
         id: true,
         content: true,
+        html: true,
         parent_id: true,
         root_id: true,
         reply_count: true,
@@ -187,6 +200,7 @@ export class CommentServices {
       items: comments.map(comment => ({
         id: comment.id,
         content: comment.content as Record<string, any>,
+        html: comment.html,
         parent_id: comment.parent_id,
         root_id: comment.root_id,
         reply_count: comment.reply_count,
