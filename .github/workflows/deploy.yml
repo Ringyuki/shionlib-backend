@@ -171,6 +171,10 @@ jobs:
             if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
               ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
             fi
+            if [ -d "$DEPLOY_DIR/current" ]; then
+              rm -rf "$DEPLOY_DIR/current"
+            fi
+
             ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
 
             cd "$DEPLOY_DIR/current"
