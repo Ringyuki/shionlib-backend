@@ -1,0 +1,176 @@
+name: deploy backend
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+concurrency:
+  group: shionlib-backend-deploy
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks (lint/typecheck/tests)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: shionlib_ci
+          POSTGRES_USER: shionlib
+          POSTGRES_PASSWORD: shionlib
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shionlib -d shionlib_ci" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=10
+
+    env:
+      DATABASE_URL: postgresql://shionlib:shionlib@localhost:5432/shionlib_ci?schema=public
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma:generate
+
+      - name: ESLint
+        run: pnpm lint:check
+
+      - name: Prettier
+        run: pnpm format:check
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Prisma validate
+        run: pnpm prisma:validate
+
+      - name: Prepare test DB schema
+        run: pnpm prisma:push
+
+      - name: Unit tests
+        run: pnpm test -- --passWithNoTests
+
+      - name: E2E tests
+        run: pnpm test:e2e -- --passWithNoTests
+
+  build-and-deploy:
+    name: Build and Deploy
+    needs: checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma:generate
+
+      - name: Build
+        run: pnpm build
+
+      - name: Archive artifact
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          TAR_NAME="release-${SHORT_SHA}.tgz"
+          echo "TAR_NAME=$TAR_NAME" >> $GITHUB_ENV
+          tar -czf "$TAR_NAME" \
+            dist \
+            i18n \
+            package.json \
+            pnpm-lock.yaml \
+            prisma
+
+      - name: Upload to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: '${{ env.TAR_NAME }}'
+          target: '/tmp'
+
+      - name: Deploy and switch release
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: GITHUB_SHA,DEPLOY_DIR
+          script: |
+            set -euo pipefail
+            DEPLOY_DIR="${{ secrets.DEPLOY_DIR }}"
+            KEEP_RELEASES=5
+
+            mkdir -p "$DEPLOY_DIR/releases" "$DEPLOY_DIR/current"
+
+            SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            TS_UTC=$(date -u +%Y%m%d%H%M%S)
+            RELEASE_NAME="${TS_UTC}-${SHORT_SHA}"
+            RELEASE_DIR="$DEPLOY_DIR/releases/$RELEASE_NAME"
+            SHARED_DIR="$DEPLOY_DIR/shared"
+
+            TAR_NAME="release-${SHORT_SHA}.tgz"
+            mkdir -p "$RELEASE_DIR"
+            tar -xzf "/tmp/${TAR_NAME}" -C "$RELEASE_DIR"
+            rm -f "/tmp/${TAR_NAME}"
+
+            ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+            if [ -f "$SHARED_DIR/config/bangumi-tokens.json" ]; then
+              ln -sfn "$SHARED_DIR/config/bangumi-tokens.json" "$RELEASE_DIR/config/bangumi-tokens.json"
+            fi
+
+            cd "$RELEASE_DIR"
+            corepack enable
+            corepack prepare pnpm@10.10.0 --activate
+            pnpm install --prod --frozen-lockfile
+            pnpm dlx prisma generate
+            pnpm dlx prisma migrate deploy
+
+            ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+            ln -sfn "$RELEASE_DIR" "$DEPLOY_PATH/current"
+
+            cd "$DEPLOY_DIR/current"
+            pm2 restart shionlib-backend || pm2 start ecosystem.config.cjs --env production --name shionlib-backend
+
+            cd "$DEPLOY_DIR/releases"
+            ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
