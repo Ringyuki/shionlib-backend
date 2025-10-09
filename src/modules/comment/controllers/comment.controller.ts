@@ -15,6 +15,7 @@ import { CommentServices } from '../services/comment.services'
 import { CreateCommentReqDto } from '../dto/req/create-comment.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditCommentReqDto } from '../dto/req/edit-comment.req.dto'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 
 @Controller('comment')
@@ -32,7 +33,7 @@ export class CommentController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('game/:game_id/:comment_id')
+  @Patch(':comment_id')
   async editComment(
     @Body() dto: EditCommentReqDto,
     @Param('comment_id', ParseIntPipe) comment_id: number,
@@ -42,7 +43,16 @@ export class CommentController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('game/:game_id/:comment_id')
+  @Get(':comment_id/raw')
+  async getRawComment(
+    @Param('comment_id', ParseIntPipe) comment_id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.commentServices.getRaw(comment_id, req)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':comment_id')
   async deleteComment(
     @Param('comment_id', ParseIntPipe) comment_id: number,
     @Req() req: RequestWithUser,
@@ -53,10 +63,18 @@ export class CommentController {
   @Get('game/:game_id')
   async getGameComments(
     @Param('game_id', ParseIntPipe) game_id: number,
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('page_size', ParseIntPipe) page_size = 10,
+    @Query() paginationReqDto: PaginationReqDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.commentServices.getGameComments(game_id, page, page_size, req)
+    return this.commentServices.getGameComments(game_id, paginationReqDto, req)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':comment_id/like')
+  async likeComment(
+    @Param('comment_id', ParseIntPipe) comment_id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.commentServices.likeComment(comment_id, req)
   }
 }

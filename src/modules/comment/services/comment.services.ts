@@ -8,6 +8,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { CommentResDto } from '../dto/res/comment.res.dto'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { SerializedEditorState } from 'lexical'
 
@@ -50,6 +51,19 @@ export class CommentServices {
           content: true,
           html: true,
           parent_id: true,
+          parent: {
+            select: {
+              id: true,
+              html: true,
+              creator: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
           root_id: true,
           creator: {
             select: {
@@ -83,6 +97,7 @@ export class CommentServices {
       return {
         ...comment,
         root_id: root_id || comment.id,
+        like_count: 0,
       }
     })
   }
@@ -99,7 +114,11 @@ export class CommentServices {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_FOUND)
     }
 
-    if (existed.creator_id !== req.user.sub && req.user.role !== ShionlibUserRoles.ADMIN) {
+    if (
+      existed.creator_id !== req.user.sub &&
+      req.user.role !== ShionlibUserRoles.ADMIN &&
+      req.user.role !== ShionlibUserRoles.SUPER_ADMIN
+    ) {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_OWNER)
     }
 
@@ -107,7 +126,7 @@ export class CommentServices {
 
     return await this.prismaService.comment.update({
       where: { id },
-      data: { content, html },
+      data: { content, html, edited: true },
       select: {
         id: true,
         content: true,
@@ -121,10 +140,33 @@ export class CommentServices {
             avatar: true,
           },
         },
+        edited: true,
         created: true,
         updated: true,
       },
     })
+  }
+
+  async getRaw(id: number, req: RequestWithUser) {
+    const comment = await this.prismaService.comment.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        content: true,
+        creator_id: true,
+      },
+    })
+    if (!comment) {
+      throw new ShionBizException(ShionBizCode.COMMENT_NOT_FOUND)
+    }
+    if (
+      comment.creator_id !== req.user.sub &&
+      req.user.role !== ShionlibUserRoles.ADMIN &&
+      req.user.role !== ShionlibUserRoles.SUPER_ADMIN
+    ) {
+      throw new ShionBizException(ShionBizCode.COMMENT_NOT_OWNER)
+    }
+    return comment
   }
 
   async deleteComment(id: number, req: RequestWithUser) {
@@ -138,7 +180,11 @@ export class CommentServices {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_FOUND)
     }
 
-    if (comment.creator_id !== req.user.sub && req.user.role !== ShionlibUserRoles.ADMIN) {
+    if (
+      comment.creator_id !== req.user.sub &&
+      req.user.role !== ShionlibUserRoles.ADMIN &&
+      req.user.role !== ShionlibUserRoles.SUPER_ADMIN
+    ) {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_OWNER)
     }
 
@@ -163,27 +209,40 @@ export class CommentServices {
 
   async getGameComments(
     game_id: number,
-    page = 1,
-    pageSize = 10,
+    paginationReqDto: PaginationReqDto,
     req: RequestWithUser,
   ): Promise<PaginatedResult<CommentResDto>> {
+    const { page, pageSize } = paginationReqDto
     const total = await this.prismaService.comment.count({
       where: { game_id },
     })
 
     const comments = await this.prismaService.comment.findMany({
       where: { game_id, status: 1 },
-      orderBy: [{ created: 'desc' }, { id: 'desc' }],
+      orderBy: [{ created: 'asc' }],
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
         id: true,
-        content: true,
         html: true,
         parent_id: true,
+        parent: {
+          select: {
+            id: true,
+            html: true,
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
         root_id: true,
         reply_count: true,
         liked_users: { where: { id: req.user?.sub || 0 }, select: { id: true }, take: 1 },
+        _count: { select: { liked_users: true } },
         creator: {
           select: {
             id: true,
@@ -191,6 +250,7 @@ export class CommentServices {
             avatar: true,
           },
         },
+        edited: true,
         created: true,
         updated: true,
       },
@@ -199,13 +259,19 @@ export class CommentServices {
     return {
       items: comments.map(comment => ({
         id: comment.id,
-        content: comment.content as Record<string, any>,
         html: comment.html,
         parent_id: comment.parent_id,
         root_id: comment.root_id,
         reply_count: comment.reply_count,
+        parent: {
+          id: comment.parent_id,
+          html: comment.parent?.html,
+          creator: comment.parent?.creator,
+        },
         is_liked: comment.liked_users.length > 0,
+        like_count: comment._count.liked_users,
         creator: comment.creator,
+        edited: comment.edited,
         created: comment.created,
         updated: comment.updated,
       })),
@@ -216,6 +282,29 @@ export class CommentServices {
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
       },
+    }
+  }
+
+  async likeComment(id: number, req: RequestWithUser) {
+    const comment = await this.prismaService.comment.findUnique({
+      where: { id },
+      select: {
+        liked_users: { where: { id: req.user.sub }, select: { id: true }, take: 1 },
+      },
+    })
+    if (!comment) {
+      throw new ShionBizException(ShionBizCode.COMMENT_NOT_FOUND)
+    }
+    if (comment.liked_users.length > 0) {
+      await this.prismaService.comment.update({
+        where: { id },
+        data: { liked_users: { disconnect: { id: req.user.sub } } },
+      })
+    } else {
+      await this.prismaService.comment.update({
+        where: { id },
+        data: { liked_users: { connect: { id: req.user.sub } } },
+      })
     }
   }
 }

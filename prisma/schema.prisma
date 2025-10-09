@@ -401,7 +401,8 @@ model Comment {
 
   liked_users User[] @relation("user_like_comment")
 
-  status Int @default(1)
+  status Int     @default(1)
+  edited Boolean @default(false)
 
   created DateTime @default(now())
   updated DateTime @updatedAt

@@ -1,15 +1,15 @@
-import { IsOptional, IsNumber } from 'class-validator'
-import { ivm } from '../../../../common/validation/i18n'
+import { IsNumber, IsOptional } from 'class-validator'
 import { Type } from 'class-transformer'
+import { ivm } from '../../../common/validation/i18n'
 
-export class GetGameListReqDto {
+export class PaginationReqDto {
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
     { message: ivm('validation.common.IS_NUMBER', { property: 'page' }) },
   )
   @IsOptional()
   @Type(() => Number)
-  page?: number = 1
+  page: number = 1
 
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
@@ -17,5 +17,5 @@ export class GetGameListReqDto {
   )
   @IsOptional()
   @Type(() => Number)
-  pageSize?: number = 10
+  pageSize: number = 10
 }

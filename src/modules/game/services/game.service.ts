@@ -3,10 +3,10 @@ import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
-import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
 import { GetGameResDto } from '../dto/res/get-game.res.dto'
 import { Prisma } from '@prisma/client'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 
 @Injectable()
 export class GameService {
@@ -177,7 +177,7 @@ export class GameService {
     })
   }
 
-  async getList(getGameListReqDto: GetGameListReqDto): Promise<PaginatedResult<GetGameListResDto>> {
+  async getList(getGameListReqDto: PaginationReqDto): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
 
     const total = await this.prisma.game.count()
