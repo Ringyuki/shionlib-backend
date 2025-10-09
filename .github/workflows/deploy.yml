@@ -131,6 +131,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: GITHUB_SHA,DEPLOY_DIR
           script: |
+            source ~/.bashrc 2>/dev/null || true
+            source ~/.profile 2>/dev/null || true
             set -euo pipefail
             DEPLOY_DIR="${{ secrets.DEPLOY_DIR }}"
             KEEP_RELEASES=5
@@ -148,8 +150,11 @@ jobs:
             tar -xzf "/tmp/${TAR_NAME}" -C "$RELEASE_DIR"
             rm -f "/tmp/${TAR_NAME}"
 
-            ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+            if [ -f "$SHARED_DIR/.env" ]; then
+              ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+            fi
             if [ -f "$SHARED_DIR/config/bangumi-tokens.json" ]; then
+              mkdir -p "$RELEASE_DIR/config"
               ln -sfn "$SHARED_DIR/config/bangumi-tokens.json" "$RELEASE_DIR/config/bangumi-tokens.json"
             fi
 
@@ -160,30 +165,14 @@ jobs:
             pnpm dlx prisma generate
             pnpm dlx prisma migrate deploy
 
-            ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
-            ln -sfn "$RELEASE_DIR" "$DEPLOY_PATH/current"
+            if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
+              ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+            fi
+            ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
 
             cd "$DEPLOY_DIR/current"
 
-            if [ -s "$HOME/.nvm/nvm.sh" ]; then
-              . "$HOME/.nvm/nvm.sh"
-              nvm use --silent >/dev/null 2>&1 || true
-            fi
-            export PATH="$PATH:/usr/local/bin:$HOME/.local/bin:$HOME/.npm-global/bin"
-            PM2_BIN="$(command -v pm2 || true)"
-            if [ -z "$PM2_BIN" ]; then
-              CANDIDATE_BIN=$(find "$HOME/.nvm/versions/node" -maxdepth 2 -type d -name bin 2>/dev/null | head -n1)
-              if [ -n "$CANDIDATE_BIN" ]; then
-                export PATH="$CANDIDATE_BIN:$PATH"
-                PM2_BIN="$(command -v pm2 || true)"
-              fi
-            fi
-            if [ -z "$PM2_BIN" ]; then
-              echo "pm2 not found in PATH" >&2
-              exit 127
-            fi
-
-            "$PM2_BIN" restart shionlib-backend || pm2 start ecosystem.config.cjs --env production --name shionlib-backend
+            pm2 restart shionlib-backend || pm2 start ecosystem.config.cjs --env production --name shionlib-backend
 
             cd "$DEPLOY_DIR/releases"
             ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
