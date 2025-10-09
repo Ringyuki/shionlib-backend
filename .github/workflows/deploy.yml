@@ -161,7 +161,13 @@ jobs:
             cd "$RELEASE_DIR"
             pnpm install --prod --frozen-lockfile
             pnpm dlx prisma generate
-            pnpm dlx prisma migrate deploy
+            pnpm dlx prisma push
+            if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+              echo "Applying Prisma migrations..."
+              pnpm dlx prisma migrate deploy
+            else
+              echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
+            fi
 
             if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
               ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
