@@ -14,4 +14,12 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication()
     await app.init()
   })
+
+  it('should initialize the app context', () => {
+    expect(app).toBeDefined()
+  })
+
+  afterAll(async () => {
+    await app.close()
+  })
 })
