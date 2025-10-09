@@ -159,8 +159,6 @@ jobs:
             fi
 
             cd "$RELEASE_DIR"
-            corepack enable
-            corepack prepare pnpm@10.10.0 --activate
             pnpm install --prod --frozen-lockfile
             pnpm dlx prisma generate
             pnpm dlx prisma migrate deploy
