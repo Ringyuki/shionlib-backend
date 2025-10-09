@@ -39,7 +39,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -74,6 +73,7 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     needs: checks
+    environment: deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -84,7 +84,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
