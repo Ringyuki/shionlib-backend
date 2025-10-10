@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "comments" DROP COLUMN "test";
+ALTER TABLE "comments" DROP COLUMN IF EXISTS "test";
 
 -- AlterTable
 ALTER TABLE "game_developers" ALTER COLUMN "extra_info" SET DEFAULT '[]'::jsonb;
