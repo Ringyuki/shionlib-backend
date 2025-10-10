@@ -161,7 +161,34 @@ jobs:
             cd "$RELEASE_DIR"
             pnpm install --prod --frozen-lockfile
             pnpm dlx prisma generate
-            pnpm dlx prisma db push
+            # if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+            #   echo "Applying Prisma migrations..."
+            #   pnpm dlx prisma migrate deploy
+            # else
+            #   echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
+            # fi
+            set -a
+            [ -f "$RELEASE_DIR/.env" ] && . "$RELEASE_DIR/.env"
+            set +a
+
+            if command -v psql >/dev/null 2>&1; then
+              HAS_TABLES=$(psql "$DATABASE_URL" -tAc "select count(*) from information_schema.tables where table_schema='public' and table_name <> '_prisma_migrations'")
+              HAS_PRISMA_TABLE=$(psql "$DATABASE_URL" -tAc "select to_regclass('_prisma_migrations') is not null")
+              MIG_CNT=0
+              if [ "$HAS_PRISMA_TABLE" = "t" ]; then
+                MIG_CNT=$(psql "$DATABASE_URL" -tAc "select count(*) from _prisma_migrations")
+              fi
+
+              if [ "$HAS_TABLES" -gt 0 ] && { [ "$HAS_PRISMA_TABLE" = "f" ] || [ "$MIG_CNT" -eq 0 ]; }; then
+                echo "Detected existing DB without Prisma migration history."
+                echo "Run once in this release dir:"
+                echo "pnpm dlx prisma migrate resolve --applied 0000_initial_baseline && pnpm dlx prisma migrate deploy"
+                exit 1
+              fi
+            else
+              echo "psql not found; cannot run safety check. Ensure baseline is resolved if DB is non-empty."
+            fi
+
             if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
               echo "Applying Prisma migrations..."
               pnpm dlx prisma migrate deploy
