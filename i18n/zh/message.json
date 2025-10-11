@@ -1,6 +1,6 @@
 {
   "EMAIL_VERIFICATION_CODE_SUBJECT": "Shionlib 验证码",
   "EMAIL_VERIFICATION_CODE_PREFIX": "您的验证码是: ",
-  "EMAIL_VERIFICATION_CODE_SUFFIX": "，请在10分钟内使用。",
+  "EMAIL_VERIFICATION_CODE_SUFFIX": "请在{exp}分钟内使用。",
   "EMAIL_VERIFICATION_CODE_IGNORE": "如果您没有请求此验证码，请忽略此邮件。"
 }

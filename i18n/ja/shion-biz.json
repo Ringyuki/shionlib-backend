@@ -16,6 +16,7 @@
   "USER_NOT_ALLOW_REGISTER": "登録は締め切られました",
   "USER_BANNED": "ユーザーが禁止されました",
   "USER_INVALID_PASSWORD": "無効なパスワード",
+  "USER_INVALID_LANG": "無効な言語",
 
   "GAME_NOT_FOUND": "ゲームが見つかりません",
   "GAME_INVALID_VNDB_ID": "無効なvndb id",

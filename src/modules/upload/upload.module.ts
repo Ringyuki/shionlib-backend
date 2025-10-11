@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, Global } from '@nestjs/common'
 import { LargeFileUploadController } from './controllers/large-file-upload.controller'
 import { LargeFileUploadService } from './services/large-file-upload.service'
 import { SmallFileUploadController } from './controllers/small-file-upload.controller'
@@ -12,6 +12,7 @@ import { UploadQuotaController } from './controllers/upload-quota.controller'
 import { FileCleanService } from './services/file-clean.service'
 import { FileCleanTask } from './tasks/file-clean.task'
 
+@Global()
 @Module({
   controllers: [LargeFileUploadController, SmallFileUploadController, UploadQuotaController],
   providers: [
@@ -23,6 +24,6 @@ import { FileCleanTask } from './tasks/file-clean.task'
     FileCleanTask,
   ],
   imports: [S3Module, BullModule.registerQueue({ name: LARGE_FILE_UPLOAD_QUEUE })],
-  exports: [BullModule],
+  exports: [BullModule, SmallFileUploadService],
 })
 export class UploadModule {}

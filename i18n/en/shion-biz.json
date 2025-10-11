@@ -16,6 +16,7 @@
   "USER_NOT_ALLOW_REGISTER": "register is closed",
   "USER_BANNED": "user banned",
   "USER_INVALID_PASSWORD": "invalid password",
+  "USER_INVALID_LANG": "invalid language",
 
   "GAME_NOT_FOUND": "game not found",
   "GAME_INVALID_VNDB_ID": "invalid vndb id",

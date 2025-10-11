@@ -7,6 +7,6 @@ import { SmallFileUploadService } from '../upload/services/small-file-upload.ser
 @Global()
 @Module({
   providers: [ImageProcessService, ImageUploadService, ImageUploadTask, SmallFileUploadService],
-  exports: [ImageProcessService],
+  exports: [ImageProcessService, ImageUploadService],
 })
 export class ImageModule {}

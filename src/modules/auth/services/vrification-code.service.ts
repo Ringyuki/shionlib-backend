@@ -16,12 +16,15 @@ export class VerificationCodeService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async request(email: string): Promise<{
+  async request(
+    email: string,
+    expSeconds?: number,
+  ): Promise<{
     uuid: string
   }> {
     const code = this.generateVerificationCode()
     const uuid = nodeRandomUUID()
-    const expirationTime = 60 * 10 // 10 minutes
+    const expirationTime = expSeconds ? expSeconds : 60 * 10 // 10 minutes
 
     const key = `verificationCode:${uuid}-${email}`
     const value = {
@@ -32,7 +35,7 @@ export class VerificationCodeService {
 
     try {
       await this.cacheManager.set(key, JSON.stringify(value), expirationTime * 1000)
-      await this.emailService.sendVerificationCode(email, code)
+      await this.emailService.sendVerificationCode(email, code, expSeconds)
 
       return {
         uuid,
@@ -97,7 +100,14 @@ export class VerificationCodeService {
         }
       }
 
-      await this.cacheManager.del(key)
+      // logically, the code should be deleted after verification
+      // however, if we delete the code immediately after verification,
+      // in some cases(e.g. verify more than one code in single request)
+      // if the first one is correct, but the second one is incorrect, request failed
+      // and the user fixs the error then request again, it will not work anymore
+      // because the code is already deleted.
+      // in most situations, we can ignore the risk of code leakage, just keep it here for future reference.
+      // await this.cacheManager.del(key)
 
       return {
         verified: true,

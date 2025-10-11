@@ -151,4 +151,19 @@ export class SmallFileUploadService {
       key,
     }
   }
+
+  async _uploadUserAvatar(user_id: number, file: Express.Multer.File) {
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+      maxWidth: 233,
+      maxHeight: 233,
+    })
+    const key = `user/${user_id}/avatar/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      user_id: user_id.toString(),
+    })
+    return {
+      key,
+    }
+  }
 }

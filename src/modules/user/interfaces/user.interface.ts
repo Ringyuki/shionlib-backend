@@ -5,5 +5,11 @@ export interface UserInterface {
   cover: string | null
   email: string
   role: number
-  lang: string
+  lang: UserLang
+}
+
+export enum UserLang {
+  EN = 'en',
+  ZH = 'zh',
+  JA = 'ja',
 }
