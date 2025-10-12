@@ -41,6 +41,8 @@ export class GameDownloadSourceService {
                 avatar: true,
               },
             },
+            created: true,
+            updated: true,
             files: {
               select: {
                 id: true,

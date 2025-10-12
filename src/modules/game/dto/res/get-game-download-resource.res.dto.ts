@@ -6,6 +6,8 @@ export class GetGameDownloadResourceResDto {
   downloads: number
   creator: Creator
   files: GameDownloadResourceFile[]
+  created: string
+  updated: string
 }
 
 export class GameDownloadResourceFile {
