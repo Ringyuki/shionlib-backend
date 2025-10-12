@@ -17,6 +17,7 @@
   "USER_BANNED": "用户已封禁",
   "USER_INVALID_PASSWORD": "无效的密码",
   "USER_INVALID_LANG": "不支持的语言",
+  "USER_INVALID_CONTENT_LIMIT": "无效的内容限制状态",
 
   "GAME_NOT_FOUND": "游戏不存在",
   "GAME_INVALID_VNDB_ID": "无效的vndb id",

@@ -5,7 +5,9 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 
 function run(cmd, opts = {}) {
-  return execSync(cmd, { stdio: 'pipe', encoding: 'utf8', ...opts }).trim()
+  const result = execSync(cmd, { stdio: 'pipe', encoding: 'utf8', ...opts })
+  if (result == null) return ''
+  return (typeof result === 'string' ? result : String(result)).trim()
 }
 
 function main() {

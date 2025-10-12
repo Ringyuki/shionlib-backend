@@ -5,7 +5,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import argon2 from 'argon2'
 import { VerificationCodeService } from '../../auth/services/vrification-code.service'
 import { UpdateEmailReqDto } from '../dto/req/update-email.req.dto'
-import { UserLang } from '../interfaces/user.interface'
+import { UserContentLimit, UserLang } from '../interfaces/user.interface'
 import { SmallFileUploadService } from '../../upload/services/small-file-upload.service'
 import { UserLoginSessionStatus } from '../../../shared/enums/auth/user-login-session-status.enum'
 import { verifyPassword } from '../utils/verify-password.util'
@@ -137,6 +137,16 @@ export class UserInfoService {
       throw new ShionBizException(ShionBizCode.USER_INVALID_LANG, 'shion-biz.USER_INVALID_LANG')
     }
     await this.updateUserInfo('lang', lang, user_id)
+  }
+
+  async updateContentLimit(content_limit: number, user_id: number) {
+    if (!Array.from(Object.values(UserContentLimit)).includes(content_limit as UserContentLimit)) {
+      throw new ShionBizException(
+        ShionBizCode.USER_INVALID_CONTENT_LIMIT,
+        'shion-biz.USER_INVALID_CONTENT_LIMIT',
+      )
+    }
+    await this.updateUserInfo('content_limit', content_limit, user_id)
   }
 
   private async updateUserInfo<T>(path: string, value: T, user_id: number) {

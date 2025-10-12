@@ -80,4 +80,12 @@ export class UserInfoController {
   async updateLang(@Body() body: { lang: string }, @Req() request: RequestWithUser) {
     return await this.userInfoService.updateLang(body.lang, request.user.sub)
   }
+
+  @Post('content-limit')
+  async updateContentLimit(
+    @Body() body: { content_limit: number },
+    @Req() request: RequestWithUser,
+  ) {
+    return await this.userInfoService.updateContentLimit(body.content_limit, request.user.sub)
+  }
 }

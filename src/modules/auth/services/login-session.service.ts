@@ -32,6 +32,7 @@ export class LoginSessionService {
     userId: number,
     device: DeviceSignals,
     role: ShionlibUserRoles,
+    content_limit: number,
   ): Promise<SignResInterface> {
     const now = new Date()
     const fid = globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID()
@@ -61,6 +62,7 @@ export class LoginSessionService {
       sid: session.id,
       fid,
       role,
+      content_limit,
       type: 'access',
     })
 
@@ -165,7 +167,7 @@ export class LoginSessionService {
 
       const user = await tx.user.findUnique({
         where: { id: old.user_id },
-        select: { id: true, role: true, status: true },
+        select: { id: true, role: true, status: true, content_limit: true },
       })
       if (!user) {
         await tx.userLoginSession.updateMany({
@@ -248,6 +250,7 @@ export class LoginSessionService {
         sid: newer.id,
         fid: old.family_id,
         role: user.role,
+        content_limit: user.content_limit,
         type: 'access',
       })
 

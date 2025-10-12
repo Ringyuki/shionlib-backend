@@ -10,6 +10,7 @@ datasource db {
 // user roles: 1 -> user, 2 -> admin, 3 -> super_admin
 // user status: 1 -> active, 2 -> banned
 // user lang: en -> English, zh -> Chinese(Simplified), ja -> Japanese
+// user content limit: 1 -> never show nsfw content, 2 -> show with spoiler, 3 -> just show
 enum UserLang {
   en
   zh
@@ -31,9 +32,10 @@ model User {
 
   favorite_games GameFavoriteRelation[] @relation("user_favorite_game")
 
-  lang   UserLang @default(en)
-  role   Int      @default(1)
-  status Int      @default(1)
+  lang          UserLang @default(en)
+  content_limit Int      @default(2)
+  role          Int      @default(1)
+  status        Int      @default(1)
 
   email_verified_at  DateTime?
   last_login_at      DateTime?

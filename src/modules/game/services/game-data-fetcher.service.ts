@@ -514,6 +514,9 @@ export class GameDataFetcherService {
       throw error
     }
 
+    if (finalCoversData.every(c => c.sexual > 0)) {
+      finalGameData.nsfw = true
+    }
     dedupeCharactersInPlace(finalCharactersData)
     dedupeDevelopersInPlace(finalProducersData)
     return { finalGameData, finalCharactersData, finalProducersData, finalCoversData }

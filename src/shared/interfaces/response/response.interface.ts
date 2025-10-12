@@ -14,6 +14,7 @@ export interface PaginatedResult<T> {
     itemsPerPage: number
     totalPages: number
     currentPage: number
+    content_limit?: number
   }
 }
 

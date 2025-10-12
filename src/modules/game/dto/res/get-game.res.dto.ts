@@ -26,6 +26,7 @@ export class GetGameResDto {
   characters: GameCharacter[]
   creator: Creator
   is_favorite: boolean
+  content_limit: number
 }
 
 export class GameCover {

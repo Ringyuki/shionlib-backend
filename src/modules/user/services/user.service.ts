@@ -107,6 +107,7 @@ export class UserService {
         cover: true,
         role: true,
         lang: true,
+        content_limit: true,
         status: true,
       },
     })
@@ -137,6 +138,7 @@ export class UserService {
       foundUser.id,
       device,
       foundUser.role,
+      foundUser.content_limit,
     )
 
     return {
@@ -178,6 +180,7 @@ export class UserService {
         cover: true,
         role: true,
         lang: true,
+        content_limit: true,
       },
     })
 

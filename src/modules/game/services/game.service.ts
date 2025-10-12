@@ -7,20 +7,28 @@ import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
 import { GetGameResDto } from '../dto/res/get-game.res.dto'
 import { Prisma } from '@prisma/client'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { UserContentLimit } from '../../user/interfaces/user.interface'
 
 @Injectable()
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
-  async getById(id: number, user_id?: number): Promise<GetGameResDto> {
+  async getById(id: number, user_id?: number, content_limit?: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
       where: {
         id,
       },
       select: {
         views: true,
+        nsfw: true,
       },
     })
     if (!exist) {
+      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+    }
+    if (
+      exist.nsfw &&
+      (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit)
+    ) {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
 
@@ -124,13 +132,15 @@ export class GameService {
       },
     }
     if (user_id) {
-      select.images = {
-        select: {
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
+      if (content_limit !== UserContentLimit.NEVER_SHOW_NSFW_CONTENT) {
+        select.images = {
+          select: {
+            url: true,
+            dims: true,
+            sexual: true,
+            violence: true,
+          },
+        }
       }
     }
     const game = await this.prisma.game.update({
@@ -152,6 +162,7 @@ export class GameService {
 
     const data = {
       ...game,
+      content_limit,
     } as unknown as GetGameResDto
 
     if (user_id) {
@@ -177,13 +188,26 @@ export class GameService {
     })
   }
 
-  async getList(getGameListReqDto: PaginationReqDto): Promise<PaginatedResult<GetGameListResDto>> {
+  async getList(
+    getGameListReqDto: PaginationReqDto,
+    content_limit?: number,
+  ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
 
-    const total = await this.prisma.game.count()
+    const where: Prisma.GameWhereInput = {}
+    if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
+      where.nsfw = {
+        not: true,
+      }
+    }
+
+    const total = await this.prisma.game.count({
+      where,
+    })
     const games = await this.prisma.game.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
+      where,
       select: {
         id: true,
         title_jp: true,
@@ -211,6 +235,7 @@ export class GameService {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit,
       },
     }
   }

@@ -3,5 +3,6 @@ export interface TokenPayloadInterface {
   fid: string // family id
   sid: number // session id
   role: number
+  content_limit: number
   type: 'access'
 }

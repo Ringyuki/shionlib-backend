@@ -30,13 +30,13 @@ export class GameController {
   ) {}
 
   @Get('list')
-  async getList(@Query() getGameListReqDto: PaginationReqDto) {
-    return await this.gameService.getList(getGameListReqDto)
+  async getList(@Query() getGameListReqDto: PaginationReqDto, @Req() req: RequestWithUser) {
+    return await this.gameService.getList(getGameListReqDto, req.user?.content_limit)
   }
 
   @Get(':id')
   async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
-    return await this.gameService.getById(getGameReqDto.id, req.user?.sub)
+    return await this.gameService.getById(getGameReqDto.id, req.user?.sub, req.user?.content_limit)
   }
 
   @Get(':id/download-source')
