@@ -6,16 +6,21 @@ export interface ResponseInterface<T> {
   timestamp: string
 }
 
-export interface PaginatedResult<T> {
+type MetaBase = {
+  totalItems: number
+  itemCount: number
+  itemsPerPage: number
+  totalPages: number
+  currentPage: number
+}
+
+type MetaExtras<E> = {
+  [K in Exclude<string, keyof MetaBase>]?: E
+}
+
+export interface PaginatedResult<T, E = string | number | boolean | undefined> {
   items: T[]
-  meta: {
-    totalItems: number
-    itemCount: number
-    itemsPerPage: number
-    totalPages: number
-    currentPage: number
-    content_limit?: number
-  }
+  meta: MetaBase & MetaExtras<E>
 }
 
 export interface FieldError {

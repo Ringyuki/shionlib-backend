@@ -197,4 +197,47 @@ export class UserService {
       exists: !!exists,
     }
   }
+
+  async getById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        avatar: true,
+        role: true,
+        created: true,
+      },
+    })
+    if (!user) {
+      throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
+    }
+    const resource = await this.prisma.gameDownloadResource.count({
+      where: {
+        creator_id: id,
+      },
+    })
+    const comment = await this.prisma.comment.count({
+      where: {
+        creator_id: id,
+      },
+    })
+    const favorite = await this.prisma.gameFavoriteRelation.count({
+      where: {
+        user_id: id,
+      },
+    })
+    const edit = await this.prisma.editRecord.count({
+      where: {
+        actor_id: id,
+      },
+    })
+    return {
+      ...user,
+      resource_count: resource,
+      comment_count: comment,
+      favorite_count: favorite,
+      edit_count: edit,
+    }
+  }
 }

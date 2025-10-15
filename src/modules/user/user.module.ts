@@ -7,15 +7,18 @@ import { AuthModule } from '../auth/auth.module'
 import { VerificationCodeService } from '../auth/services/vrification-code.service'
 import { UserInfoController } from './controllers/user-info.controller'
 import { UserInfoService } from './services/user-info.service'
+import { UserDataController } from './controllers/user-data.controller'
+import { UserDataService } from './services/user-data.service'
 
 @Module({
-  controllers: [UserController, UserInfoController],
+  controllers: [UserController, UserInfoController, UserDataController],
   providers: [
     UserService,
     LoginSessionService,
     TokenService,
     VerificationCodeService,
     UserInfoService,
+    UserDataService,
   ],
   imports: [AuthModule],
 })

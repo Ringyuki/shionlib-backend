@@ -1,12 +1,6 @@
 import diff from 'microdiff'
 import { EditGameReqDto } from '../dto/req/edit-game.req.dto'
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => {
-  if (value === null || typeof value !== 'object') return false
-  const proto = Object.getPrototypeOf(value)
-  return proto === Object.prototype || proto === null
-}
-
 const normalizeDate = (value: unknown): number | unknown => {
   if (value instanceof Date) return value.getTime()
   if (typeof value === 'string') {
@@ -24,7 +18,7 @@ const deepNormalize = <T = unknown>(value: T): T => {
   if (Array.isArray(v)) {
     return v.map(item => deepNormalize(item)) as any
   }
-  if (isPlainObject(v)) {
+  if (v !== null && typeof v === 'object') {
     const out: Record<string, unknown> = {}
     for (const k of Object.keys(v)) {
       out[k] = deepNormalize((v as Record<string, unknown>)[k])

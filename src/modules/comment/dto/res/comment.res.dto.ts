@@ -6,6 +6,12 @@ export class CommentResDto {
   reply_count: number
   is_liked: boolean
   like_count: number
+  game?: {
+    id: number
+    title_jp: string | null
+    title_zh: string | null
+    title_en: string | null
+  }
   creator: {
     id: number
     name: string

@@ -22,8 +22,26 @@ export interface GameData {
 
   nsfw: boolean
   type?: string
-  platform?: string[]
+  platform?: GamePlatform[]
 }
+
+export type GamePlatform =
+  | 'win'
+  | 'ios'
+  | 'and'
+  | 'lin'
+  | 'mac'
+  | 'ps2'
+  | 'ps3'
+  | 'ps4'
+  | 'psv'
+  | 'psp'
+  | 'swi'
+  | 'dvd'
+  | 'mob'
+  | 'web'
+  | 'vnd'
+  | 'drc'
 
 export interface GameCover {
   language: string

@@ -40,7 +40,7 @@ export class LexicalRendererService {
         img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
         code: ['class', 'data-gutter', 'data-highlight-language', 'data-language', 'spellcheck'],
         pre: ['class', 'spellcheck', 'data-language', 'data-gutter', 'data-highlight-language'],
-        '*': ['style', 'class', 'data-*'],
+        span: ['class', 'style'],
       },
       allowedStyles: {
         '*': {
@@ -55,10 +55,11 @@ export class LexicalRendererService {
             /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
           ],
           'text-align': [/^left$|^right$|^center$|^justify$/],
+          'font-size': [/^(?:[1-9]|[12]\d|30)px$/],
         },
       },
       transformTags: {
-        a: (tagName, attribs) => ({
+        a: (_tagName, attribs) => ({
           tagName: 'a',
           attribs: { ...attribs, rel: 'noopener noreferrer' },
         }),

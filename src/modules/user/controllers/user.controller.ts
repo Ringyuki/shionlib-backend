@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Req, Res, Get, UseGuards } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  Res,
+  Get,
+  UseGuards,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common'
 import { Response } from 'express'
 import { UserService } from '../services/user.service'
 import { CreateUserDto } from '../dto/req/CreateUser.req.dto'
@@ -37,6 +47,11 @@ export class UserController {
   @Get('me')
   async getProfile(@Req() request: RequestWithUser) {
     return await this.userService.getMe(request)
+  }
+
+  @Get(':id')
+  async getUser(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.getById(id)
   }
 
   @Post('check-name')

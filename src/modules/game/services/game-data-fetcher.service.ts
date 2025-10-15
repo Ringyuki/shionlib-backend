@@ -9,7 +9,13 @@ import {
 } from '../interfaces/bangumi/game-item.res.interface'
 import { BangumiCharacterItemRes } from '../interfaces/bangumi/character-item.res.interface'
 import { BangumiProducerItemRes } from '../interfaces/bangumi/producer-item.res.interface'
-import { GameCharacter, GameCover, GameData, GameDeveloper } from '../interfaces/game.interface'
+import {
+  GameCharacter,
+  GameCover,
+  GameData,
+  GameDeveloper,
+  GamePlatform,
+} from '../interfaces/game.interface'
 import { VNDBService } from '../../vndb/services/vndb.service'
 import { VNDBGameItemRes } from '../interfaces/vndb/game-item.res'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
@@ -272,7 +278,7 @@ export class GameDataFetcherService {
         sexual: s.sexual,
         violence: s.violence,
       }))
-      finalGameData.platform = rawGameData.platforms
+      finalGameData.platform = rawGameData.platforms as GamePlatform[]
       finalGameData.links = rawGameData.extlinks
       for (const release of rawReleasesData) {
         finalGameData.links.push(...release.extlinks)

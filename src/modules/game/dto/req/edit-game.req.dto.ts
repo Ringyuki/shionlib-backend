@@ -18,6 +18,25 @@ import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 import { Type } from 'class-transformer'
 import { GameCoverLanguage, GameCoverType } from './create-game.req.dto'
 
+enum GamePlatformEnum {
+  WINDOWS = 'win',
+  IOS = 'ios',
+  ANDROID = 'and',
+  LINUX = 'lin',
+  MAC = 'mac',
+  PS3 = 'ps3',
+  PS4 = 'ps4',
+  PSV = 'psv',
+  PSP = 'psp',
+  SWI = 'swi',
+  DVD = 'dvd',
+  PS2 = 'ps2',
+  MOB = 'mob',
+  WEB = 'web',
+  VND = 'vnd',
+  DRC = 'drc',
+}
+
 export class EditGameReqDto {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'b_id' }) })
   @IsOptional()
@@ -80,6 +99,12 @@ export class EditGameReqDto {
   type?: string
 
   @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'platform' }) })
+  @IsEnum(GamePlatformEnum, {
+    each: true,
+    message: ivmEnum('validation.common.IS_ENUM', GamePlatformEnum, {
+      property: 'platform',
+    }),
+  })
   @IsOptional()
   platform?: string[]
 

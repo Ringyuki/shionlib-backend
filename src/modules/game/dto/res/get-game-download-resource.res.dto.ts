@@ -1,6 +1,8 @@
+import { GamePlatform } from '../../interfaces/game.interface'
+
 export class GetGameDownloadResourceResDto {
   id: number
-  platform: ('win' | 'ios' | 'and' | 'lin' | 'ps3' | 'ps4' | 'psv' | 'psp' | 'swi' | 'dvd')[]
+  platform: GamePlatform[]
   language: ('zh' | 'en' | 'jp')[]
   note?: string
   downloads: number
