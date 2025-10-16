@@ -248,6 +248,7 @@ export class GameDataFetcherService {
           'va.character{id,aliases,description,name,original,blood_type,height,weight,bust,waist,hips,cup,age,birthday,gender,image{url,sexual,violence},vns{role,id}}',
           'developers{id,name,original,aliases,type,description,extlinks{url,label,name}}',
           'extlinks{url,label,name}',
+          'image{url,dims,sexual,violence}',
         ],
         'vn',
       ),
@@ -366,7 +367,10 @@ export class GameDataFetcherService {
           p =>
             this.formatString(p.name) === this.formatString(producerNameOri) ||
             this.formatString(p.name) === this.formatString(producerName) ||
-            (p.aliases && p.aliases.some(a => producer.aliases.includes(a))),
+            (p.aliases &&
+              p.aliases.some(
+                a => producer.aliases.includes(a) || a === producerNameOri || a === producerName,
+              )),
         )
         if (existingProducer) {
           existingProducer.v_id = producer.id
@@ -377,12 +381,16 @@ export class GameDataFetcherService {
           existingProducer.aliases = existingProducer.aliases.filter(
             (alias, index, self) => self.indexOf(alias) === index,
           )
+          existingProducer.website = producer.extlinks?.find(
+            e => e.label === 'Official website',
+          )?.url
         } else {
           finalProducersData.push({
             v_id: producer.id,
-            name: producerNameOri,
+            name: producerNameOri || producerName || producer.aliases[0],
             intro_en: producer.description,
             aliases: producer.aliases,
+            website: producer.extlinks?.find(e => e.label === 'Official website')?.url,
           })
         }
       }
@@ -530,8 +538,24 @@ export class GameDataFetcherService {
       console.error(error)
       throw error
     }
+    if (!finalCoversData.length && rawGameData.image) {
+      const langMap = {
+        zh: 'zh',
+        en: 'en',
+        ja: 'ja',
+      }
+      const language = langMap[rawGameData.olang as keyof typeof langMap] ?? 'ja'
+      finalCoversData.push({
+        language,
+        type: 'dig',
+        url: rawGameData.image.url,
+        dims: rawGameData.image.dims,
+        sexual: rawGameData.image.sexual,
+        violence: rawGameData.image.violence,
+      })
+    }
 
-    if (finalCoversData.every(c => c.sexual > 0)) {
+    if (finalCoversData.every(c => c.sexual > 1)) {
       finalGameData.nsfw = true
     }
     dedupeCharactersInPlace(finalCharactersData)
@@ -553,8 +577,10 @@ export class GameDataFetcherService {
     const vTitles = this.collectVNDBTitles(v_data)
 
     const yearClose = this.isReleaseYearClose(b_data.date, v_data.released, 1)
-
     if (yearClose) return
+
+    const titleSimilar = this.isTitleSimilar(bTitles, vTitles)
+    if (titleSimilar) return
 
     throw new ShionBizException(
       ShionBizCode.GAME_DATA_CONSISTENCY_CHECK_FAILED,
@@ -613,5 +639,14 @@ export class GameDataFetcherService {
     if (!match) return undefined
     const year = parseInt(match[0], 10)
     return isNaN(year) ? undefined : year
+  }
+
+  private isTitleSimilar(b_titles: string[], v_titles: string[]) {
+    for (const b_title of b_titles) {
+      for (const v_title of v_titles) {
+        if (b_title.toLowerCase() === v_title.toLowerCase()) return true
+      }
+    }
+    return false
   }
 }

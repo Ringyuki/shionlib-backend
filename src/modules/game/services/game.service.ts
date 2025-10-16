@@ -207,6 +207,9 @@ export class GameService {
     const games = await this.prisma.game.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
+      orderBy: {
+        release_date: 'desc',
+      },
       where,
       select: {
         id: true,

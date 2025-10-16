@@ -205,6 +205,7 @@ model GameDeveloper {
   intro_jp   String   @default("") @db.VarChar(20000)
   intro_zh   String   @default("") @db.VarChar(20000)
   intro_en   String   @default("") @db.VarChar(20000)
+  website    String?
   extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   games GameDeveloperRelation[] @relation("game_produce")

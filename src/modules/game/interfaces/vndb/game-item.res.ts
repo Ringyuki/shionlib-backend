@@ -16,6 +16,8 @@ export interface VNDBGameItemRes {
   va: VA[]
   developers: Developer[]
   extlinks: GameLink[]
+  image: Image
+  olang: string
 }
 
 interface Title {
@@ -58,6 +60,7 @@ interface Character {
 
 interface Image {
   url: string
+  dims: number[]
   sexual: number
   violence: number
 }

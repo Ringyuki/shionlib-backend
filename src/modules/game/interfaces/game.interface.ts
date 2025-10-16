@@ -84,6 +84,7 @@ export interface GameDeveloper {
   intro_jp?: string
   intro_zh?: string
   intro_en?: string
+  website?: string
   extra_info?: Record<string, string>[]
 }
 
