@@ -103,9 +103,9 @@ model Game {
   title_zh     String      @default("") @db.VarChar(255)
   title_en     String      @default("") @db.VarChar(255)
   aliases      String[]    @default([])
-  intro_jp     String      @default("") @db.VarChar(2000)
-  intro_zh     String      @default("") @db.VarChar(2000)
-  intro_en     String      @default("") @db.VarChar(2000)
+  intro_jp     String      @default("") @db.VarChar(20000)
+  intro_zh     String      @default("") @db.VarChar(20000)
+  intro_en     String      @default("") @db.VarChar(20000)
   covers       GameCover[] @relation("game_cover")
   images       GameImage[] @relation("game_image")
   release_date DateTime?
@@ -202,9 +202,9 @@ model GameDeveloper {
   name       String   @default("") @db.VarChar(255)
   aliases    String[] @default([])
   logo       String?
-  intro_jp   String   @default("") @db.VarChar(2000)
-  intro_zh   String   @default("") @db.VarChar(2000)
-  intro_en   String   @default("") @db.VarChar(2000)
+  intro_jp   String   @default("") @db.VarChar(20000)
+  intro_zh   String   @default("") @db.VarChar(20000)
+  intro_en   String   @default("") @db.VarChar(20000)
   extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   games GameDeveloperRelation[] @relation("game_produce")
@@ -265,9 +265,9 @@ model GameCharacter {
   name_zh    String?
   name_en    String?
   aliases    String[]                @default([])
-  intro_jp   String                  @default("") @db.VarChar(2000)
-  intro_zh   String                  @default("") @db.VarChar(2000)
-  intro_en   String                  @default("") @db.VarChar(2000)
+  intro_jp   String                  @default("") @db.VarChar(20000)
+  intro_zh   String                  @default("") @db.VarChar(20000)
+  intro_en   String                  @default("") @db.VarChar(20000)
   blood_type GameCharacterBloodType?
   height     Int?
   weight     Int?

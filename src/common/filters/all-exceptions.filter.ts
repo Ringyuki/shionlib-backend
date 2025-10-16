@@ -108,7 +108,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(msg, exception instanceof Error ? exception.stack : undefined)
-    } else if (status >= 400 && status !== 401 && status < 500) {
+      // } else if (status >= 400 && status !== 401 && status < 500) {
+    } else if (status >= 400 && status !== 401 && status !== 409 && status < 500) {
       this.logger.warn(msg)
     }
 

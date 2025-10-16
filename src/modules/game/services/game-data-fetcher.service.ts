@@ -40,10 +40,10 @@ export class GameDataFetcherService {
     finalProducersData: GameDeveloper[]
     finalCoversData?: GameCover[]
   }> {
-    if (v_id && !v_id.startsWith('v')) {
+    if (v_id && v_id.startsWith('v')) {
       throw new ShionBizException(ShionBizCode.GAME_INVALID_VNDB_ID)
     }
-    return this.fetchDatafromBangumi(b_id, v_id)
+    return this.fetchDatafromBangumi(b_id, `v${v_id}`)
   }
 
   private async fetchDatafromBangumi(b_id: string, v_id?: string) {
@@ -109,7 +109,9 @@ export class GameDataFetcherService {
           name: typeof i.value === 'string' ? i.value : i.value.map(v => v.v).join(', '),
           role: i.key,
         }))
-      finalGameData.type = rawGameData.infobox.find(i => i.key === '游戏类型')?.value as string
+      const gameType = rawGameData.infobox.find(i => i.key === '游戏类型')?.value
+      finalGameData.type =
+        typeof gameType === 'string' ? gameType : gameType?.map(v => v.v).join(', ')
 
       for (const character of rawCharacterData) {
         finalCharactersData.push({
@@ -194,14 +196,20 @@ export class GameDataFetcherService {
 
   private async fetchRawFullCharactersDataFromBangumi(ids: number[]) {
     const charactersData: BangumiCharacterItemRes[] = []
+    if (!ids?.length) return charactersData
 
-    const promises = ids.map(id =>
-      this.bangumiService.bangumiRequest<BangumiCharacterItemRes>(
-        `https://api.bgm.tv/v0/characters/${id}`,
-      ),
-    )
-    const results = await Promise.all(promises)
-    charactersData.push(...results)
+    const batchSize = 8
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize)
+      const results = await Promise.all(
+        batch.map(id =>
+          this.bangumiService.bangumiRequest<BangumiCharacterItemRes>(
+            `https://api.bgm.tv/v0/characters/${id}`,
+          ),
+        ),
+      )
+      charactersData.push(...results)
+    }
     return charactersData
   }
 
@@ -313,10 +321,13 @@ export class GameDataFetcherService {
           existingCharacter.cup = character.character.cup
           existingCharacter.age = character.character.age
           existingCharacter.birthday = character.character.birthday
-          if (!character.character.gender[0] || !character.character.gender[1])
+          if (!character.character.gender) {
+            character.character.gender = []
+          } else if (!character.character.gender[0] || !character.character.gender[1]) {
             character.character.gender = Array(2).fill(
               character.character.gender[0] ?? character.character.gender[1],
             )
+          }
           existingCharacter.gender = character.character.gender
           if (!existingCharacter.image && character.character.image)
             existingCharacter.image = character.character.image.url

@@ -9,6 +9,7 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PrismaService } from '../../../prisma.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { nativeFetch } from '../../render/providers/dom-env.provider'
 
 @Injectable()
 export class SmallFileUploadService {
@@ -78,7 +79,7 @@ export class SmallFileUploadService {
   }
 
   async _uploadGameCover(game_id: number, url: string) {
-    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_raw = await nativeFetch(url).then(res => res.arrayBuffer())
     const image_buffer = Buffer.from(image_raw)
     const data = await this.imageProcessService.process(image_buffer, {
       format: TargetFormatEnum.WEBP,
@@ -93,7 +94,7 @@ export class SmallFileUploadService {
   }
 
   async _uploadGameImage(game_id: number, url: string) {
-    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_raw = await nativeFetch(url).then(res => res.arrayBuffer())
     const image_buffer = Buffer.from(image_raw)
     const data = await this.imageProcessService.process(image_buffer, {
       format: TargetFormatEnum.WEBP,
@@ -108,7 +109,7 @@ export class SmallFileUploadService {
   }
 
   async _uploadGameCharacterImage(character_id: number, url: string) {
-    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_raw = await nativeFetch(url).then(res => res.arrayBuffer())
     const image_buffer = Buffer.from(image_raw)
     const data = await this.imageProcessService.process(image_buffer, {
       format: TargetFormatEnum.WEBP,
@@ -123,7 +124,7 @@ export class SmallFileUploadService {
   }
 
   async _uploadGameCharacterRelationImage(character_id: number, url: string) {
-    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_raw = await nativeFetch(url).then(res => res.arrayBuffer())
     const image_buffer = Buffer.from(image_raw)
     const data = await this.imageProcessService.process(image_buffer, {
       format: TargetFormatEnum.WEBP,
@@ -138,7 +139,7 @@ export class SmallFileUploadService {
   }
 
   async _uploadGameDeveloperImage(developer_id: number, url: string) {
-    const image_raw = await fetch(url).then(res => res.arrayBuffer())
+    const image_raw = await nativeFetch(url).then(res => res.arrayBuffer())
     const image_buffer = Buffer.from(image_raw)
     const data = await this.imageProcessService.process(image_buffer, {
       format: TargetFormatEnum.WEBP,

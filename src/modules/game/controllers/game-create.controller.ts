@@ -49,8 +49,8 @@ export class GameCreateController {
     @Req() req: RequestWithUser,
   ) {
     return await this.gameService.createFromBangumiAndVNDB(
-      createGameReqDto.b_id,
-      createGameReqDto.v_id,
+      createGameReqDto.b_id.toString(),
+      createGameReqDto.v_id?.toString(),
       req.user.sub,
     )
   }

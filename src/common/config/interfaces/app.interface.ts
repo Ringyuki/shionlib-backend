@@ -54,4 +54,9 @@ export interface AppConfig {
     download_cdn_host: string
     download_expires_in: number
   }
+  tasks: {
+    image_upload: {
+      enabled: boolean
+    }
+  }
 }

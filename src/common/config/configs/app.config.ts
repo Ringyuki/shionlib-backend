@@ -64,4 +64,10 @@ export default () => ({
     download_cdn_host: process.env.FILE_DOWNLOAD_CDN_HOST || 'https://ft.hikarifallback.uk/',
     download_expires_in: process.env.FILE_DOWNLOAD_EXPIRES_IN || 3600, // 1 hour
   },
+
+  tasks: {
+    image_upload: {
+      enabled: process.env.TASKS_IMAGE_UPLOAD_ENABLED === 'true',
+    },
+  },
 })
