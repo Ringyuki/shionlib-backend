@@ -36,7 +36,9 @@ export class VNDBService {
     }
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`https://api.vndb.org/kana/${path}`, requestData),
+        this.httpService.post(`https://api.vndb.org/kana/${path}`, requestData, {
+          family: 4,
+        }),
       )
 
       if (resultType === 'single') {
