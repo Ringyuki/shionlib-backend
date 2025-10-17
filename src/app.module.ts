@@ -27,6 +27,7 @@ import { B2Module } from './modules/b2/b2.module'
 import { EditModule } from './modules/edit/edit.module'
 import { CommentModule } from './modules/comment/comment.module'
 import { RenderModule } from './modules/render/render.module'
+import { DeveloperModule } from './modules/developer/developer.module'
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { RenderModule } from './modules/render/render.module'
     EditModule,
     CommentModule,
     RenderModule,
+    DeveloperModule,
   ],
   controllers: [],
   providers: [

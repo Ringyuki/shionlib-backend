@@ -210,6 +210,10 @@ model GameDeveloper {
 
   games GameDeveloperRelation[] @relation("game_produce")
 
+  parent_developer_id Int?
+  parent_developer    GameDeveloper?  @relation("game_developer_parent", fields: [parent_developer_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  child_developers    GameDeveloper[] @relation("game_developer_parent")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 

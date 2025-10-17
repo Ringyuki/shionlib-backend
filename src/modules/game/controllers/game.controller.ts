@@ -31,7 +31,11 @@ export class GameController {
 
   @Get('list')
   async getList(@Query() getGameListReqDto: PaginationReqDto, @Req() req: RequestWithUser) {
-    return await this.gameService.getList(getGameListReqDto, req.user?.content_limit)
+    return await this.gameService.getList(
+      getGameListReqDto,
+      req.user?.content_limit,
+      getGameListReqDto.developer_id,
+    )
   }
 
   @Get(':id')

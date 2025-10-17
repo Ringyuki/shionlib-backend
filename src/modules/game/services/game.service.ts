@@ -20,13 +20,18 @@ export class GameService {
       select: {
         views: true,
         nsfw: true,
+        covers: {
+          select: {
+            sexual: true,
+          },
+        },
       },
     })
     if (!exist) {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
     if (
-      exist.nsfw &&
+      (exist.nsfw || exist.covers.some(c => c.sexual > 0)) &&
       (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit)
     ) {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
@@ -191,6 +196,7 @@ export class GameService {
   async getList(
     getGameListReqDto: PaginationReqDto,
     content_limit?: number,
+    producer_id?: number,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
 
@@ -198,6 +204,22 @@ export class GameService {
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       where.nsfw = {
         not: true,
+      }
+      where.covers = {
+        some: {
+          sexual: {
+            in: [0],
+          },
+        },
+      }
+    }
+    if (producer_id) {
+      where.developers = {
+        some: {
+          developer: {
+            id: producer_id,
+          },
+        },
       }
     }
 
