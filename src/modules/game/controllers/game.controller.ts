@@ -18,9 +18,9 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../auth/guards/roles.guard'
 import { Roles } from '../../auth/decorators/roles.decorator'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
-import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
+import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 
 @Controller('game')
 export class GameController {
@@ -30,7 +30,7 @@ export class GameController {
   ) {}
 
   @Get('list')
-  async getList(@Query() getGameListReqDto: PaginationReqDto, @Req() req: RequestWithUser) {
+  async getList(@Query() getGameListReqDto: GetGameListReqDto, @Req() req: RequestWithUser) {
     return await this.gameService.getList(
       getGameListReqDto,
       req.user?.content_limit,

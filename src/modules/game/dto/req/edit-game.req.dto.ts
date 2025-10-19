@@ -35,6 +35,8 @@ enum GamePlatformEnum {
   WEB = 'web',
   VND = 'vnd',
   DRC = 'drc',
+  GBA = 'gba',
+  NDS = 'nds',
 }
 
 export class EditGameReqDto {

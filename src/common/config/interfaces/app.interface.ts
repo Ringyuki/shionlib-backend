@@ -59,4 +59,7 @@ export interface AppConfig {
       enabled: boolean
     }
   }
+  search: {
+    engine: 'pg' | 'es' | 'opensearch' | 'meilisearch'
+  }
 }

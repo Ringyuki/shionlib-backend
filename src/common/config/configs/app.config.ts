@@ -70,4 +70,8 @@ export default () => ({
       enabled: process.env.TASKS_IMAGE_UPLOAD_ENABLED === 'true',
     },
   },
+
+  search: {
+    engine: process.env.SEARCH_ENGINE || 'pg',
+  },
 })

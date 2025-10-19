@@ -28,6 +28,7 @@ import { EditModule } from './modules/edit/edit.module'
 import { CommentModule } from './modules/comment/comment.module'
 import { RenderModule } from './modules/render/render.module'
 import { DeveloperModule } from './modules/developer/developer.module'
+import { SearchModule } from './modules/search/search.module'
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { DeveloperModule } from './modules/developer/developer.module'
     CommentModule,
     RenderModule,
     DeveloperModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [
