@@ -7,9 +7,16 @@ import { SearchService } from './services/search.service'
 import { SearchController } from './controllers/search.controller'
 import { PrismaService } from '../../prisma.service'
 import { MeilisearchService } from './services/meilisearch.service'
+import { SearchAnalyticsTask } from './tasks/analytics.task'
+import { SearchAnalyticsService } from './services/analytics.service'
+import { SearchAnalyticsProcessor } from './queues/analytics.processor'
+import { RedisService } from './services/redis.service'
+import { BullModule } from '@nestjs/bull'
+import { SEARCH_ANALYTICS_QUEUE } from './constants/analytics'
 
 @Global()
 @Module({
+  imports: [BullModule.registerQueue({ name: SEARCH_ANALYTICS_QUEUE })],
   controllers: [SearchController],
   providers: [
     {
@@ -33,6 +40,10 @@ import { MeilisearchService } from './services/meilisearch.service'
     },
     SearchService,
     MeilisearchService,
+    SearchAnalyticsTask,
+    RedisService,
+    SearchAnalyticsService,
+    SearchAnalyticsProcessor,
   ],
   exports: [SEARCH_ENGINE],
 })

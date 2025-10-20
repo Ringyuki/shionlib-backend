@@ -35,7 +35,6 @@ export class MeilisearchEngine implements SearchEngine {
   async upsertGame(doc: IndexedGame): Promise<void> {
     const index = await this.getIndex(true)
     if (!index) return
-    console.log('upsertGame', doc)
     await index.addDocuments([doc])
   }
 

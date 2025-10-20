@@ -12,7 +12,7 @@ import { ShionConfigService } from '../../common/config/services/config.service'
           port: configService.get('redis.port'),
           password: configService.get('redis.password'),
           keyPrefix: configService.get('redis.keyPrefix'),
-          database: configService.get('redis.database'),
+          db: configService.get('redis.database'),
         },
         defaultJobOptions: {
           removeOnComplete: true,
