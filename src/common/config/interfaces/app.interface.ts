@@ -60,6 +60,11 @@ export interface AppConfig {
     }
   }
   search: {
-    engine: 'pg' | 'es' | 'opensearch' | 'meilisearch'
+    engine: 'pg' | 'meilisearch'
+    meilisearch: {
+      host: string
+      apiKey: string
+      indexName: string
+    }
   }
 }

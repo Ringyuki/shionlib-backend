@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from 'class-validator'
+import { IsNumber, IsOptional, Min, Max } from 'class-validator'
 import { Type } from 'class-transformer'
 import { ivm } from '../../../common/validation/i18n'
 
@@ -17,5 +17,7 @@ export class PaginationReqDto {
   )
   @IsOptional()
   @Type(() => Number)
+  @Min(1)
+  @Max(50)
   pageSize: number = 10
 }

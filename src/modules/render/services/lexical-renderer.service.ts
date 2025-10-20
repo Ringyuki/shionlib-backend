@@ -3,72 +3,73 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $generateHtmlFromNodes } from '@lexical/html'
 import type { SerializedEditorState } from 'lexical'
 import sanitizeHtml from 'sanitize-html'
-import { DomEnv } from '../providers/dom-env.provider'
 import { serverNodes as nodes } from '../lexical/nodes'
 import { editorTheme } from '../lexical/theme'
+import { withDomEnv } from '../providers/dom-env.provider'
 
 @Injectable()
 export class LexicalRendererService {
-  constructor(private readonly dom: DomEnv) {}
+  constructor() {}
 
   toHtml(serialized: SerializedEditorState | string) {
-    const editor = createHeadlessEditor({ namespace: 'Renderer', nodes, theme: editorTheme })
-    const str = typeof serialized === 'string' ? serialized : JSON.stringify(serialized)
-    const state = editor.parseEditorState(str)
+    return withDomEnv((win, doc) => {
+      const editor = createHeadlessEditor({ namespace: 'Renderer', nodes, theme: editorTheme })
+      const str = typeof serialized === 'string' ? serialized : JSON.stringify(serialized)
+      const state = editor.parseEditorState(str)
 
-    let html = ''
-    editor.setEditorState(state)
-    state.read(() => {
-      html = $generateHtmlFromNodes(editor)
-    })
-    html = this.handleCodeBlocks(html)
+      let html = ''
+      editor.setEditorState(state)
+      state.read(() => {
+        html = $generateHtmlFromNodes(editor)
+      })
+      html = this.handleCodeBlocks(html, doc)
 
-    return sanitizeHtml(html, {
-      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-        'img',
-        'table',
-        'thead',
-        'tbody',
-        'tr',
-        'th',
-        'td',
-        'pre',
-        'code',
-      ]),
-      allowedAttributes: {
-        a: ['href', 'name', 'target', 'rel'],
-        img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-        code: ['class', 'data-gutter', 'data-highlight-language', 'data-language', 'spellcheck'],
-        pre: ['class', 'spellcheck', 'data-language', 'data-gutter', 'data-highlight-language'],
-        span: ['class', 'style'],
-      },
-      allowedStyles: {
-        '*': {
-          color: [
-            /^#[0-9a-fA-F]{3,8}$/,
-            /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i,
-            /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
-          ],
-          'background-color': [
-            /^#[0-9a-fA-F]{3,8}$/,
-            /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i,
-            /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
-          ],
-          'text-align': [/^left$|^right$|^center$|^justify$/],
-          'font-size': [/^(?:[1-9]|[12]\d|30)px$/],
+      return sanitizeHtml(html, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+          'img',
+          'table',
+          'thead',
+          'tbody',
+          'tr',
+          'th',
+          'td',
+          'pre',
+          'code',
+        ]),
+        allowedAttributes: {
+          a: ['href', 'name', 'target', 'rel'],
+          img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
+          code: ['class', 'data-gutter', 'data-highlight-language', 'data-language', 'spellcheck'],
+          pre: ['class', 'spellcheck', 'data-language', 'data-gutter', 'data-highlight-language'],
+          span: ['class', 'style'],
         },
-      },
-      transformTags: {
-        a: (_tagName, attribs) => ({
-          tagName: 'a',
-          attribs: { ...attribs, rel: 'noopener noreferrer' },
-        }),
-      },
+        allowedStyles: {
+          '*': {
+            color: [
+              /^#[0-9a-fA-F]{3,8}$/,
+              /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i,
+              /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
+            ],
+            'background-color': [
+              /^#[0-9a-fA-F]{3,8}$/,
+              /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i,
+              /^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
+            ],
+            'text-align': [/^left$|^right$|^center$|^justify$/],
+            'font-size': [/^(?:[1-9]|[12]\d|30)px$/],
+          },
+        },
+        transformTags: {
+          a: (_tagName, attribs) => ({
+            tagName: 'a',
+            attribs: { ...attribs, rel: 'noopener noreferrer' },
+          }),
+        },
+      })
     })
   }
 
-  private handleCodeBlocks(rawHtml: string): string {
-    const doc = globalThis.document as Document | undefined
+  private handleCodeBlocks(rawHtml: string, doc: Document): string {
     if (!doc) return rawHtml
 
     const container = doc.createElement('div')

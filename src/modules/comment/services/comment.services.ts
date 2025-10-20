@@ -35,7 +35,7 @@ export class CommentServices {
         root_id = parent.root_id ?? parent.id
       }
 
-      const html = this.renderService.toHtml(content as SerializedEditorState)
+      const html = await this.renderService.toHtml(content as SerializedEditorState)
 
       const comment = await tx.comment.create({
         data: {
@@ -122,7 +122,7 @@ export class CommentServices {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_OWNER)
     }
 
-    const html = this.renderService.toHtml(content as SerializedEditorState)
+    const html = await this.renderService.toHtml(content as SerializedEditorState)
 
     return await this.prismaService.comment.update({
       where: { id },

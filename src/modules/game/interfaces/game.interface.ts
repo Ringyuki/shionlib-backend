@@ -1,5 +1,6 @@
 export interface GameData {
   creator_id: number
+  id: number
 
   b_id?: string
   v_id?: string
@@ -16,6 +17,16 @@ export interface GameData {
   release_date: Date
   extra_info: Record<string, string>[]
   links: GameLink[]
+
+  developers: {
+    role: string
+    developer: GameDeveloper
+  }[]
+  characters: {
+    role: string
+    actor: string
+    character: GameCharacter
+  }[]
 
   tags: string[]
   staffs: GameStaff[]
@@ -76,6 +87,7 @@ interface GameStaff {
 }
 
 export interface GameDeveloper {
+  id?: number
   b_id?: string
   v_id?: string
   name: string

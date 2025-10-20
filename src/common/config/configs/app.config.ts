@@ -73,5 +73,10 @@ export default () => ({
 
   search: {
     engine: process.env.SEARCH_ENGINE || 'pg',
+    meilisearch: {
+      host: process.env.MEILISEARCH_HOST,
+      apiKey: process.env.MEILISEARCH_API_KEY,
+      indexName: process.env.MEILISEARCH_INDEX_NAME || 'shionlib_games',
+    },
   },
 })

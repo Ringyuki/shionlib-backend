@@ -1,6 +1,9 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '../../../prisma.service'
 import type { SearchEngine, SearchQuery } from '../interfaces/search.interface'
+import { UserContentLimit } from '../../user/interfaces/user.interface'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { GameItemResDto } from '../dto/res/game-item.res.dto'
 
 export class PgSearchEngine implements SearchEngine {
   constructor(private readonly prisma: PrismaService) {}
@@ -11,7 +14,7 @@ export class PgSearchEngine implements SearchEngine {
 
   async removeGame() {}
 
-  async searchGames(q: SearchQuery) {
+  async searchGames(q: SearchQuery): Promise<PaginatedResult<GameItemResDto>> {
     const { page, pageSize, content_limit } = q
     if (!q.q) {
       return {
@@ -27,7 +30,7 @@ export class PgSearchEngine implements SearchEngine {
     }
 
     const where: Prisma.GameWhereInput = {}
-    if (!content_limit) {
+    if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       where.nsfw = { not: true }
       where.covers = { every: { sexual: { in: [0] } } }
     }
@@ -80,13 +83,33 @@ export class PgSearchEngine implements SearchEngine {
           title_jp: true,
           title_zh: true,
           title_en: true,
-          covers: true,
-          views: true,
+          aliases: true,
+          covers: {
+            select: {
+              id: true,
+              sexual: true,
+              violence: true,
+              url: true,
+              dims: true,
+            },
+          },
+          developers: {
+            select: {
+              developer: {
+                select: {
+                  id: true,
+                  name: true,
+                  aliases: true,
+                },
+              },
+            },
+          },
+          release_date: true,
         },
       }),
     ])
     return {
-      items,
+      items: items as unknown as GameItemResDto[],
       meta: {
         totalItems: total,
         itemCount: items.length,
