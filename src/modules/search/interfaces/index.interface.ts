@@ -25,5 +25,6 @@ export interface IndexedGame {
   character_intros_jp?: string[]
   character_intros_en?: string[]
   character_intros_zh?: string[]
+  character_actors?: string[]
   staffs?: string[]
 }

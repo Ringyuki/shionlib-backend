@@ -15,7 +15,7 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { pickChanges } from '../helpers/pick-changes'
 import { gameRequiredBits } from '../../edit/resolvers/permisson-resolver'
-import { formatDoc } from '../../search/helpers/format-doc'
+import { formatDoc, rawDataQuery } from '../../search/helpers/format-doc'
 import { GameData } from '../interfaces/game.interface'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
 
@@ -66,44 +66,7 @@ export class GameEditService {
 
     const updated = await this.prisma.game.findUnique({
       where: { id: game.id },
-      select: {
-        id: true,
-        title_jp: true,
-        title_zh: true,
-        title_en: true,
-        aliases: true,
-        intro_jp: true,
-        intro_zh: true,
-        intro_en: true,
-        tags: true,
-        platform: true,
-        nsfw: true,
-        release_date: true,
-        staffs: true,
-        covers: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-        images: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-        developers: {
-          select: {
-            role: true,
-            developer: { select: { id: true, name: true, aliases: true } },
-          },
-        },
-        characters: {
-          select: {
-            character: {
-              select: {
-                name_jp: true,
-                name_en: true,
-                name_zh: true,
-                aliases: true,
-                intro_jp: true,
-                intro_en: true,
-                intro_zh: true,
-              },
-            },
-          },
-        },
-      },
+      select: rawDataQuery,
     })
     await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
@@ -235,44 +198,7 @@ export class GameEditService {
 
     const game = await this.prisma.game.findUnique({
       where: { id },
-      select: {
-        id: true,
-        title_jp: true,
-        title_zh: true,
-        title_en: true,
-        aliases: true,
-        intro_jp: true,
-        intro_zh: true,
-        intro_en: true,
-        tags: true,
-        platform: true,
-        nsfw: true,
-        release_date: true,
-        staffs: true,
-        covers: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-        images: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-        developers: {
-          select: {
-            role: true,
-            developer: { select: { id: true, name: true, aliases: true } },
-          },
-        },
-        characters: {
-          select: {
-            character: {
-              select: {
-                name_jp: true,
-                name_en: true,
-                name_zh: true,
-                aliases: true,
-                intro_jp: true,
-                intro_en: true,
-                intro_zh: true,
-              },
-            },
-          },
-        },
-      },
+      select: rawDataQuery,
     })
 
     await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
@@ -311,6 +237,12 @@ export class GameEditService {
         },
       })
     })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 
   async removeCovers(id: number, covers: number[], req: RequestWithUser) {
@@ -335,5 +267,11 @@ export class GameEditService {
         },
       })
     })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 }

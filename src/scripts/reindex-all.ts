@@ -4,7 +4,7 @@ import { AppModule } from '../app.module'
 import { PrismaService } from '../prisma.service'
 import { SEARCH_ENGINE, SearchEngine } from '../modules/search/interfaces/search.interface'
 import type { IndexedGame } from '../modules/search/interfaces/index.interface'
-import { formatDoc } from '../modules/search/helpers/format-doc'
+import { formatDoc, rawDataQuery } from '../modules/search/helpers/format-doc'
 import { GameData } from '../modules/game/interfaces/game.interface'
 import { Logger } from '@nestjs/common'
 
@@ -13,44 +13,7 @@ async function buildIndexedGameBatch(prisma: PrismaService, skip: number, take: 
     skip,
     take,
     orderBy: [{ id: 'asc' }],
-    select: {
-      id: true,
-      title_jp: true,
-      title_zh: true,
-      title_en: true,
-      aliases: true,
-      intro_jp: true,
-      intro_zh: true,
-      intro_en: true,
-      tags: true,
-      platform: true,
-      nsfw: true,
-      release_date: true,
-      staffs: true,
-      covers: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-      images: { select: { id: true, sexual: true, violence: true, url: true, dims: true } },
-      developers: {
-        select: {
-          role: true,
-          developer: { select: { id: true, name: true, aliases: true } },
-        },
-      },
-      characters: {
-        select: {
-          character: {
-            select: {
-              name_jp: true,
-              name_en: true,
-              name_zh: true,
-              aliases: true,
-              intro_jp: true,
-              intro_en: true,
-              intro_zh: true,
-            },
-          },
-        },
-      },
-    },
+    select: rawDataQuery,
   })
 
   const docs: IndexedGame[] = games.map(g => formatDoc(g as unknown as GameData))
