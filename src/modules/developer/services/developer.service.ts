@@ -27,9 +27,7 @@ export class DeveloperService {
       aliasLikeIds = ids.map(r => r.id)
     }
 
-    const where: Prisma.GameDeveloperWhereInput = {
-      name: { not: '' },
-    }
+    const where: Prisma.GameDeveloperWhereInput = {}
     if (q && q.length > 0) {
       const or: Prisma.GameDeveloperWhereInput[] = [{ name: { contains: q, mode: 'insensitive' } }]
       if (aliasLikeIds.length > 0) {
