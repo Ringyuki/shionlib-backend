@@ -8,6 +8,8 @@ import { GetGameResDto } from '../dto/res/get-game.res.dto'
 import { Prisma } from '@prisma/client'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
+import { GetGameListFilterReqDto } from '../dto/req/get-game-list.req.dto'
+import { applyDate } from '../helpers/date-filters'
 
 @Injectable()
 export class GameService {
@@ -197,10 +199,15 @@ export class GameService {
     getGameListReqDto: PaginationReqDto,
     content_limit?: number,
     producer_id?: number,
+    filter?: GetGameListFilterReqDto,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
+    const { tags, years, months, sort_by, sort_order } = filter ?? {}
 
-    const where: Prisma.GameWhereInput = {}
+    let where: Prisma.GameWhereInput = {}
+    let orderBy: Prisma.GameOrderByWithRelationInput = {
+      release_date: 'desc',
+    }
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       where.nsfw = {
         not: true,
@@ -213,7 +220,7 @@ export class GameService {
         },
       }
     }
-    if (producer_id) {
+    if (producer_id)
       where.developers = {
         some: {
           developer: {
@@ -221,7 +228,18 @@ export class GameService {
           },
         },
       }
-    }
+
+    if (tags)
+      where.tags = {
+        hasSome: tags,
+      }
+
+    if (years || months) where = applyDate(where, { years, months })
+
+    if (sort_by)
+      orderBy = {
+        [sort_by]: sort_order,
+      }
 
     const total = await this.prisma.game.count({
       where,
@@ -229,9 +247,7 @@ export class GameService {
     const games = await this.prisma.game.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: {
-        release_date: 'desc',
-      },
+      orderBy,
       where,
       select: {
         id: true,

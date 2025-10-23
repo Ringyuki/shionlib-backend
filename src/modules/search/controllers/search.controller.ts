@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { SearchService } from '../services/search.service'
-import { SearchReqDto } from '../dto/req/search.req.dto'
+import { SearchGamesReqDto, SearchGameTagsReqDto } from '../dto/req/search.req.dto'
 import { SearchAnalyticsService } from '../services/analytics.service'
 import { Queue } from 'bull'
 import { InjectQueue } from '@nestjs/bull'
@@ -18,10 +18,15 @@ export class SearchController {
   ) {}
 
   @Get('games')
-  async searchGames(@Query() query: SearchReqDto) {
+  async searchGames(@Query() query: SearchGamesReqDto) {
     if (query.q && query.q.length >= SUGG_PREFIX_MIN_LENGTH)
       this.analyticsQueue.add(SEARCH_ANALYTICS_QUEUE, query.q)
     return this.searchService.searchGames(query)
+  }
+
+  @Get('tags')
+  async searchGameTags(@Query() query: SearchGameTagsReqDto) {
+    return this.searchService.searchGameTags(query)
   }
 
   @Get('trending')

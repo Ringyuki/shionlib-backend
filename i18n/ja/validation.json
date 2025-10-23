@@ -11,6 +11,7 @@
     "IS_STRING": "{property} は文字列である必要があります",
     "IS_EMAIL": "{property} は有効なメールアドレスである必要があります",
     "IS_NUMBER": "{property} は数字である必要があります",
+    "IS_INT": "{property} は整数である必要があります",
     "IS_BOOLEAN": "{property} は真偽値である必要があります",
     "IS_ARRAY": "{property} は配列である必要があります",
     "ARRAY_MAX_SIZE": "{property} は {max} 個を超えてはいけません",

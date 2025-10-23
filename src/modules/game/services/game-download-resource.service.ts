@@ -210,13 +210,26 @@ export class GameDownloadSourceService {
       )
     }
 
-    await this.prismaService.gameDownloadResource.update({
-      where: { id: file.game_download_resource_id },
-      data: {
-        downloads: {
-          increment: 1,
+    await this.prismaService.$transaction(async tx => {
+      const { game_id } = await tx.gameDownloadResource.update({
+        where: { id: file.game_download_resource_id },
+        data: {
+          downloads: {
+            increment: 1,
+          },
         },
-      },
+        select: {
+          game_id: true,
+        },
+      })
+      await tx.game.update({
+        where: { id: game_id },
+        data: {
+          downloads: {
+            increment: 1,
+          },
+        },
+      })
     })
 
     return {

@@ -95,6 +95,7 @@ export type I18nTranslations = {
             "IS_STRING": string;
             "IS_EMAIL": string;
             "IS_NUMBER": string;
+            "IS_INT": string;
             "IS_BOOLEAN": string;
             "IS_ARRAY": string;
             "ARRAY_MAX_SIZE": string;

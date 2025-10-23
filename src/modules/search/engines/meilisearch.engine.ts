@@ -97,7 +97,7 @@ export class MeilisearchEngine implements SearchEngine {
         'intro_en',
         'aliases',
       ],
-      highlightPreTag: '<span class="bg-primary/10 text-primary rounded-sm p-0.5">',
+      highlightPreTag: '<span class="search-highlight">',
       highlightPostTag: '</span>',
     })
 
@@ -123,5 +123,26 @@ export class MeilisearchEngine implements SearchEngine {
         currentPage: page,
       },
     }
+  }
+
+  async searchGameTags(query: string, limit?: number): Promise<string[]> {
+    const index = await this.getIndex()
+    const res = await index?.searchForFacetValues({
+      facetName: 'tags',
+      facetQuery: query,
+      hitsPerPage: limit ?? 10, // not working
+    })
+    const hits = res?.facetHits ?? []
+    const ranked = hits
+      .sort((a, b) => {
+        const ax = a.value === query ? 2 : a.value.startsWith(query) ? 1 : 0
+        const bx = b.value === query ? 2 : b.value.startsWith(query) ? 1 : 0
+        if (ax !== bx) return bx - ax
+        if (a.count !== b.count) return b.count - a.count
+        if (a.value.length !== b.value.length) return a.value.length - b.value.length
+        return a.value.localeCompare(b.value)
+      })
+      .slice(0, limit ?? 10)
+    return ranked.map(h => h.value)
   }
 }

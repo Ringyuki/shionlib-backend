@@ -11,6 +11,7 @@
     "IS_STRING": "{property} 必须是字符串",
     "IS_EMAIL": "{property} 必须是有效的邮箱地址",
     "IS_NUMBER": "{property} 必须是数字",
+    "IS_INT": "{property} 必须是整数",
     "IS_BOOLEAN": "{property} 必须是布尔值",
     "IS_ARRAY": "{property} 必须是数组",
     "ARRAY_MAX_SIZE": "{property} 不能超过 {max} 个元素",

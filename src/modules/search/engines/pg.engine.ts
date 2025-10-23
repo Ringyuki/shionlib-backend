@@ -119,4 +119,8 @@ export class PgSearchEngine implements SearchEngine {
       },
     }
   }
+
+  async searchGameTags(): Promise<string[]> {
+    return []
+  }
 }

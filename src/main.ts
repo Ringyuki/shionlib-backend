@@ -19,6 +19,7 @@ async function bootstrap() {
   app.disable('x-powered-by')
   app.use(requestId())
   app.use(cookieParser())
+  app.set('query parser', 'extended')
   const configService = app.get(ShionConfigService)
   app.use(
     '/uploads/large',

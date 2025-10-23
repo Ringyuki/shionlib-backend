@@ -12,6 +12,7 @@ export interface SearchEngine {
   bulkUpsertGames(docs: IndexedGame[]): Promise<void>
   removeGame(id: number): Promise<void>
   searchGames(query: SearchQuery): Promise<PaginatedResult<any>>
+  searchGameTags(query: string, limit?: number): Promise<string[]>
 }
 
 export const SEARCH_ENGINE = 'SEARCH_ENGINE'

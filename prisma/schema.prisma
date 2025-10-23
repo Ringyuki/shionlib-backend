@@ -122,6 +122,7 @@ model Game {
   platform String[] @default([])
 
   download_resources GameDownloadResource[] @relation("game_download_resource")
+  downloads          Int                    @default(0)
 
   views Int @default(0)
 
@@ -140,6 +141,7 @@ model Game {
   @@index([b_id, v_id])
   @@index([b_id])
   @@index([v_id])
+  @@index([downloads])
   @@map("games")
 }
 

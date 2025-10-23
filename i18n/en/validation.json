@@ -11,6 +11,7 @@
     "IS_STRING": "{property} must be a string",
     "IS_EMAIL": "{property} must be a valid email address",
     "IS_NUMBER": "{property} must be a number",
+    "IS_INT": "{property} must be an integer",
     "IS_BOOLEAN": "{property} must be a boolean",
     "IS_ARRAY": "{property} must be an array",
     "ARRAY_MAX_SIZE": "{property} must not exceed {max} elements",
