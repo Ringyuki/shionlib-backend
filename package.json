@@ -67,6 +67,7 @@
     "ioredis": "^5.7.0",
     "jsdom": "^27.0.1",
     "lexical": "^0.36.2",
+    "linkedom": "^0.18.12",
     "meilisearch": "^0.53.0",
     "microdiff": "^1.5.0",
     "mime-types": "^3.0.1",
