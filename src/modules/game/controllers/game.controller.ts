@@ -21,6 +21,7 @@ import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 
 @Controller('game')
 export class GameController {
@@ -79,6 +80,11 @@ export class GameController {
       id,
       req.user?.sub,
     )
+  }
+
+  @Get('download-source/list')
+  async getDownloadSourceList(@Query() getDownloadSourceListReqDto: PaginationReqDto) {
+    return await this.gameDownloadSourceService.getList(getDownloadSourceListReqDto)
   }
 
   @UseGuards(JwtAuthGuard)

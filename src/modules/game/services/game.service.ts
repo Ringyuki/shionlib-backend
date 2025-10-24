@@ -213,7 +213,7 @@ export class GameService {
         not: true,
       }
       where.covers = {
-        some: {
+        every: {
           sexual: {
             in: [0],
           },

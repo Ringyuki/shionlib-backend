@@ -10,6 +10,9 @@ import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { GetGameDownloadResourceResDto } from '../dto/res/get-game-download-resource.res.dto'
 import { B2Service } from '../../b2/services/b2.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { GetDownloadResourcesListResDto } from '../dto/res/get-download-resources-list.res.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -235,6 +238,74 @@ export class GameDownloadSourceService {
     return {
       file_url: await this.b2Service.getDownloadUrl(file.s3_file_key!),
       expires_in: this.configService.get('file_download.download_expires_in'),
+    }
+  }
+
+  async getList(dto: PaginationReqDto): Promise<PaginatedResult<GetDownloadResourcesListResDto>> {
+    const { page, pageSize } = dto
+
+    const total = await this.prismaService.gameDownloadResource.count()
+    const resources = await this.prismaService.gameDownloadResource.findMany({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: {
+        created: 'desc',
+      },
+      select: {
+        id: true,
+        platform: true,
+        language: true,
+        note: true,
+        game: {
+          select: {
+            id: true,
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+          },
+        },
+        _count: {
+          select: {
+            files: true,
+          },
+        },
+        files: {
+          select: {
+            file_name: true,
+          },
+        },
+        downloads: true,
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        created: true,
+      },
+    })
+
+    return {
+      items: resources.map(r => ({
+        id: r.id,
+        platform: r.platform,
+        language: r.language,
+        note: r.note,
+        downloads: r.downloads,
+        game: r.game,
+        files: r.files.map(f => f.file_name),
+        files_count: r._count.files,
+        creator: r.creator,
+        created: r.created,
+      })) as unknown as GetDownloadResourcesListResDto[],
+      meta: {
+        totalItems: total,
+        itemCount: resources.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
     }
   }
 }
