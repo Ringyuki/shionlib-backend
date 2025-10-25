@@ -1,0 +1,14 @@
+model GameFavoriteRelation {
+  id      Int @id @default(autoincrement())
+  user_id Int
+  game_id Int
+
+  user User @relation("user_favorite_game", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation("game_favorite", fields: [game_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([user_id, game_id])
+  @@map("game_favorite_relations")
+}

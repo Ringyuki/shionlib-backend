@@ -1,0 +1,57 @@
+model GameDownloadResource {
+  id      Int                        @id @default(autoincrement())
+  game_id Int
+  game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  files   GameDownloadResourceFile[] @relation("game_download_resource_files")
+
+  platform String[] @default([])
+  language String[] @default([])
+  note     String?  @db.VarChar(255)
+
+  downloads Int @default(0)
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_upload_session", fields: [upload_session_id], references: [id])
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("game_download_resources")
+}
+
+// file type: 1 -> s3 native, 2 -> direct link, 3 -> third party link
+// file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
+// file check status: 0 -> pending, 1 -> ok, 2 -> broken or truncated, 3 -> broken or unsupported, 4 -> encrypted, 5 -> harmful
+model GameDownloadResourceFile {
+  id                Int     @id @default(autoincrement())
+  type              Int
+  file_name         String
+  file_path         String? // for file type 1, local file path
+  file_size         BigInt
+  file_url          String? // for file type 2 and 3
+  s3_file_key       String? // for file type 1
+  file_content_type String? // for file type 1
+  file_hash         String
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_files_upload_session", fields: [upload_session_id], references: [id])
+  file_status       Int                @default(1)
+  file_check_status Int                @default(0)
+
+  game_download_resource_id Int
+  game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([upload_session_id])
+  @@unique([file_path])
+  @@index([file_path])
+  @@map("game_download_resource_files")
+}
