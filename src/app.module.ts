@@ -65,10 +65,10 @@ import { SearchModule } from './modules/search/search.module'
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: join(__dirname, '..', 'i18n/'),
+        path: join(process.cwd(), 'i18n'),
         watch: true,
       },
-      typesOutputPath: join(__dirname, '../src/generated/i18n.generated.ts'),
+      typesOutputPath: join(process.cwd(), 'src/generated/i18n.generated.ts'),
       resolvers: [
         new CookieResolver(['shionlib_locale']),
         { use: QueryResolver, options: ['lang'] },
