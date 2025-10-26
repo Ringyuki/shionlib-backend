@@ -31,6 +31,7 @@ model Game {
   downloads          Int                    @default(0)
 
   views Int @default(0)
+  hot_score Float @default(0)
 
   creator_id Int
   creator    User @relation("user_create_game", fields: [creator_id], references: [id])
@@ -48,6 +49,7 @@ model Game {
   @@index([b_id, v_id])
   @@index([b_id])
   @@index([v_id])
+  @@index([hot_score])
   @@index([downloads])
   @@map("games")
 }

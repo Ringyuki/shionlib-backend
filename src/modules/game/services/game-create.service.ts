@@ -104,6 +104,12 @@ export class GameCreateService {
         if (!check) throw new Error('Row not visible inside tx')
         return game.id
       })
+
+      const game = await this.prisma.game.findUnique({
+        where: { id: gameId },
+        select: rawDataQuery,
+      })
+      await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
     } catch (e) {
       console.error(e)
       throw e

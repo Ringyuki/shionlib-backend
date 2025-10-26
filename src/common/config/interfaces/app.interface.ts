@@ -67,4 +67,15 @@ export interface AppConfig {
       indexName: string
     }
   }
+
+  game: {
+    hot_score: {
+      half_life_release_days: number
+      half_life_created_days: number
+      weight_views: number
+      weight_downloads: number
+      weight_release: number
+      weight_created: number
+    }
+  }
 }

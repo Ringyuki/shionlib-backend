@@ -79,4 +79,15 @@ export default () => ({
       indexName: process.env.MEILISEARCH_INDEX_NAME || 'shionlib_games',
     },
   },
+
+  game: {
+    hot_score: {
+      half_life_release_days: process.env.GAME_HOT_SCORE_HALF_LIFE_RELEASE_DAYS || 30,
+      half_life_created_days: process.env.GAME_HOT_SCORE_HALF_LIFE_CREATED_DAYS || 15,
+      weight_views: process.env.GAME_HOT_SCORE_WEIGHT_VIEWS || 0.6,
+      weight_downloads: process.env.GAME_HOT_SCORE_WEIGHT_DOWNLOADS || 1.0,
+      weight_release: process.env.GAME_HOT_SCORE_WEIGHT_RELEASE || 0.8,
+      weight_created: process.env.GAME_HOT_SCORE_WEIGHT_CREATED || 0.4,
+    },
+  },
 })

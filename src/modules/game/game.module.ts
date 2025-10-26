@@ -8,6 +8,8 @@ import { GameDownloadSourceService } from './services/game-download-resource.ser
 import { B2Module } from '../b2/b2.module'
 import { GameEditService } from './services/game-edit.service'
 import { GameEditController } from './controllers/game-edit.controller'
+import { GameHotScoreService } from './services/game-hot-score.service'
+import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
 
 @Module({
   controllers: [GameCreateController, GameController, GameEditController],
@@ -19,6 +21,8 @@ import { GameEditController } from './controllers/game-edit.controller'
     GameCreateService,
     GameDownloadSourceService,
     GameEditService,
+    GameHotScoreService,
+    GameHotScoreCalcTask,
   ],
 })
 export class GameModule {}
