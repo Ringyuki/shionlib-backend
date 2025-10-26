@@ -50,7 +50,7 @@ export class EmailService {
         this.logger.log(`Email sent successfully to ${to}`)
         return true
       } catch (error) {
-        this.logger.error(`Failed to send email to ${to}:`, error.message)
+        this.logger.error(`Failed to send email to ${to}:`, error)
         throw new Error('Failed to send email')
       }
     } else if (this.emailConfig.provider === 'postal') {
@@ -71,14 +71,14 @@ export class EmailService {
         )
 
         if (res.data.status !== 'success') {
-          this.logger.error(`Failed to send email to ${to}:`, res.data.message)
-          throw new Error(`Failed to send email to ${to}: ${res.data.data.message}`)
+          this.logger.error(`Failed to send email to ${to}:`, res.data)
+          throw new Error(`Failed to send email to ${to}: ${res.data}`)
         }
 
         this.logger.log(`Email sent successfully to ${to}`)
         return true
       } catch (error) {
-        this.logger.error(`Failed to send email to ${to}:`, error.message)
+        this.logger.error(`Failed to send email to ${to}:`, error)
         throw new Error('Failed to send email')
       }
     }
