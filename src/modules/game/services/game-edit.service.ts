@@ -18,12 +18,15 @@ import { gameRequiredBits } from '../../edit/resolvers/permisson-resolver'
 import { formatDoc, rawDataQuery } from '../../search/helpers/format-doc'
 import { GameData } from '../interfaces/game.interface'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
+import { ActivityService } from '../../activity/services/activity.service'
+import { ActivityType } from '../../activity/dto/create-activity.dto'
 
 @Injectable()
 export class GameEditService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
+    private readonly activityService: ActivityService,
   ) {}
 
   async editGameScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
@@ -62,6 +65,15 @@ export class GameEditService {
           field_changes,
         },
       })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
 
     const updated = await this.prisma.game.findUnique({
@@ -99,6 +111,14 @@ export class GameEditService {
           } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
   }
 
@@ -126,6 +146,14 @@ export class GameEditService {
           changes: { relation: 'links', added: uniqueLinks } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
   }
 
@@ -150,6 +178,14 @@ export class GameEditService {
           changes: { relation: 'links', removed: linksToRemove } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
   }
 
@@ -194,6 +230,14 @@ export class GameEditService {
           } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
 
     const game = await this.prisma.game.findUnique({
@@ -236,6 +280,14 @@ export class GameEditService {
           changes: { relation: 'covers', added: uniqueCovers } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
 
     const updated = await this.prisma.game.findUnique({
@@ -266,6 +318,14 @@ export class GameEditService {
           changes: { relation: 'covers', removed: coversToRemove } as any,
         },
       })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+        },
+        tx,
+      )
     })
 
     const updated = await this.prisma.game.findUnique({

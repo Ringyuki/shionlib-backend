@@ -7,6 +7,12 @@ import { GAME_STORAGE } from '../../s3/constants/s3.constants'
 import { LARGE_FILE_UPLOAD_QUEUE, S3_UPLOAD_JOB } from '../constants/upload.constants'
 import * as fs from 'fs'
 import * as path from 'path'
+import { ActivityService } from '../../activity/services/activity.service'
+import {
+  ActivityType,
+  ActivityFileStatus,
+  ActivityFileCheckStatus,
+} from '../../activity/dto/create-activity.dto'
 
 type S3UploadJobPayload = {
   resourceFileId: number
@@ -19,6 +25,7 @@ export class UploadProcessor {
     private readonly prismaService: PrismaService,
     @Inject(GAME_STORAGE)
     private readonly s3Service: S3Service,
+    private readonly activityService: ActivityService,
   ) {
     this.logger = new Logger(UploadProcessor.name)
   }
@@ -59,7 +66,7 @@ export class UploadProcessor {
       this.logger.warn(`resource file ${resourceFileId} not found, skip`)
       return
     }
-    if (file.file_status === 3 && file.file_url) {
+    if (file.file_status === 3 && file.s3_file_key) {
       this.logger.log(`resource file ${resourceFileId} already on S3, skip`)
       return
     }
@@ -94,6 +101,15 @@ export class UploadProcessor {
         file_status: 3,
         s3_file_key: s3Key,
       },
+    })
+
+    await this.activityService.create({
+      type: ActivityType.FILE_UPLOAD_TO_S3,
+      user_id: file.creator_id,
+      game_id: gameId,
+      file_id: resourceFileId,
+      file_status: ActivityFileStatus.UPLOADED_TO_S3,
+      file_check_status: ActivityFileCheckStatus.OK,
     })
 
     try {

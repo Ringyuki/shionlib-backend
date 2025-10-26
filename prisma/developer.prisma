@@ -18,6 +18,8 @@ model GameDeveloper {
   parent_developer    GameDeveloper?  @relation("game_developer_parent", fields: [parent_developer_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   child_developers    GameDeveloper[] @relation("game_developer_parent")
 
+  activities Activity[] @relation("developer_activity")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 

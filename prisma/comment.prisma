@@ -18,7 +18,8 @@ model Comment {
   creator_id Int
   creator    User @relation("user_create_comment", fields: [creator_id], references: [id])
 
-  liked_users User[] @relation("user_like_comment")
+  liked_users User[]     @relation("user_like_comment")
+  activities  Activity[] @relation("comment_activity")
 
   status Int     @default(1)
   edited Boolean @default(false)

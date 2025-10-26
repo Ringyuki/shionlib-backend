@@ -11,12 +11,15 @@ import { CommentResDto } from '../dto/res/comment.res.dto'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { SerializedEditorState } from 'lexical'
+import { ActivityService } from '../../activity/services/activity.service'
+import { ActivityType } from '../../activity/dto/create-activity.dto'
 
 @Injectable()
 export class CommentServices {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly renderService: LexicalRendererService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async createGameComment(game_id: number, dto: CreateCommentReqDto, req: RequestWithUser) {
@@ -94,6 +97,15 @@ export class CommentServices {
           data: { reply_count: { increment: 1 } },
         })
       }
+      await this.activityService.create(
+        {
+          type: ActivityType.COMMENT,
+          user_id: req.user.sub,
+          game_id,
+          comment_id: comment.id,
+        },
+        tx,
+      )
       return {
         ...comment,
         root_id: root_id || comment.id,

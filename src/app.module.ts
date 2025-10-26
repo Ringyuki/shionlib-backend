@@ -29,6 +29,7 @@ import { CommentModule } from './modules/comment/comment.module'
 import { RenderModule } from './modules/render/render.module'
 import { DeveloperModule } from './modules/developer/developer.module'
 import { SearchModule } from './modules/search/search.module'
+import { ActivityModule } from './modules/activity/activity.module'
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { SearchModule } from './modules/search/search.module'
     RenderModule,
     DeveloperModule,
     SearchModule,
+    ActivityModule,
   ],
   controllers: [],
   providers: [

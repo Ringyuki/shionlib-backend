@@ -9,6 +9,12 @@ import { Queue } from 'bull'
 import { InjectQueue } from '@nestjs/bull'
 import { LARGE_FILE_UPLOAD_QUEUE, S3_UPLOAD_JOB } from '../../upload/constants/upload.constants'
 import { UploadQuotaService } from '../../upload/services/upload-quota.service'
+import { ActivityService } from '../../activity/services/activity.service'
+import {
+  ActivityType,
+  ActivityFileStatus,
+  ActivityFileCheckStatus,
+} from '../../activity/dto/create-activity.dto'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -19,6 +25,7 @@ export class FileScanService implements OnModuleInit {
     private readonly configService: ShionConfigService,
     @InjectQueue(LARGE_FILE_UPLOAD_QUEUE) private readonly uploadQueue: Queue,
     private readonly uploadQuotaService: UploadQuotaService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async onModuleInit() {
@@ -68,7 +75,22 @@ export class FileScanService implements OnModuleInit {
   }
 
   private async scanFile(filePath: string, creator_id: number, upload_session_id: number) {
-    console.log('scanning file', filePath)
+    const file = await this.prismaService.gameDownloadResourceFile.findUnique({
+      where: { file_path: filePath },
+      select: {
+        id: true,
+        game_download_resource: {
+          select: {
+            game_id: true,
+          },
+        },
+      },
+    })
+    if (!file) {
+      this.logger.warn(`file ${filePath} not found, skip`)
+      return
+    }
+    this.logger.log(`scanning file ${filePath}`)
     const status = await this.inspectArchive(filePath)
     if (status !== ArchiveStatus.OK) {
       await this.prismaService.gameDownloadResourceFile.update({
@@ -76,7 +98,27 @@ export class FileScanService implements OnModuleInit {
         data: { file_check_status: status },
       })
       await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(creator_id, upload_session_id)
-      console.log('file is not ok, reason: ', status)
+      const activityType =
+        status === ArchiveStatus.BROKEN_OR_TRUNCATED
+          ? ActivityType.FILE_CHECK_BROKEN_OR_TRUNCATED
+          : status === ArchiveStatus.BROKEN_OR_UNSUPPORTED
+            ? ActivityType.FILE_CHECK_BROKEN_OR_UNSUPPORTED
+            : ActivityType.FILE_CHECK_ENCRYPTED
+      const activityCheckStatus =
+        status === ArchiveStatus.BROKEN_OR_TRUNCATED
+          ? ActivityFileCheckStatus.BROKEN_OR_TRUNCATED
+          : status === ArchiveStatus.BROKEN_OR_UNSUPPORTED
+            ? ActivityFileCheckStatus.BROKEN_OR_UNSUPPORTED
+            : ActivityFileCheckStatus.ENCRYPTED
+      await this.activityService.create({
+        type: activityType,
+        user_id: creator_id,
+        game_id: file.game_download_resource.game_id,
+        file_id: file.id,
+        file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+        file_check_status: activityCheckStatus,
+      })
+      this.logger.warn(`file ${filePath} is not ok, reason: ${status}`)
       return
     }
     const result = await this.clam.scanFile(filePath)
@@ -85,10 +127,18 @@ export class FileScanService implements OnModuleInit {
         where: { file_path: filePath },
         data: { file_check_status: ArchiveStatus.HARMFUL },
       })
-      console.log('file is not ok, reason: ', result)
+      await this.activityService.create({
+        type: ActivityType.FILE_CHECK_HARMFUL,
+        user_id: creator_id,
+        game_id: file.game_download_resource.game_id,
+        file_id: file.id,
+        file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+        file_check_status: ActivityFileCheckStatus.HARMFUL,
+      })
+      this.logger.warn(`file ${filePath} is not ok, reason: ${result}`)
       return
     }
-    const file = await this.prismaService.gameDownloadResourceFile.update({
+    await this.prismaService.gameDownloadResourceFile.update({
       where: { file_path: filePath },
       data: { file_check_status: ArchiveStatus.OK },
     })
@@ -104,72 +154,15 @@ export class FileScanService implements OnModuleInit {
         removeOnComplete: true,
       },
     )
+    await this.activityService.create({
+      type: ActivityType.FILE_CHECK_OK,
+      game_id: file.game_download_resource.game_id,
+      user_id: creator_id,
+      file_id: file.id,
+      file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+      file_check_status: ActivityFileCheckStatus.OK,
+    })
   }
-
-  // private async inspectArchive(filePath: string) {
-  //   const execFileAsync = promisify(execFile)
-  //   let listStdout = ''
-  //   let listStderr = ''
-  //   let status = ArchiveStatus.OK
-
-  //   try {
-  //     const { stdout, stderr } = await execFileAsync('7zz', ['l', '-slt', '-p-', filePath], {
-  //       timeout: 20_000,
-  //     })
-  //     listStdout = stdout || ''
-  //     listStderr = stderr || ''
-  //   } catch (error: any) {
-  //     listStdout = error?.stdout || ''
-  //     listStderr = error?.stderr || ''
-  //   }
-
-  //   const stdoutToInspect = listStdout || ''
-
-  //   // check if it is a multi-volume rar file and if it has headers error
-  //   const isRar = /\bType\s*=\s*Rar/i.test(stdoutToInspect)
-  //   const isMultiVolume =
-  //     /\bMultivolume\s*=\s*\+/i.test(stdoutToInspect) ||
-  //     /\bVolumes\s*=\s*\d+/i.test(stdoutToInspect)
-  //   const hasHeadersError =
-  //     /Headers Error/i.test(stdoutToInspect) || /Headers Error/i.test(listStderr)
-
-  //   if (isRar && isMultiVolume && hasHeadersError) {
-  //     return ArchiveStatus.BROKEN_OR_TRUNCATED
-  //   }
-
-  //   const encrypted =
-  //     /\bEncrypted\s*=\s*\+/.test(stdoutToInspect) || /\bMethod\s*=\s*AES/i.test(stdoutToInspect)
-  //   if (encrypted) {
-  //     status = ArchiveStatus.ENCRYPTED
-  //   }
-
-  //   try {
-  //     const { stdout: testOut } = await execFileAsync('7zz', ['t', '-p-', filePath], {
-  //       timeout: 60_000,
-  //     })
-  //     if (/Headers Error|Data Error|Unexpected end of file/i.test(testOut)) {
-  //       status = ArchiveStatus.BROKEN_OR_TRUNCATED
-  //     }
-  //   } catch (error: any) {
-  //     const testOut: string = error?.stdout || ''
-  //     const testErr: string = error?.stderr || ''
-  //     const hasCritical =
-  //       /Headers Error|Data Error|Unexpected end of file/i.test(testOut) ||
-  //       /Headers Error|Data Error|Unexpected end of file/i.test(testErr)
-  //     const hasUnsupportedMethod =
-  //       /Unsupported Method/i.test(testOut) || /Unsupported Method/i.test(testErr)
-
-  //     if (hasCritical) {
-  //       status = ArchiveStatus.BROKEN_OR_TRUNCATED
-  //     } else if (hasUnsupportedMethod) {
-  //       status = ArchiveStatus.OK
-  //     } else {
-  //       status = ArchiveStatus.BROKEN_OR_UNSUPPORTED
-  //     }
-  //   }
-
-  //   return status
-  // }
 
   private async inspectArchive(filePath: string) {
     const execFileAsync = promisify(execFile)
@@ -181,7 +174,11 @@ export class FileScanService implements OnModuleInit {
     let status = ArchiveStatus.OK
 
     try {
-      const { stdout, stderr } = await execFileAsync('7zz', ['l', '-slt', filePath], execOptsList)
+      const { stdout, stderr } = await execFileAsync(
+        '7zz',
+        ['l', '-slt', '-p-', filePath],
+        execOptsList,
+      )
       listStdout = stdout || ''
       listStderr = stderr || ''
     } catch (error: any) {
@@ -229,7 +226,7 @@ export class FileScanService implements OnModuleInit {
     try {
       const { stdout: testOut } = await execFileAsync(
         '7zz',
-        ['t', '-bb0', '-bd', '-y', filePath],
+        ['t', '-bb0', '-bd', '-y', '-p-', filePath],
         execOptsTest,
       )
       if (

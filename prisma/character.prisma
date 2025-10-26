@@ -23,6 +23,8 @@ model GameCharacter {
 
   games GameCharacterRelation[] @relation("game_appear_on")
 
+  activities Activity[] @relation("character_activity")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 

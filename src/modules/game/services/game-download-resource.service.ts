@@ -13,6 +13,12 @@ import { ShionConfigService } from '../../../common/config/services/config.servi
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { GetDownloadResourcesListResDto } from '../dto/res/get-download-resources-list.res.dto'
+import { ActivityService } from '../../activity/services/activity.service'
+import {
+  ActivityType,
+  ActivityFileStatus,
+  ActivityFileCheckStatus,
+} from '../../activity/dto/create-activity.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -21,6 +27,7 @@ export class GameDownloadSourceService {
     @Inject(GAME_STORAGE) private readonly s3Service: S3Service,
     private readonly b2Service: B2Service,
     private readonly configService: ShionConfigService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
@@ -141,7 +148,7 @@ export class GameDownloadSourceService {
         },
       })
 
-      await tx.gameDownloadResourceFile.create({
+      const gameDownloadResourceFile = await tx.gameDownloadResourceFile.create({
         data: {
           game_download_resource_id: gameDownloadResource.id,
           file_name: session.file_name,
@@ -154,7 +161,22 @@ export class GameDownloadSourceService {
           file_status: 2,
           type: 1,
         },
+        select: {
+          id: true,
+        },
       })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.FILE_UPLOAD_TO_SERVER,
+          user_id: creator_id,
+          game_id: game_id,
+          file_id: gameDownloadResourceFile.id,
+          file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+          file_check_status: ActivityFileCheckStatus.PENDING,
+        },
+        tx,
+      )
     })
   }
 

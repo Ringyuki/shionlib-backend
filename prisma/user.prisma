@@ -33,6 +33,7 @@ model User {
   upload_quota         UserUploadQuota?      @relation("user_upload_quota")
   field_permissions    UserFieldPermission[] @relation("user_field_permissions")
   edit_records         EditRecord[]          @relation("user_edit_record")
+  activities           Activity[]            @relation("user_activity")
   liked_comments       Comment[]             @relation("user_like_comment")
 
   @@index([email])

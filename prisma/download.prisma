@@ -47,6 +47,8 @@ model GameDownloadResourceFile {
   creator_id Int
   creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
 
+  activities Activity[] @relation("game_download_resource_file_activity")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 
