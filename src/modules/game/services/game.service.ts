@@ -254,6 +254,8 @@ export class GameService {
         title_jp: true,
         title_zh: true,
         title_en: true,
+        aliases: true,
+        type: true,
         covers: {
           select: {
             language: true,
