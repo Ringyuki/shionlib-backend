@@ -16,11 +16,14 @@ export class ActivityService {
       user_id,
       comment_id,
       game_id,
+      edit_record_id,
       developer_id,
       character_id,
       file_id,
       file_status,
       file_check_status,
+      file_size,
+      file_name,
     } = createActivityReqDto
 
     await (tx || this.prismaService).activity.create({
@@ -28,12 +31,15 @@ export class ActivityService {
         type,
         user_id,
         game_id,
+        edit_record_id,
         comment_id,
         developer_id,
         character_id,
         file_id,
         file_status,
         file_check_status,
+        file_size,
+        file_name,
       },
     })
   }
@@ -56,6 +62,12 @@ export class ActivityService {
             title_jp: true,
             title_zh: true,
             title_en: true,
+          },
+        },
+        comment: {
+          select: {
+            id: true,
+            html: true,
           },
         },
         developer: {
@@ -81,6 +93,8 @@ export class ActivityService {
         },
         file_status: true,
         file_check_status: true,
+        file_size: true,
+        file_name: true,
         user: {
           select: {
             id: true,
@@ -99,17 +113,18 @@ export class ActivityService {
         type: a.type,
         user: a.user,
         game: a.game,
+        comment: a.comment,
         developer: a.developer,
         character: a.character,
-        file: a.file
-          ? {
-              id: a.file.id,
-              file_name: a.file.file_name,
-              file_size: Number(a.file.file_size),
-              file_status: a.file_status,
-              file_check_status: a.file_check_status,
-            }
-          : undefined,
+        file:
+          a.file || a.file_name || a.file_size
+            ? {
+                file_name: a.file?.file_name ?? a.file_name ?? '',
+                file_size: Number(a.file?.file_size ?? a.file_size ?? 0),
+                file_status: a.file_status,
+                file_check_status: a.file_check_status,
+              }
+            : undefined,
         created: a.created,
         updated: a.updated,
       })) as unknown as ActivityResDto[],

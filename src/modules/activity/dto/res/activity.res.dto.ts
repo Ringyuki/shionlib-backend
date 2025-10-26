@@ -14,6 +14,10 @@ export class ActivityResDto {
     title_zh: string
     title_en: string
   }
+  comment?: {
+    id: number
+    html: string
+  }
   developer?: {
     id: number
     name: string
@@ -25,7 +29,6 @@ export class ActivityResDto {
     name_en: string
   }
   file?: {
-    id: number
     file_name: string
     file_size: number
     file_status: ActivityFileStatus

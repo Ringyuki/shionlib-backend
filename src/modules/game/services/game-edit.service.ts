@@ -53,7 +53,7 @@ export class GameEditService {
         },
       })
 
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -64,6 +64,7 @@ export class GameEditService {
           changes: { before, after } as any,
           field_changes,
         },
+        select: { id: true },
       })
 
       await this.activityService.create(
@@ -71,6 +72,7 @@ export class GameEditService {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -95,7 +97,7 @@ export class GameEditService {
         where: { game_id: id, id: { in: links.map(l => l.id) } },
         data: links.map(l => ({ url: l.url, label: l.label, name: l.name })),
       })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -110,12 +112,14 @@ export class GameEditService {
             after: links.map(l => ({ id: l.id, url: l.url, label: l.label, name: l.name })),
           } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -134,7 +138,7 @@ export class GameEditService {
       await tx.gameLink.createMany({
         data: uniqueLinks.map(l => ({ game_id: id, url: l.url, label: l.label, name: l.name })),
       })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -145,12 +149,14 @@ export class GameEditService {
           field_changes: ['links'],
           changes: { relation: 'links', added: uniqueLinks } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -166,7 +172,7 @@ export class GameEditService {
 
     await this.prisma.$transaction(async tx => {
       await tx.gameLink.deleteMany({ where: { game_id: id, id: { in: links } } })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -177,12 +183,14 @@ export class GameEditService {
           field_changes: ['links'],
           changes: { relation: 'links', removed: linksToRemove } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -207,7 +215,7 @@ export class GameEditService {
           violence: c.violence,
         })),
       })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -229,12 +237,14 @@ export class GameEditService {
             })),
           } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -268,7 +278,7 @@ export class GameEditService {
           violence: c.violence,
         })),
       })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -279,12 +289,14 @@ export class GameEditService {
           field_changes: ['covers'],
           changes: { relation: 'covers', added: uniqueCovers } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )
@@ -306,7 +318,7 @@ export class GameEditService {
 
     await this.prisma.$transaction(async tx => {
       await tx.gameCover.deleteMany({ where: { game_id: id, id: { in: covers } } })
-      await tx.editRecord.create({
+      const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
           target_id: id,
@@ -317,12 +329,14 @@ export class GameEditService {
           field_changes: ['covers'],
           changes: { relation: 'covers', removed: coversToRemove } as any,
         },
+        select: { id: true },
       })
       await this.activityService.create(
         {
           type: ActivityType.GAME_EDIT,
           user_id: req.user.sub,
           game_id: id,
+          edit_record_id: editRecord.id,
         },
         tx,
       )

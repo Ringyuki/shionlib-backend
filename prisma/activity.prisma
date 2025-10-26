@@ -21,6 +21,8 @@ model Activity {
   user              User                      @relation("user_activity", fields: [user_id], references: [id])
   game_id           Int?
   game              Game?                     @relation("game_activity", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  edit_record_id    Int?
+  edit_record       EditRecord?               @relation("edit_record_activity", fields: [edit_record_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   comment_id        Int?
   comment           Comment?                  @relation("comment_activity", fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   developer_id      Int?
@@ -28,9 +30,11 @@ model Activity {
   character_id      Int?
   character         GameCharacter?            @relation("character_activity", fields: [character_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   file_id           Int?
-  file              GameDownloadResourceFile? @relation("game_download_resource_file_activity", fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file              GameDownloadResourceFile? @relation("game_download_resource_file_activity", fields: [file_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   file_status       Int?                      @default(1)
   file_check_status Int?                      @default(0)
+  file_size         BigInt?
+  file_name         String?
   created           DateTime                  @default(now())
   updated           DateTime                  @updatedAt
 

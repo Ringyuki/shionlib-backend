@@ -174,6 +174,8 @@ export class GameDownloadSourceService {
           file_id: gameDownloadResourceFile.id,
           file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
           file_check_status: ActivityFileCheckStatus.PENDING,
+          file_size: Number(session.total_size),
+          file_name: session.file_name,
         },
         tx,
       )

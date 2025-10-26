@@ -79,6 +79,8 @@ export class FileScanService implements OnModuleInit {
       where: { file_path: filePath },
       select: {
         id: true,
+        file_size: true,
+        file_name: true,
         game_download_resource: {
           select: {
             game_id: true,
@@ -117,6 +119,8 @@ export class FileScanService implements OnModuleInit {
         file_id: file.id,
         file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
         file_check_status: activityCheckStatus,
+        file_size: Number(file.file_size),
+        file_name: file.file_name,
       })
       this.logger.warn(`file ${filePath} is not ok, reason: ${status}`)
       return
@@ -134,6 +138,8 @@ export class FileScanService implements OnModuleInit {
         file_id: file.id,
         file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
         file_check_status: ActivityFileCheckStatus.HARMFUL,
+        file_size: Number(file.file_size),
+        file_name: file.file_name,
       })
       this.logger.warn(`file ${filePath} is not ok, reason: ${result}`)
       return
@@ -161,6 +167,8 @@ export class FileScanService implements OnModuleInit {
       file_id: file.id,
       file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
       file_check_status: ActivityFileCheckStatus.OK,
+      file_size: Number(file.file_size),
+      file_name: file.file_name,
     })
   }
 

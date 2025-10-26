@@ -112,6 +112,8 @@ model EditRecord {
 
   note String? @db.VarChar(255)
 
+  activities Activity[] @relation("edit_record_activity")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 

@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 import { ivm, ivmEnum } from '../../../common/validation/i18n'
 
 export enum ActivityType {
@@ -48,6 +48,10 @@ export class CreateActivityReqDto {
   game_id?: number
 
   @IsOptional()
+  @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'edit_record_id' }) })
+  edit_record_id?: number
+
+  @IsOptional()
   @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'developer_id' }) })
   developer_id?: number
 
@@ -58,6 +62,14 @@ export class CreateActivityReqDto {
   @IsOptional()
   @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'file_id' }) })
   file_id?: number
+
+  @IsOptional()
+  @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'file_size' }) })
+  file_size?: number
+
+  @IsOptional()
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'file_name' }) })
+  file_name?: string
 
   @IsOptional()
   @IsEnum(ActivityFileStatus, {

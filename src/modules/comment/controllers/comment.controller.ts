@@ -11,7 +11,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common'
-import { CommentServices } from '../services/comment.services'
+import { CommentServices } from '../services/comment.service'
 import { CreateCommentReqDto } from '../dto/req/create-comment.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditCommentReqDto } from '../dto/req/edit-comment.req.dto'
