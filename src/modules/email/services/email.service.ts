@@ -43,6 +43,7 @@ export class EmailService {
       try {
         await firstValueFrom(
           this.httpService.post(this.emailConfig.endPoint, null, {
+            family: 4,
             params: emailData,
           }),
         )
@@ -64,6 +65,7 @@ export class EmailService {
       try {
         const res = await firstValueFrom(
           this.httpService.post(this.emailConfig.endPoint, emailData, {
+            family: 4,
             headers: {
               'X-Server-API-Key': this.emailConfig.apiKey,
             },
