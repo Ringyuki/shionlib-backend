@@ -98,7 +98,7 @@ export class GameController {
 
   @UseGuards(JwtAuthGuard)
   @Roles(ShionlibUserRoles.ADMIN)
-  @Get('all')
+  @Get('migrate/all')
   async getAllGames() {
     return await this.gameService.getAllGames()
   }
