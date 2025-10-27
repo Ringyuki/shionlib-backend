@@ -319,10 +319,10 @@ export class GameService {
       })
     ).map(game => ({
       game_id: game.id,
-      game_title: game.title_jp,
-      game_title_zh: game.title_zh,
-      game_title_en: game.title_en,
-      game_aliases: game.aliases,
+      title_jp: game.title_jp,
+      title_zh: game.title_zh,
+      title_en: game.title_en,
+      aliases: game.aliases,
     }))
   }
 }
