@@ -52,3 +52,29 @@ export class CreateGameDownloadSourceReqDto {
   @IsOptional()
   note?: string
 }
+
+export class MigrateCreateGameDownloadSourceReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'platform' }) })
+  @IsEnum(GameDownloadSourcePlatform, {
+    each: true,
+    message: ivmEnum('validation.common.IS_ENUM', GameDownloadSourcePlatform, {
+      property: 'platform',
+    }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'platform' }) })
+  platform: GameDownloadSourcePlatform[]
+
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'language' }) })
+  @IsEnum(GameDownloadSourceLanguage, {
+    each: true,
+    message: ivmEnum('validation.common.IS_ENUM', GameDownloadSourceLanguage, {
+      property: 'language',
+    }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'language' }) })
+  language: GameDownloadSourceLanguage[]
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })
+  @IsOptional()
+  note?: string
+}

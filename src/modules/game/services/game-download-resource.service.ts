@@ -1,6 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
-import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
+import {
+  CreateGameDownloadSourceReqDto,
+  MigrateCreateGameDownloadSourceReqDto,
+} from '../dto/req/create-game-download-source.req.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { S3Service } from '../../s3/services/s3.service'
@@ -19,6 +22,7 @@ import {
   ActivityFileStatus,
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
+import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -331,5 +335,53 @@ export class GameDownloadSourceService {
         currentPage: page,
       },
     }
+  }
+
+  async migrateCreate(dto: MigrateCreateGameDownloadSourceReqDto, game_id: number) {
+    const gameDownloadResource = await this.prismaService.$transaction(async tx => {
+      const game = await tx.game.findUnique({
+        where: {
+          id: game_id,
+        },
+      })
+      if (!game) {
+        throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND, 'shion-biz.GAME_NOT_FOUND')
+      }
+      return await tx.gameDownloadResource.create({
+        data: {
+          game_id,
+          platform: dto.platform,
+          language: dto.language,
+          note: dto.note,
+          creator_id: 1,
+        },
+        select: {
+          id: true,
+        },
+      })
+    })
+
+    return gameDownloadResource.id
+  }
+
+  async migrateCreateFile(
+    dto: CreateGameDownloadSourceFileReqDto,
+    game_download_resource_id: number,
+  ) {
+    return await this.prismaService.$transaction(async tx => {
+      await tx.gameDownloadResourceFile.create({
+        data: {
+          type: 1,
+          creator_id: 1,
+          file_status: 3,
+          game_download_resource_id,
+          file_name: dto.file_name,
+          file_size: dto.file_size,
+          file_hash: dto.file_hash,
+          file_content_type: dto.file_content_type,
+          s3_file_key: dto.s3_file_key,
+        },
+      })
+    })
   }
 }
