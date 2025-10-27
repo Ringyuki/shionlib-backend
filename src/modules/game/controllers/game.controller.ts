@@ -95,4 +95,11 @@ export class GameController {
   ) {
     return await this.gameDownloadSourceService.delete(downloadSourceId, req)
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(ShionlibUserRoles.ADMIN)
+  @Get('all')
+  async getAllGames() {
+    return await this.gameService.getAllGames()
+  }
 }

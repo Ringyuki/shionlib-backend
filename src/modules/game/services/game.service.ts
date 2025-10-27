@@ -305,4 +305,24 @@ export class GameService {
       })
     }
   }
+
+  async getAllGames() {
+    return (
+      await this.prisma.game.findMany({
+        select: {
+          id: true,
+          title_jp: true,
+          title_zh: true,
+          title_en: true,
+          aliases: true,
+        },
+      })
+    ).map(game => ({
+      game_id: game.id,
+      game_title: game.title_jp,
+      game_title_zh: game.title_zh,
+      game_title_en: game.title_en,
+      game_aliases: game.aliases,
+    }))
+  }
 }
