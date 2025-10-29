@@ -51,7 +51,10 @@ export class MeilisearchEngine implements SearchEngine {
     await index.deleteDocument(id)
   }
 
-  async searchGames(query: SearchQuery): Promise<PaginatedResult<GameItemResDto>> {
+  async searchGames(
+    query: SearchQuery,
+    content_limit?: UserContentLimit,
+  ): Promise<PaginatedResult<GameItemResDto>> {
     const index = await this.getIndex()
     if (!index || !query.q) {
       return {
@@ -66,7 +69,7 @@ export class MeilisearchEngine implements SearchEngine {
       }
     }
 
-    const { page, pageSize, q, content_limit } = query
+    const { page, pageSize, q } = query
     const filter: string[] = []
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       filter.push('nsfw = false')

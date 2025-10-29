@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Query, Req } from '@nestjs/common'
 import { SearchService } from '../services/search.service'
 import { SearchGamesReqDto, SearchGameTagsReqDto } from '../dto/req/search.req.dto'
 import { SearchAnalyticsService } from '../services/analytics.service'
@@ -8,7 +8,7 @@ import { SEARCH_ANALYTICS_QUEUE } from '../constants/analytics'
 import { GetTrendingReqDto } from '../dto/req/get-trending.req.dto'
 import { GetSuggestionsReqDto } from '../dto/req/get-suggestions.req.dto'
 import { SUGG_PREFIX_MIN_LENGTH } from '../constants/analytics'
-
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 @Controller('search')
 export class SearchController {
   constructor(
@@ -18,10 +18,10 @@ export class SearchController {
   ) {}
 
   @Get('games')
-  async searchGames(@Query() query: SearchGamesReqDto) {
+  async searchGames(@Query() query: SearchGamesReqDto, @Req() req: RequestWithUser) {
     if (query.q && query.q.length >= SUGG_PREFIX_MIN_LENGTH)
       this.analyticsQueue.add(SEARCH_ANALYTICS_QUEUE, query.q)
-    return this.searchService.searchGames(query)
+    return this.searchService.searchGames(query, req.user.content_limit)
   }
 
   @Get('tags')
