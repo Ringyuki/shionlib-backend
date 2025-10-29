@@ -180,7 +180,7 @@ export class GameDataFetcherService {
       throw error
     }
 
-    if (v_id) {
+    if (v_id && v_id !== 'vundefined') {
       return this.fetchDataFromVNDB(
         v_id,
         finalGameData,
