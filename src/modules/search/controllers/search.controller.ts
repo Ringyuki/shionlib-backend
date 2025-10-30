@@ -9,6 +9,7 @@ import { GetTrendingReqDto } from '../dto/req/get-trending.req.dto'
 import { GetSuggestionsReqDto } from '../dto/req/get-suggestions.req.dto'
 import { SUGG_PREFIX_MIN_LENGTH } from '../constants/analytics'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+
 @Controller('search')
 export class SearchController {
   constructor(
@@ -21,7 +22,7 @@ export class SearchController {
   async searchGames(@Query() query: SearchGamesReqDto, @Req() req: RequestWithUser) {
     if (query.q && query.q.length >= SUGG_PREFIX_MIN_LENGTH)
       this.analyticsQueue.add(SEARCH_ANALYTICS_QUEUE, query.q)
-    return this.searchService.searchGames(query, req.user.content_limit)
+    return this.searchService.searchGames(query, req.user?.content_limit)
   }
 
   @Get('tags')
