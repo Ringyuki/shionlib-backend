@@ -14,6 +14,7 @@ import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { verifyPassword } from '../utils/verify-password.util'
 import { LoginSessionService } from '../../auth/services/login-session.service'
 import { VerificationCodeService } from '../../auth/services/vrification-code.service'
+import { UserContentLimit } from '../interfaces/user.interface'
 
 @Injectable()
 export class UserService {
@@ -67,6 +68,7 @@ export class UserService {
         email,
         password: passwordHash,
         lang,
+        content_limit: UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
         upload_quota: {
           create: {
             size: 0n,
