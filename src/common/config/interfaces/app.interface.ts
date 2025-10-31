@@ -45,6 +45,13 @@ export interface AppConfig {
     chunk_size: number
     upload_session_expires_in: number
     upload_temp_file_suffix: string
+    upload_quota: {
+      base_size_bytes: number
+      cap_size_bytes: number
+      dynamic_step_bytes: number
+      dynamic_threshold_bytes: number
+      grant_after_days: number
+    }
   }
   file_scan: {
     clamscan_binary_path: string

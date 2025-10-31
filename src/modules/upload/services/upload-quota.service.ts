@@ -6,10 +6,16 @@ import {
 } from '../dto/req/adjust-quota.req.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { UserUploadQuotaSizeRecordAction } from '../dto/req/adjust-quota.req.dto'
+import { UserUploadQuotaUsedAmountRecordAction } from '../dto/req/adjust-quota.req.dto'
+import { ShionConfigService } from '../../../common/config/services/config.service'
 
 @Injectable()
 export class UploadQuotaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ShionConfigService,
+  ) {}
 
   async getUploadQuota(user_id: number) {
     const quota = await this.prisma.userUploadQuota.findUnique({
@@ -110,6 +116,12 @@ export class UploadQuotaService {
           },
         },
       })
+      if (dto.action_reason === 'INITIAL_GRANT') {
+        await tx.userUploadQuota.update({
+          where: { id: quota.id },
+          data: { is_first_grant: true },
+        })
+      }
     })
   }
 
@@ -161,5 +173,101 @@ export class UploadQuotaService {
       )
     }
     return record.used + BigInt(amount) > record.size
+  }
+
+  async initialGrant(user_id: number) {
+    const quota = await this.prisma.userUploadQuota.findUnique({
+      where: { user_id },
+      select: { is_first_grant: true },
+    })
+    if (!quota) {
+      throw new ShionBizException(
+        ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND,
+        'shion-biz.USER_UPLOAD_QUOTA_NOT_FOUND',
+      )
+    }
+    if (quota.is_first_grant) return
+    const target = this.configService.get('file_upload.upload_quota.base_size_bytes')
+    await this.adjustUploadQuotaSizeAmount(user_id, {
+      action: UserUploadQuotaSizeRecordAction.ADD,
+      amount: target,
+      action_reason: 'INITIAL_GRANT',
+    })
+  }
+
+  async resetUsed(user_id: number) {
+    await this.prisma.$transaction(async tx => {
+      const quota = await tx.userUploadQuota.findUnique({
+        where: { user_id },
+      })
+      if (!quota) {
+        throw new ShionBizException(
+          ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND,
+          'shion-biz.USER_UPLOAD_QUOTA_NOT_FOUND',
+        )
+      }
+      const used = quota.used
+      if (used === 0n) return
+      await tx.userUploadQuota.update({
+        where: { id: quota.id },
+        data: {
+          used: 0n,
+        },
+      })
+      await tx.userUploadQuotaRecord.create({
+        data: {
+          field: 'USED',
+          amount: used,
+          action: UserUploadQuotaUsedAmountRecordAction.ADD,
+          action_reason: 'RESET_USED',
+          user_upload_quota_id: quota.id,
+        },
+      })
+    })
+  }
+
+  async dynamicTopup(user_id: number) {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const quota = await this.prisma.userUploadQuota.findUnique({
+      where: { user_id },
+      select: {
+        id: true,
+        size: true,
+        used: true,
+        is_first_grant: true,
+      },
+    })
+    if (!quota) {
+      throw new ShionBizException(
+        ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND,
+        'shion-biz.USER_UPLOAD_QUOTA_NOT_FOUND',
+      )
+    }
+    if (!quota.is_first_grant) return
+
+    const remaining = quota.size - quota.used
+
+    if (
+      quota.size < BigInt(this.configService.get('file_upload.upload_quota.cap_size_bytes')) &&
+      remaining <=
+        BigInt(this.configService.get('file_upload.upload_quota.dynamic_threshold_bytes'))
+    ) {
+      const hasApprovedThisMonth = await this.prisma.gameDownloadResourceFile.count({
+        where: {
+          creator_id: user_id,
+          file_check_status: 1, // ok
+          created: { gte: startOfMonth },
+        },
+      })
+      if (hasApprovedThisMonth > 0) {
+        const step = this.configService.get('file_upload.upload_quota.dynamic_step_bytes')
+        await this.adjustUploadQuotaSizeAmount(user_id, {
+          action: UserUploadQuotaSizeRecordAction.ADD,
+          amount: Number(step),
+          action_reason: 'DYNAMIC_TOPUP',
+        })
+      }
+    }
   }
 }

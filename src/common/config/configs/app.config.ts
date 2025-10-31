@@ -52,6 +52,14 @@ export default () => ({
     chunk_size: process.env.FILE_UPLOAD_CHUNK_SIZE || 1024 * 1024 * 50, // 50MB
     upload_session_expires_in: process.env.FILE_UPLOAD_SESSION_EXPIRES_IN || 1000 * 60 * 60 * 24, // 1 day
     upload_temp_file_suffix: process.env.FILE_UPLOAD_TEMP_FILE_SUFFIX || '.sltf', // shionlib temp file
+    upload_quota: {
+      base_size_bytes: process.env.UPLOAD_QUOTA_BASE_SIZE_BYTES || 5 * 1024 * 1024 * 1024, // 5GB
+      cap_size_bytes: process.env.UPLOAD_QUOTA_CAP_SIZE_BYTES || 20 * 1024 * 1024 * 1024, // 20GB
+      dynamic_step_bytes: process.env.UPLOAD_QUOTA_DYNAMIC_STEP_BYTES || 2 * 1024 * 1024 * 1024, // 2GB
+      dynamic_threshold_bytes:
+        process.env.UPLOAD_QUOTA_DYNAMIC_THRESHOLD_BYTES || 1 * 1024 * 1024 * 1024, // 1GB
+      grant_after_days: process.env.UPLOAD_QUOTA_GRANT_AFTER_DAYS || 7,
+    },
   },
 
   file_scan: {

@@ -63,6 +63,7 @@ model UserUploadQuota {
 
   user_id Int  @unique
   user    User @relation("user_upload_quota", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_first_grant Boolean @default(false)
 
   created DateTime @default(now())
   updated DateTime @updatedAt

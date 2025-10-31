@@ -9,6 +9,11 @@ export interface UserInterface {
   content_limit: UserContentLimit
 }
 
+export enum UserStatus {
+  ACTIVE = 1,
+  BANNED = 2,
+}
+
 export enum UserLang {
   EN = 'en',
   ZH = 'zh',
