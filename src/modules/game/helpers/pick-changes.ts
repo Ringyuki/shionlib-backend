@@ -1,5 +1,4 @@
 import diff from 'microdiff'
-import { EditGameReqDto } from '../dto/req/edit-game.req.dto'
 
 const normalizeDate = (value: unknown): number | unknown => {
   if (value instanceof Date) return value.getTime()
@@ -28,7 +27,7 @@ const deepNormalize = <T = unknown>(value: T): T => {
   return v
 }
 
-export const pickChanges = (dto: EditGameReqDto, original: EditGameReqDto) => {
+export const pickChanges = (dto: any, original: any) => {
   const candidateKeys = Object.keys(dto).filter(
     key =>
       (dto as Record<string, unknown>)[key] !== undefined &&

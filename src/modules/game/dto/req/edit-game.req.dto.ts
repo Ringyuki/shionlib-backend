@@ -214,8 +214,8 @@ export class GameCoverDto {
     { allowNaN: false, allowInfinity: false },
     { message: ivm('validation.common.IS_NUMBER', { property: 'sexual' }) },
   )
-  @Max(2, { message: ivm('validation.common.MAX', { property: 'sexual' }) })
-  @Min(0, { message: ivm('validation.common.MIN', { property: 'sexual' }) })
+  @Max(2, { message: ivm('validation.common.MAX', { property: 'sexual', max: 2 }) })
+  @Min(0, { message: ivm('validation.common.MIN', { property: 'sexual', min: 0 }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'sexual' }) })
   sexual: number
 
@@ -223,8 +223,8 @@ export class GameCoverDto {
     { allowNaN: false, allowInfinity: false },
     { message: ivm('validation.common.IS_NUMBER', { property: 'violence' }) },
   )
-  @Max(2, { message: ivm('validation.common.MAX', { property: 'violence' }) })
-  @Min(0, { message: ivm('validation.common.MIN', { property: 'violence' }) })
+  @Max(2, { message: ivm('validation.common.MAX', { property: 'violence', max: 2 }) })
+  @Min(0, { message: ivm('validation.common.MIN', { property: 'violence', min: 0 }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'violence' }) })
   violence: number
 }

@@ -37,7 +37,7 @@ export class GameEditService {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
 
-    const { before, after, field_changes } = pickChanges(dto, game as unknown as EditGameReqDto)
+    const { before, after, field_changes } = pickChanges(dto, game)
     if (field_changes.length === 0) return
 
     const bits = gameRequiredBits(after)
@@ -198,22 +198,39 @@ export class GameEditService {
   }
 
   async editCovers(id: number, covers: EditGameCoverDto[], req: RequestWithUser) {
-    const coversToEdit = await this.prisma.gameCover.findMany({
-      where: { game_id: id, id: { in: covers.map(c => c.id) } },
-      select: { id: true, url: true, type: true, dims: true, sexual: true, violence: true },
+    for (const cover of covers) {
+      await this.editCover(id, cover, req)
+    }
+
+    const game = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
     })
-    if (coversToEdit.length === 0) return
+
+    await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+  }
+
+  async editCover(id: number, cover: EditGameCoverDto, req: RequestWithUser) {
+    const coverToEdit = await this.prisma.gameCover.findUnique({
+      where: { game_id: id, id: cover.id },
+      select: {
+        id: true,
+        url: true,
+        type: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        language: true,
+      },
+    })
+    if (!coverToEdit) return
+    const { before, after, field_changes } = pickChanges(cover, coverToEdit)
+    if (field_changes.length === 0) return
 
     await this.prisma.$transaction(async tx => {
-      await tx.gameCover.updateMany({
-        where: { game_id: id, id: { in: covers.map(c => c.id) } },
-        data: covers.map(c => ({
-          url: c.url,
-          type: c.type,
-          dims: c.dims,
-          sexual: c.sexual,
-          violence: c.violence,
-        })),
+      await tx.gameCover.update({
+        where: { id: cover.id },
+        data: cover,
       })
       const editRecord = await tx.editRecord.create({
         data: {
@@ -224,18 +241,7 @@ export class GameEditService {
           actor_role: req.user.role,
           relation_type: EditRelationType.COVER,
           field_changes: ['covers'],
-          changes: {
-            relation: 'covers',
-            before: coversToEdit,
-            after: covers.map(c => ({
-              id: c.id,
-              url: c.url,
-              type: c.type,
-              dims: c.dims,
-              sexual: c.sexual,
-              violence: c.violence,
-            })),
-          } as any,
+          changes: { relation: 'covers', before, after } as any,
         },
         select: { id: true },
       })
@@ -250,12 +256,11 @@ export class GameEditService {
       )
     })
 
-    const game = await this.prisma.game.findUnique({
+    const updated = await this.prisma.game.findUnique({
       where: { id },
       select: rawDataQuery,
     })
-
-    await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 
   async addCovers(id: number, covers: GameCoverDto[], req: RequestWithUser) {

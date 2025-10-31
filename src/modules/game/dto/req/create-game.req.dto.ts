@@ -280,7 +280,7 @@ export class GameDeveloper {
 }
 
 export enum GameCoverLanguage {
-  JA = 'ja',
+  JA = 'jp',
   ZH = 'zh',
   EN = 'en',
 }

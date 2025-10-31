@@ -19,6 +19,7 @@ import {
   EditGameCoverReqDto,
   AddGameCoverReqDto,
   RemoveGameCoverReqDto,
+  EditGameCoverDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -107,6 +108,23 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.editCovers(id, dto.covers, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_COVERS],
+      undefined,
+      'covers',
+    ),
+  )
+  @Patch(':id/edit/cover')
+  async editCover(
+    @Body() dto: EditGameCoverDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editCover(id, dto, req)
   }
 
   @UseGuards(
