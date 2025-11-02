@@ -68,7 +68,7 @@ export class B2Service {
       const authToken = await this.getDownloadAuthorizationToken(key)
       const cdn = this.configService.get('file_download.download_cdn_host')
       const cdnHost = cdn.endsWith('/') ? cdn : `${cdn}/`
-      return `${cdnHost}${key}?Authorization=${authToken}`
+      return `${cdnHost}${encodeURIComponent(key)}?Authorization=${authToken}`
     } catch (error) {
       console.error(`Error getting download URL for key: ${key}`, error)
       throw error
