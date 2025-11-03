@@ -19,7 +19,7 @@ import { VerificationCodeController } from './controllers/verification-code.cont
       inject: [ShionConfigService],
       useFactory: (configService: ShionConfigService) => ({
         secret: configService.get('token.secret'),
-        signOptions: { expiresIn: configService.get('token.expiresIn') },
+        signOptions: { expiresIn: Number(configService.get('token.expiresIn')) * 1000 },
       }),
     }),
     PassportModule.register({

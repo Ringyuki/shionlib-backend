@@ -12,7 +12,7 @@ export class TokenService {
     private readonly configService: ShionConfigService,
   ) {}
   async signToken(paylod: TokenPayloadInterface) {
-    const expiresIn = this.configService.get('token.expiresIn')
+    const expiresIn = Number(this.configService.get('token.expiresIn')) * 1000
     const secret = this.configService.get('token.secret')
     const token = await this.jwtService.signAsync(paylod, { expiresIn, secret })
 
