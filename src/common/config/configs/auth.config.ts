@@ -1,7 +1,7 @@
 export default () => ({
   token: {
     secret: process.env.TOKEN_SECRET,
-    expiresIn: process.env.TOKEN_EXPIRES_IN,
+    expiresIn: process.env.TOKEN_EXPIRES_IN_SEC,
   },
   refresh_token: {
     shortWindowSec: process.env.REFRESH_TOKEN_SHORT_WINDOW_SEC,
