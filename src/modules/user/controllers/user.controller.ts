@@ -15,7 +15,10 @@ import { CreateUserDto } from '../dto/req/CreateUser.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { LoginDto } from '../dto/req/Login.req.dto'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
+import { Roles } from '../../auth/decorators/roles.decorator'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { BanUserReqDto } from '../dto/req/ban-user.req.dto'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 @Controller('user')
 export class UserController {
@@ -57,5 +60,19 @@ export class UserController {
   @Post('check-name')
   async checkName(@Body() body: { name: string }) {
     return await this.userService.checkName(body.name)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(ShionlibUserRoles.ADMIN)
+  @Post(':id/ban')
+  async ban(@Body() dto: BanUserReqDto, @Param('id', ParseIntPipe) id: number) {
+    return await this.userService.ban(id, dto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(ShionlibUserRoles.ADMIN)
+  @Post(':id/unban')
+  async unban(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.unban(id)
   }
 }

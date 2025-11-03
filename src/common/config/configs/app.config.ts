@@ -59,6 +59,7 @@ export default () => ({
       dynamic_threshold_bytes:
         process.env.UPLOAD_QUOTA_DYNAMIC_THRESHOLD_BYTES || 1 * 1024 * 1024 * 1024, // 1GB
       grant_after_days: process.env.UPLOAD_QUOTA_GRANT_AFTER_DAYS || 7,
+      longest_inactive_days: process.env.UPLOAD_QUOTA_LONGEST_INACTIVE_DAYS || 30,
     },
   },
 

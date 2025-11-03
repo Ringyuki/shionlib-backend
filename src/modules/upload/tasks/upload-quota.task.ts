@@ -42,7 +42,7 @@ export class UploadQuotaTask {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_WEEK)
   async handleDynamicTopup() {
     try {
       const users = await this.prisma.user.findMany({
@@ -63,6 +63,28 @@ export class UploadQuotaTask {
         select: { id: true },
       })
       for (const u of users) await this.uploadQuotaService.resetUsed(u.id)
+    } catch (error) {
+      this.logger.error('Error running upload quota cron', error)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleLongestInactive() {
+    try {
+      const longestInactiveDays = this.configService.get(
+        'file_upload.upload_quota.longest_inactive_days',
+      )
+      const cutoff = new Date()
+      cutoff.setDate(cutoff.getDate() - longestInactiveDays)
+      const users = await this.prisma.user.findMany({
+        where: {
+          status: UserStatus.ACTIVE,
+          role: ShionlibUserRoles.USER,
+          NOT: { sessions: { some: { updated: { gte: cutoff } } } },
+        },
+        select: { id: true },
+      })
+      for (const u of users) await this.uploadQuotaService.resetQuota(u.id)
     } catch (error) {
       this.logger.error('Error running upload quota cron', error)
     }

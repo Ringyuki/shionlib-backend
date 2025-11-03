@@ -26,6 +26,9 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.USER_INVALID_PASSWORD]: HttpStatus.UNAUTHORIZED,
   [ShionBizCode.USER_INVALID_LANG]: HttpStatus.UNPROCESSABLE_ENTITY,
   [ShionBizCode.USER_INVALID_CONTENT_LIMIT]: HttpStatus.UNPROCESSABLE_ENTITY,
+  [ShionBizCode.USER_ALREADY_BANNED]: HttpStatus.CONFLICT,
+  [ShionBizCode.USER_ALREADY_UNBANNED]: HttpStatus.CONFLICT,
+  [ShionBizCode.USER_INVALID_BAN_DURATION]: HttpStatus.UNPROCESSABLE_ENTITY,
 
   // 40
   [ShionBizCode.GAME_NOT_FOUND]: HttpStatus.NOT_FOUND,

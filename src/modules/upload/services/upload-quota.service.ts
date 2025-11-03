@@ -270,4 +270,21 @@ export class UploadQuotaService {
       }
     }
   }
+
+  async resetQuota(user_id: number) {
+    const quota = await this.prisma.userUploadQuota.findUnique({
+      where: { user_id },
+    })
+    if (!quota) {
+      throw new ShionBizException(
+        ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND,
+        'shion-biz.USER_UPLOAD_QUOTA_NOT_FOUND',
+      )
+    }
+    await this.adjustUploadQuotaSizeAmount(user_id, {
+      action: UserUploadQuotaSizeRecordAction.SUB,
+      amount: Number(quota.size),
+      action_reason: 'RESET_QUOTA',
+    })
+  }
 }

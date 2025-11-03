@@ -51,6 +51,7 @@ export interface AppConfig {
       dynamic_step_bytes: number
       dynamic_threshold_bytes: number
       grant_after_days: number
+      longest_inactive_days: number
     }
   }
   file_scan: {

@@ -15,6 +15,10 @@ import { verifyPassword } from '../utils/verify-password.util'
 import { LoginSessionService } from '../../auth/services/login-session.service'
 import { VerificationCodeService } from '../../auth/services/vrification-code.service'
 import { UserContentLimit } from '../interfaces/user.interface'
+import { UserLoginSessionStatus } from '../../../shared/enums/auth/user-login-session-status.enum'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
+import { BanUserReqDto } from '../dto/req/ban-user.req.dto'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class UserService {
@@ -241,5 +245,79 @@ export class UserService {
       favorite_count: favorite,
       edit_count: edit,
     }
+  }
+
+  async ban(id: number, dto: BanUserReqDto, _tx?: Prisma.TransactionClient) {
+    const execute = async (tx: Prisma.TransactionClient) => {
+      const user = await tx.user.findUnique({
+        where: { id, role: { not: ShionlibUserRoles.SUPER_ADMIN } },
+        select: { id: true, status: true },
+      })
+      if (!user) {
+        throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
+      }
+      if (user.status === UserStatus.BANNED) {
+        throw new ShionBizException(
+          ShionBizCode.USER_ALREADY_BANNED,
+          'shion-biz.USER_ALREADY_BANNED',
+        )
+      }
+
+      const { banned_by, banned_reason, banned_duration_days, is_permanent } = dto
+      if (!is_permanent && (banned_duration_days == null || banned_duration_days <= 0))
+        throw new ShionBizException(
+          ShionBizCode.USER_INVALID_BAN_DURATION,
+          'shion-biz.USER_INVALID_BAN_DURATION',
+        )
+
+      await tx.userBannedRecord.create({
+        data: { user_id: id, banned_by, banned_reason, banned_duration_days, is_permanent },
+      })
+      await tx.user.update({ where: { id }, data: { status: UserStatus.BANNED } })
+      await tx.userLoginSession.updateMany({
+        where: { user_id: id },
+        data: {
+          status: UserLoginSessionStatus.BLOCKED,
+          blocked_at: new Date(),
+          blocked_reason: 'user_banned',
+        },
+      })
+    }
+
+    if (_tx) return execute(_tx)
+    return this.prisma.$transaction(execute)
+  }
+
+  async unban(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id, role: { not: ShionlibUserRoles.SUPER_ADMIN } },
+      select: { id: true, status: true },
+    })
+    if (!user) {
+      throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
+    }
+    if (user.status === UserStatus.ACTIVE) {
+      throw new ShionBizException(
+        ShionBizCode.USER_ALREADY_UNBANNED,
+        'shion-biz.USER_ALREADY_UNBANNED',
+      )
+    }
+    await this.prisma.$transaction(async tx => {
+      const record = await tx.userBannedRecord.findFirst({
+        where: { user_id: id, unbanned_at: null },
+        orderBy: { banned_at: 'desc' },
+        select: { id: true },
+      })
+      if (record) {
+        await tx.userBannedRecord.update({
+          where: { id: record.id },
+          data: { unbanned_at: new Date() },
+        })
+      }
+      await tx.user.update({
+        where: { id },
+        data: { status: UserStatus.ACTIVE },
+      })
+    })
   }
 }

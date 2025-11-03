@@ -15,6 +15,7 @@ import {
   ActivityFileStatus,
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
+import { UserService } from '../../user/services/user.service'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -26,6 +27,7 @@ export class FileScanService implements OnModuleInit {
     @InjectQueue(LARGE_FILE_UPLOAD_QUEUE) private readonly uploadQueue: Queue,
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly activityService: ActivityService,
+    private readonly userService: UserService,
   ) {}
 
   async onModuleInit() {
@@ -127,19 +129,48 @@ export class FileScanService implements OnModuleInit {
     }
     const result = await this.clam.scanFile(filePath)
     if (result.isInfected) {
-      await this.prismaService.gameDownloadResourceFile.update({
-        where: { file_path: filePath },
-        data: { file_check_status: ArchiveStatus.HARMFUL },
-      })
-      await this.activityService.create({
-        type: ActivityType.FILE_CHECK_HARMFUL,
-        user_id: creator_id,
-        game_id: file.game_download_resource.game_id,
-        file_id: file.id,
-        file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
-        file_check_status: ActivityFileCheckStatus.HARMFUL,
-        file_size: Number(file.file_size),
-        file_name: file.file_name,
+      await this.prismaService.$transaction(async tx => {
+        await tx.gameDownloadResourceFile.update({
+          where: { file_path: filePath },
+          data: { file_check_status: ArchiveStatus.HARMFUL },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.FILE_CHECK_HARMFUL,
+            user_id: creator_id,
+            game_id: file.game_download_resource.game_id,
+            file_id: file.id,
+            file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+            file_check_status: ActivityFileCheckStatus.HARMFUL,
+            file_size: Number(file.file_size),
+            file_name: file.file_name,
+          },
+          tx,
+        )
+        const user = await tx.user.update({
+          where: { id: creator_id },
+          data: { upload_injected_file_times: { increment: 1 } },
+          select: { upload_injected_file_times: true },
+        })
+        if (user.upload_injected_file_times === 3) {
+          await this.userService.ban(
+            creator_id,
+            {
+              banned_reason: 'Uploaded harmful file (3 times)',
+              banned_duration_days: 30,
+            },
+            tx,
+          )
+        } else if (user.upload_injected_file_times === 5) {
+          await this.userService.ban(
+            creator_id,
+            {
+              banned_reason: 'Uploaded harmful file (5 times)',
+              is_permanent: true,
+            },
+            tx,
+          )
+        }
       })
       this.logger.warn(`file ${filePath} is not ok, reason: ${result}`)
       return

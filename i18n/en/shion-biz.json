@@ -18,6 +18,9 @@
   "USER_INVALID_PASSWORD": "invalid password",
   "USER_INVALID_LANG": "invalid language",
   "USER_INVALID_CONTENT_LIMIT": "invalid content limit status",
+  "USER_ALREADY_BANNED": "user already banned",
+  "USER_ALREADY_UNBANNED": "user already unbanned",
+  "USER_INVALID_BAN_DURATION": "invalid ban duration",
 
   "GAME_NOT_FOUND": "game not found",
   "GAME_INVALID_VNDB_ID": "invalid vndb id",

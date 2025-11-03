@@ -43,6 +43,9 @@ export type I18nTranslations = {
         "USER_INVALID_PASSWORD": string;
         "USER_INVALID_LANG": string;
         "USER_INVALID_CONTENT_LIMIT": string;
+        "USER_ALREADY_BANNED": string;
+        "USER_ALREADY_UNBANNED": string;
+        "USER_INVALID_BAN_DURATION": string;
         "GAME_NOT_FOUND": string;
         "GAME_INVALID_VNDB_ID": string;
         "GAME_BANGUMI_REQUEST_FAILED": string;
