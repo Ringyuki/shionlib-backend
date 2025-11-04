@@ -22,6 +22,7 @@ import { GameDownloadSourceService } from '../services/game-download-resource.se
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { SkipThrottle } from '@nestjs/throttler'
 
 @Controller('game')
 export class GameController {
@@ -50,6 +51,7 @@ export class GameController {
     return await this.gameDownloadSourceService.getByGameId(id, req)
   }
 
+  @SkipThrottle({ default: true })
   @Get('download/:id/link')
   async getDownloadSourceLink(@Param('id', ParseIntPipe) id: number) {
     return await this.gameDownloadSourceService.getDownloadLink(id)

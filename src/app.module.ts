@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { I18nModule, AcceptLanguageResolver, QueryResolver, CookieResolver } from 'nestjs-i18n'
 import { PrismaModule } from './prisma.module'
 import { CacheModule } from '@nestjs/cache-manager'
+import { ThrottleModule } from './modules/throttle/throttle.module'
 import { redisStore } from 'cache-manager-redis-yet'
 import { KeyvAdapter } from 'cache-manager'
 import { AuthModule } from './modules/auth/auth.module'
@@ -39,6 +40,7 @@ import { ActivityModule } from './modules/activity/activity.module'
     BullModule,
     S3Module,
     B2Module,
+    ThrottleModule,
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ShionConfigService],

@@ -4,6 +4,17 @@ export default () => ({
 
   allowRegister: process.env.ALLOW_REGISTER === 'true',
 
+  throttle: {
+    ttl: process.env.THROTTLE_TTL_MS || 60000,
+    limit: process.env.THROTTLE_LIMIT || 100,
+    blockDuration: process.env.THROTTLE_BLOCK_DURATION_MS || 10000,
+    download: {
+      ttl: process.env.THROTTLE_DOWNLOAD_TTL_MS || 60000,
+      limit: process.env.THROTTLE_DOWNLOAD_LIMIT || 60,
+      blockDuration: process.env.THROTTLE_DOWNLOAD_BLOCK_DURATION_MS || 360000 * 12,
+    },
+  },
+
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
     methods: process.env.CORS_METHODS || ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],

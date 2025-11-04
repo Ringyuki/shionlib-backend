@@ -2,6 +2,16 @@ export interface AppConfig {
   port: number
   environment: string
   allowRegister: boolean
+  throttle: {
+    ttl: number
+    limit: number
+    blockDuration: number
+    download: {
+      limit: number
+      ttl: number
+      blockDuration: number
+    }
+  }
   cors: {
     origin: string
     methods: string[]
