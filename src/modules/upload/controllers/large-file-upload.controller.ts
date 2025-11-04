@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { LargeFileUploadService } from '../services/large-file-upload.service'
 import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
+import { Throttle } from '@nestjs/throttler'
 
 @UseGuards(JwtAuthGuard)
 @Controller('uploads/large')
@@ -31,6 +32,7 @@ export class LargeFileUploadController {
     return await this.largeFileUploadService.init(body, req)
   }
 
+  @Throttle({ default: { limit: 10000, ttl: 60000 } })
   @Put(':id/chunks/:index')
   async putChunk(
     @Req() req: RequestWithUser,
