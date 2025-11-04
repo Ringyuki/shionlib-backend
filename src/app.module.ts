@@ -31,6 +31,7 @@ import { RenderModule } from './modules/render/render.module'
 import { DeveloperModule } from './modules/developer/developer.module'
 import { SearchModule } from './modules/search/search.module'
 import { ActivityModule } from './modules/activity/activity.module'
+import { SiteModule } from './modules/site/site.module'
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { ActivityModule } from './modules/activity/activity.module'
     DeveloperModule,
     SearchModule,
     ActivityModule,
+    SiteModule,
   ],
   controllers: [],
   providers: [

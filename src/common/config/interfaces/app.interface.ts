@@ -1,6 +1,7 @@
 export interface AppConfig {
   port: number
   environment: string
+  siteUrl: string
   allowRegister: boolean
   throttle: {
     ttl: number

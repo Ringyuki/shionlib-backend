@@ -1,7 +1,7 @@
 export default () => ({
   port: process.env.PORT || 5000,
   environment: process.env.ENVIRONMENT || 'production',
-
+  siteUrl: process.env.SITE_URL || 'https://shionlib.com',
   allowRegister: process.env.ALLOW_REGISTER === 'true',
 
   throttle: {

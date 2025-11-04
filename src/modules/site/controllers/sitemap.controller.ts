@@ -1,0 +1,60 @@
+import { Controller, Get, Header, Res, Param, ParseIntPipe } from '@nestjs/common'
+import { SitemapService } from '../services/sitemap.service'
+import { CacheService } from '../../cache/services/cache.service'
+import { Response } from 'express'
+import { SitemapType } from '../enums/sitemap/sitemap-type.enum'
+
+@Controller()
+export class SitemapController {
+  constructor(
+    private readonly sitemapService: SitemapService,
+    private readonly cacheService: CacheService,
+  ) {}
+
+  @Get('sitemap.xml')
+  @Header('Content-Type', 'application/xml; charset=utf-8')
+  @Header('Cache-Control', 'public, max-age=3600')
+  async getSitemapIndex(@Res() res: Response): Promise<void> {
+    const cacheKey = 'sitemap:index'
+    const cached = await this.cacheService.get<string>(cacheKey)
+    if (cached) {
+      res.type('application/xml; charset=utf-8').send(cached)
+      return
+    }
+
+    const xml = await this.sitemapService.generateIndex()
+    await this.cacheService.set(cacheKey, xml, 60 * 60 * 1000)
+    res.type('application/xml; charset=utf-8').send(xml)
+    return
+  }
+
+  @Get('sitemap-:type-:page.xml')
+  @Header('Content-Type', 'application/xml; charset=utf-8')
+  @Header('Cache-Control', 'public, max-age=3600')
+  async getSectionSitemap(
+    @Param('type') type: SitemapType,
+    @Param('page', ParseIntPipe) page: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    if (![SitemapType.GAME, SitemapType.DEVELOPER].includes(type)) {
+      res
+        .type('application/xml; charset=utf-8')
+        .send(
+          '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>',
+        )
+      return
+    }
+
+    const cacheKey = `sitemap:${type}:${page}`
+    const cached = await this.cacheService.get<string>(cacheKey)
+    if (cached) {
+      res.type('application/xml; charset=utf-8').send(cached)
+      return
+    }
+
+    const xml = await this.sitemapService.generateSectionSitemap(type, { page, pageSize: 50000 })
+    await this.cacheService.set(cacheKey, xml, 60 * 60 * 1000)
+    res.type('application/xml; charset=utf-8').send(xml)
+    return
+  }
+}
