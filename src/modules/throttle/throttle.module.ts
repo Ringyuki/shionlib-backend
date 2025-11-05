@@ -17,7 +17,7 @@ import { APP_GUARD } from '@nestjs/core'
             blockDuration: configService.get('throttle.blockDuration'),
             getTracker: req =>
               req.headers['cf-connecting-ip'] ||
-              req.headers['true-client-ip'] ||
+              req.headers['x-real-ip'] ||
               req.headers['x-forwarded-for']?.split(',')[0].trim() ||
               req.ip,
           },
