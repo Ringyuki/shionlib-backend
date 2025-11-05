@@ -15,6 +15,11 @@ import { APP_GUARD } from '@nestjs/core'
             ttl: configService.get('throttle.ttl'),
             limit: configService.get('throttle.limit'),
             blockDuration: configService.get('throttle.blockDuration'),
+            getTracker: req =>
+              req.headers['cf-connecting-ip'] ||
+              req.headers['true-client-ip'] ||
+              req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+              req.ip,
           },
           {
             name: 'download',

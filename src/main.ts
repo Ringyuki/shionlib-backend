@@ -20,6 +20,7 @@ async function bootstrap() {
   app.use(requestId())
   app.use(cookieParser())
   app.set('query parser', 'extended')
+  app.set('trust proxy', true)
   const configService = app.get(ShionConfigService)
   app.use(
     '/uploads/large',
