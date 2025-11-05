@@ -93,7 +93,7 @@ export class UserService {
 
   async login(user: LoginDto, req: RequestWithUser): Promise<LoginResDto> {
     const { identifier, password } = user
-    const ip = req.ip
+    const ip = (req.headers['x-real-ip'] as string) || (req.headers['cf-connecting-ip'] as string)
     const user_agent = req.headers['user-agent']
     const device = { ip, user_agent }
 
@@ -162,7 +162,7 @@ export class UserService {
         HttpStatus.UNAUTHORIZED,
       )
     }
-    const ip = req.ip
+    const ip = (req.headers['x-real-ip'] as string) || (req.headers['cf-connecting-ip'] as string)
     const user_agent = req.headers['user-agent']
     const device = { ip, user_agent }
 

@@ -15,18 +15,10 @@ import { APP_GUARD } from '@nestjs/core'
             ttl: configService.get('throttle.ttl'),
             limit: configService.get('throttle.limit'),
             blockDuration: configService.get('throttle.blockDuration'),
-            getTracker: req => {
-              console.log('x-real-ip', req.headers['x-real-ip'])
-              console.log('cf-connecting-ip', req.headers['cf-connecting-ip'])
-              console.log('x-forwarded-for', req.headers['x-forwarded-for']?.split(',')[0].trim())
-              console.log('ip', req.ip)
-              return (
-                req.headers['x-real-ip'] ||
-                req.headers['cf-connecting-ip'] ||
-                req.headers['x-forwarded-for']?.split(',')[0].trim() ||
-                req.ip
-              )
-            },
+            getTracker: req =>
+              req.headers['x-real-ip'] ||
+              req.headers['cf-connecting-ip'] ||
+              req.headers['x-forwarded-for']?.split(',')[0].trim(),
           },
           {
             name: 'download',
