@@ -22,6 +22,15 @@ export class MeilisearchEngine implements SearchEngine {
     return this.configService.get('search.meilisearch.indexName')
   }
 
+  private sanitizeQuery(q: string): string {
+    if (!q) return q
+    return q
+      .replace(/(^-+)|(-+$)/g, '')
+      .replace(/(^|\s)-(?=\S)/g, '$1')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  }
+
   private async getIndex(
     createIfNotExists: boolean = false,
   ): Promise<MeiliIndex<IndexedGame> | null> {
@@ -76,7 +85,7 @@ export class MeilisearchEngine implements SearchEngine {
       filter.push('max_cover_sexual = 0')
     }
 
-    const res = await index.search(q, {
+    const res = await index.search(this.sanitizeQuery(q), {
       page,
       hitsPerPage: pageSize,
       filter: filter.length ? filter : undefined,
@@ -132,7 +141,7 @@ export class MeilisearchEngine implements SearchEngine {
     const index = await this.getIndex()
     const res = await index?.searchForFacetValues({
       facetName: 'tags',
-      facetQuery: query,
+      facetQuery: this.sanitizeQuery(query),
       hitsPerPage: limit ?? 10, // not working
     })
     const hits = res?.facetHits ?? []
