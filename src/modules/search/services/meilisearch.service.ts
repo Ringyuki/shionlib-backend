@@ -8,9 +8,13 @@ import type { IndexedGame } from '../interfaces/index.interface'
 export class MeilisearchService implements OnModuleInit {
   private client: MeiliSearch | null = null
   private readonly logger = new Logger(MeilisearchService.name)
+  private get enabled() {
+    return this.configService.get('search.engine') === 'meilisearch'
+  }
   constructor(private readonly configService: ShionConfigService) {}
 
   async onModuleInit() {
+    if (!this.enabled) return
     if (
       !this.configService.get('search.meilisearch.host') ||
       !this.configService.get('search.meilisearch.apiKey')

@@ -351,7 +351,7 @@ export class LoginSessionService {
     await this.cacheService.set(
       cacheKey,
       res,
-      Number(this.configService.get('refresh_token.rotationGraceSec')) * 1000,
+      this.configService.get('refresh_token.rotationGraceSec') * 1000,
     )
   }
 
