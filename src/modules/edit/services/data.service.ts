@@ -29,7 +29,6 @@ export class DataService {
         tags: true,
         staffs: true,
         nsfw: true,
-        views: true,
         type: true,
       },
     })
@@ -134,6 +133,7 @@ export class DataService {
             avatar: true,
           },
         },
+        note: true,
         created: true,
         updated: true,
       },

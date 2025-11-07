@@ -37,7 +37,8 @@ export class GameEditService {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
 
-    const { before, after, field_changes } = pickChanges(dto, game)
+    const { note, ...rest } = dto
+    const { before, after, field_changes } = pickChanges(rest, game)
     if (field_changes.length === 0) return
 
     const bits = gameRequiredBits(after)
@@ -47,7 +48,7 @@ export class GameEditService {
       await tx.game.update({
         where: { id },
         data: {
-          ...dto,
+          ...rest,
           extra_info: dto.extra_info ? (dto.extra_info as any) : undefined,
           staffs: dto.staffs ? (dto.staffs as any) : undefined,
         },
@@ -63,6 +64,7 @@ export class GameEditService {
           field_mask,
           changes: { before, after } as any,
           field_changes,
+          note,
         },
         select: { id: true },
       })

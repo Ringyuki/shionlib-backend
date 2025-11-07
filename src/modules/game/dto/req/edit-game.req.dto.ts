@@ -12,6 +12,7 @@ import {
   Min,
   ArrayMaxSize,
   ArrayMinSize,
+  MaxLength,
 } from 'class-validator'
 import { ExtraInfo, Staff } from './create-game.req.dto'
 import { ivm, ivmEnum } from '../../../../common/validation/i18n'
@@ -130,6 +131,11 @@ export class EditGameReqDto {
   @Max(2, { message: ivm('validation.common.MAX', { property: 'status' }) })
   @IsOptional()
   status?: number
+
+  @IsOptional()
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })
+  @MaxLength(255, { message: ivm('validation.common.MAX_LENGTH', { property: 'note', max: 255 }) })
+  note?: string
 }
 
 export class GameLinkDto {
