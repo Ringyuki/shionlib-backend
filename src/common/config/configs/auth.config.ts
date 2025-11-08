@@ -1,15 +1,16 @@
 import { AuthConfig } from '../interfaces/auth.interface'
+import { withDefault } from '../../utils/env.util'
 
 export default (): AuthConfig => ({
   token: {
-    secret: process.env.TOKEN_SECRET!,
-    expiresIn: process.env.TOKEN_EXPIRES_IN_SEC!,
+    secret: withDefault('TOKEN_SECRET', ''),
+    expiresIn: withDefault('TOKEN_EXPIRES_IN_SEC', ''),
   },
   refresh_token: {
-    shortWindowSec: process.env.REFRESH_TOKEN_SHORT_WINDOW_SEC!,
-    longWindowSec: process.env.REFRESH_TOKEN_LONG_WINDOW_SEC!,
-    pepper: process.env.REFRESH_TOKEN_PEPPER!,
-    rotationGraceSec: parseInt(process.env.REFRESH_TOKEN_ROTATION_GRACE_SEC || '100'),
-    algorithmVersion: process.env.REFRESH_TOKEN_ALOGRITHM_VERSION || 'slrt1',
+    shortWindowSec: withDefault('REFRESH_TOKEN_SHORT_WINDOW_SEC', ''),
+    longWindowSec: withDefault('REFRESH_TOKEN_LONG_WINDOW_SEC', ''),
+    pepper: withDefault('REFRESH_TOKEN_PEPPER', ''),
+    rotationGraceSec: withDefault('REFRESH_TOKEN_ROTATION_GRACE_SEC', 100),
+    algorithmVersion: withDefault('REFRESH_TOKEN_ALOGRITHM_VERSION', 'slrt1'),
   },
 })
