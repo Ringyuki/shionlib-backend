@@ -8,7 +8,7 @@ export default (): AppConfig => ({
 
   throttle: {
     ttl: parseInt(process.env.THROTTLE_TTL_MS || '60000'),
-    limit: parseInt(process.env.THROTTLE_LIMIT || '100'),
+    limit: parseInt(process.env.THROTTLE_LIMIT || '600'),
     blockDuration: parseInt(process.env.THROTTLE_BLOCK_DURATION_MS || '10000'),
     download: {
       ttl: parseInt(process.env.THROTTLE_DOWNLOAD_TTL_MS || '60000'),
