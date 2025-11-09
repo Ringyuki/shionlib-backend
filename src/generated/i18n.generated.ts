@@ -27,6 +27,7 @@ export type I18nTranslations = {
     };
     "shion-biz": {
         "COMMON_VALIDATION_FAILED": string;
+        "COMMON_NOT_IMPLEMENTED": string;
         "AUTH_UNAUTHORIZED": string;
         "AUTH_INVALID_TOKEN": string;
         "AUTH_INVALID_REFRESH_TOKEN": string;
@@ -85,6 +86,9 @@ export type I18nTranslations = {
         "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE": string;
         "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND": string;
         "EDIT_FIELD_PERMISSION_NOT_ENOUGH": string;
+        "EDIT_RECORD_NOT_FOUND": string;
+        "EDIT_RECORD_ALREADY_UNDONE": string;
+        "EDIT_RECORD_CONFLICT": string;
     };
     "validation": {
         "common": {

@@ -126,6 +126,17 @@ export class DataService {
         action: true,
         field_changes: true,
         changes: true,
+        undo: true,
+        undo_of: {
+          select: {
+            id: true,
+          },
+        },
+        undone_by: {
+          select: {
+            id: true,
+          },
+        },
         actor: {
           select: {
             id: true,

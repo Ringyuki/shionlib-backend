@@ -112,6 +112,11 @@ model EditRecord {
 
   note String? @db.VarChar(255)
 
+  undo          Boolean   @default(false)
+  undo_of_id    Int?      @unique
+  undo_of       EditRecord? @relation("edit_record_undo", fields: [undo_of_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  undone_by     EditRecord? @relation("edit_record_undo")
+
   activities Activity[] @relation("edit_record_activity")
 
   created DateTime @default(now())

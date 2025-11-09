@@ -6,6 +6,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 10
   [ShionBizCode.COMMON_VALIDATION_FAILED]: HttpStatus.UNPROCESSABLE_ENTITY,
+  [ShionBizCode.COMMON_NOT_IMPLEMENTED]: HttpStatus.NOT_IMPLEMENTED,
 
   // 20
   [ShionBizCode.AUTH_UNAUTHORIZED]: HttpStatus.UNAUTHORIZED,
@@ -92,4 +93,9 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 51
   [ShionBizCode.EDIT_FIELD_PERMISSION_NOT_ENOUGH]: HttpStatus.FORBIDDEN,
+
+  // 52
+  [ShionBizCode.EDIT_RECORD_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.EDIT_RECORD_ALREADY_UNDONE]: HttpStatus.CONFLICT,
+  [ShionBizCode.EDIT_RECORD_CONFLICT]: HttpStatus.CONFLICT,
 } as const satisfies Record<ShionBizCode, HttpStatus>
