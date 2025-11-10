@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsEnum, IsArray, IsOptional, IsNumber } from 'class-validator'
 import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 
-enum GameDownloadSourcePlatform {
+export enum GameDownloadSourcePlatform {
   WINDOWS = 'win',
   IOS = 'ios',
   ANDROID = 'and',
@@ -14,7 +14,7 @@ enum GameDownloadSourcePlatform {
   DVD = 'dvd',
 }
 
-enum GameDownloadSourceLanguage {
+export enum GameDownloadSourceLanguage {
   EN = 'en',
   ZH = 'zh',
   JP = 'jp',

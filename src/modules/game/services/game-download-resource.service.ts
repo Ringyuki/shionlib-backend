@@ -23,6 +23,7 @@ import {
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
+import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -183,6 +184,37 @@ export class GameDownloadSourceService {
         },
         tx,
       )
+    })
+  }
+
+  async edit(id: number, dto: EditGameDownloadSourceReqDto, req: RequestWithUser) {
+    const resource = await this.prismaService.gameDownloadResource.findUnique({
+      where: {
+        id,
+      },
+    })
+    if (!resource) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_FOUND,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_FOUND',
+      )
+    }
+    if (
+      resource.creator_id !== req.user?.sub &&
+      ![ShionlibUserRoles.ADMIN, ShionlibUserRoles.SUPER_ADMIN].includes(req.user?.role)
+    ) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_OWNER',
+      )
+    }
+    await this.prismaService.gameDownloadResource.update({
+      where: { id },
+      data: {
+        platform: dto.platform,
+        language: dto.language,
+        note: dto.note,
+      },
     })
   }
 

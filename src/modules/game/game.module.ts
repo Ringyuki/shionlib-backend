@@ -10,14 +10,14 @@ import { GameEditService } from './services/game-edit.service'
 import { GameEditController } from './controllers/game-edit.controller'
 import { GameHotScoreService } from './services/game-hot-score.service'
 import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
-import { GameDownloadResourceController } from './controllers/game-download-resource.controller'
+import { GameDownloadSourceController } from './controllers/game-download-source.controller'
 
 @Module({
   controllers: [
     GameCreateController,
     GameController,
     GameEditController,
-    GameDownloadResourceController,
+    GameDownloadSourceController,
   ],
   imports: [B2Module],
   providers: [

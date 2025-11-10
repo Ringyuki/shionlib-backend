@@ -54,6 +54,8 @@ export class UndoService {
         entity: target.entity,
         target_id: target.target_id,
         created: { gt: target.created },
+        undo: false,
+        undone_by: null,
       },
       orderBy: { created: 'asc' },
       select: {
@@ -89,18 +91,8 @@ export class UndoService {
       const chain = [...overlapping].reverse().concat([target])
       await this.prisma.$transaction(async tx => {
         for (const rec of chain) {
-          await this.applyInverse(tx, rec, req, true)
+          await this.applyInverse(tx, rec, req)
         }
-      })
-      await this.refreshIndex(target.entity as PermissionEntity, target.target_id)
-      return
-    }
-
-    if (mode === UndoMode.PATCH) {
-      // patch mode
-      // only undo the non-overlapping records; if the overlapping records are forced, overwrite them, otherwise skip them
-      await this.prisma.$transaction(async tx => {
-        await this.applyInverse(tx, target, req, false, { later: overlapping, force })
       })
       await this.refreshIndex(target.entity as PermissionEntity, target.target_id)
       return
@@ -109,7 +101,7 @@ export class UndoService {
     // strict mode
     // only undo the target record
     await this.prisma.$transaction(async tx => {
-      await this.applyInverse(tx, target, req, false)
+      await this.applyInverse(tx, target, req)
     })
     await this.refreshIndex(target.entity as PermissionEntity, target.target_id)
   }
@@ -170,27 +162,16 @@ export class UndoService {
     return keysA.some(k => keysB.includes(k))
   }
 
-  private async applyInverse(
-    tx: Prisma.TransactionClient,
-    rec: any,
-    req: RequestWithUser,
-    isCascade: boolean,
-    patch?: { later: any[]; force: boolean },
-  ) {
+  private async applyInverse(tx: Prisma.TransactionClient, rec: any, req: RequestWithUser) {
     if (rec.entity === PermissionEntity.GAME) {
-      await this.inverseGame(tx, rec, req, patch)
+      await this.inverseGame(tx, rec, req)
       return
     }
     // TODO: later extend character/developer, can distribute here
     throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 
-  private async inverseGame(
-    tx: Prisma.TransactionClient,
-    rec: any,
-    req: RequestWithUser,
-    patch?: { later: any[]; force: boolean },
-  ) {
+  private async inverseGame(tx: Prisma.TransactionClient, rec: any, req: RequestWithUser) {
     const id = rec.target_id as number
     const action: EditActionType = rec.action
     const relation: EditRelationType | null = rec.relation_type
@@ -198,23 +179,7 @@ export class UndoService {
 
     if (action === EditActionType.UPDATE_SCALAR) {
       const before = (changes as ScalarChanges)?.before ?? {}
-      const keys = Object.keys(before)
-      let data = before as Record<string, unknown>
-
-      if (patch) {
-        const overlappedKeys = new Set<string>()
-        for (const later of patch.later) {
-          for (const k of later.field_changes ?? []) overlappedKeys.add(k)
-        }
-        const safeKeys = keys.filter(k => !overlappedKeys.has(k))
-        const riskyKeys = keys.filter(k => overlappedKeys.has(k))
-        if (!patch.force && riskyKeys.length > 0) {
-          data = safeKeys.reduce(
-            (m, k) => ((m[k] = (before as any)[k]), m),
-            {} as Record<string, unknown>,
-          )
-        }
-      }
+      const data = before as Record<string, unknown>
 
       if (Object.keys(data).length > 0) {
         await tx.game.update({ where: { id }, data })
