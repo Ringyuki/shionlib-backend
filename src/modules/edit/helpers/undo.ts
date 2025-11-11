@@ -6,8 +6,10 @@ export const extractRelationId = (
   if (!changes || (changes as any).relation === undefined) return []
   const c = changes as RelationChanges
   const pool = [c.before, c.after, c.added, c.removed].filter(Boolean) as any[][]
+  console.log('pool', pool)
   const ids: number[] = []
   for (const arr of pool) {
+    console.log('arr', arr)
     for (const item of arr) if (typeof item?.id === 'number') ids.push(item.id)
   }
   return Array.from(new Set(ids))

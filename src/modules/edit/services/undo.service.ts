@@ -423,6 +423,7 @@ export class UndoService {
       }
       if (action === EditActionType.UPDATE_RELATION) {
         const before = (changes as RelationChanges)?.before?.[0]
+        const after = (changes as RelationChanges)?.after?.[0]
         if (before?.id) {
           await tx.gameCover.update({
             where: { id: before.id },
@@ -433,6 +434,15 @@ export class UndoService {
               sexual: before.sexual,
               violence: before.violence,
               language: before.language,
+            },
+            select: {
+              id: true,
+              url: true,
+              type: true,
+              dims: true,
+              sexual: true,
+              violence: true,
+              language: true,
             },
           })
         }
@@ -445,7 +455,11 @@ export class UndoService {
             actor_role: req.user.role,
             relation_type: EditRelationType.COVER,
             field_changes: ['covers'],
-            changes: { relation: 'covers', after: before ? [before] : [] } as any,
+            changes: {
+              relation: 'covers',
+              before: [after],
+              after: [before],
+            } as any,
             note: `undo of #${rec.id}`,
             undo: true,
             undo_of_id: rec.id,

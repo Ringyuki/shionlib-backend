@@ -226,13 +226,22 @@ export class GameEditService {
       },
     })
     if (!coverToEdit) return
-    const { before, after, field_changes } = pickChanges(cover, coverToEdit)
+    const { field_changes } = pickChanges(cover, coverToEdit)
     if (field_changes.length === 0) return
 
     await this.prisma.$transaction(async tx => {
-      await tx.gameCover.update({
+      const updated = await tx.gameCover.update({
         where: { id: cover.id },
         data: cover,
+        select: {
+          id: true,
+          url: true,
+          type: true,
+          dims: true,
+          sexual: true,
+          violence: true,
+          language: true,
+        },
       })
       const editRecord = await tx.editRecord.create({
         data: {
@@ -243,7 +252,11 @@ export class GameEditService {
           actor_role: req.user.role,
           relation_type: EditRelationType.COVER,
           field_changes: ['covers'],
-          changes: { relation: 'covers', before, after } as any,
+          changes: {
+            relation: 'covers',
+            before: [coverToEdit],
+            after: [updated],
+          } as any,
         },
         select: { id: true },
       })
