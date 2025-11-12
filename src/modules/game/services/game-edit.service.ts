@@ -20,6 +20,8 @@ import { GameData } from '../interfaces/game.interface'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
+import { S3Service } from '../../s3/services/s3.service'
+import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
 
 @Injectable()
 export class GameEditService {
@@ -27,6 +29,7 @@ export class GameEditService {
     private readonly prisma: PrismaService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
     private readonly activityService: ActivityService,
+    @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
   ) {}
 
   async editGameScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
@@ -336,6 +339,11 @@ export class GameEditService {
     })
     if (coversToRemove.length === 0) return
 
+    const existing = await this.prisma.gameCover.findMany({
+      where: { game_id: id },
+    })
+    if (existing.length <= 1) throw new ShionBizException(ShionBizCode.GAME_COVER_MIN_ONE_REQUIRED)
+
     await this.prisma.$transaction(async tx => {
       await tx.gameCover.deleteMany({ where: { game_id: id, id: { in: covers } } })
       const editRecord = await tx.editRecord.create({
@@ -361,6 +369,10 @@ export class GameEditService {
         tx,
       )
     })
+
+    for (const cover of coversToRemove) {
+      await this.imageStorage.deleteFile(cover.url)
+    }
 
     const updated = await this.prisma.game.findUnique({
       where: { id },

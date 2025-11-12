@@ -16,6 +16,8 @@ import { UndoReqDto } from '../dto/req/undo.req.dto'
 import { extractRelationId, extractRelationKey } from '../helpers/undo'
 import { UndoMode } from '../enums/undo.enum'
 import { ScalarChanges, RelationChanges } from '../interfaces/undo.interface'
+import { S3Service } from '../../s3/services/s3.service'
+import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
 
 @Injectable()
 export class UndoService {
@@ -23,6 +25,7 @@ export class UndoService {
     private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
+    @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
   ) {}
 
   async undo(editRecordId: number, req: RequestWithUser, dto: UndoReqDto) {
@@ -236,7 +239,7 @@ export class UndoService {
             actor_role: req.user.role,
             relation_type: EditRelationType.LINK,
             field_changes: ['links'],
-            changes: { relation: 'links', removed: added } as any,
+            changes: { relation: 'links', removed: added },
             note: `undo of #${rec.id}`,
             undo: true,
             undo_of_id: rec.id,
@@ -276,7 +279,7 @@ export class UndoService {
             actor_role: req.user.role,
             relation_type: EditRelationType.LINK,
             field_changes: ['links'],
-            changes: { relation: 'links', added: removed } as any,
+            changes: { relation: 'links', added: removed },
             note: `undo of #${rec.id}`,
             undo: true,
             undo_of_id: rec.id,
@@ -312,7 +315,7 @@ export class UndoService {
             actor_role: req.user.role,
             relation_type: EditRelationType.LINK,
             field_changes: ['links'],
-            changes: { relation: 'links', after: before ? [before] : [] } as any,
+            changes: { relation: 'links', after: before ? [before] : [] },
             note: `undo of #${rec.id}`,
             undo: true,
             undo_of_id: rec.id,
@@ -333,94 +336,6 @@ export class UndoService {
     }
 
     if (relation === EditRelationType.COVER) {
-      if (action === EditActionType.ADD_RELATION) {
-        const added = (changes as RelationChanges)?.added ?? []
-        const ids = added.map(a => a.id).filter((v: any) => typeof v === 'number')
-        if (ids.length > 0) {
-          await tx.gameCover.deleteMany({ where: { game_id: id, id: { in: ids } } })
-        }
-        const withoutId = added.filter(a => typeof a.id !== 'number')
-        for (const c of withoutId) {
-          await tx.gameCover.deleteMany({
-            where: {
-              game_id: id,
-              url: c.url ?? '',
-              type: c.type ?? '',
-              dims: c.dims ?? undefined,
-              sexual: c.sexual ?? undefined,
-              violence: c.violence ?? undefined,
-            },
-          })
-        }
-        const undoRecord = await tx.editRecord.create({
-          data: {
-            entity: PermissionEntity.GAME,
-            target_id: id,
-            action: EditActionType.REMOVE_RELATION,
-            actor_id: req.user.sub,
-            actor_role: req.user.role,
-            relation_type: EditRelationType.COVER,
-            field_changes: ['covers'],
-            changes: { relation: 'covers', removed: added } as any,
-            note: `undo of #${rec.id}`,
-            undo: true,
-            undo_of_id: rec.id,
-          },
-          select: { id: true },
-        })
-        await this.activityService.create(
-          {
-            type: ActivityType.GAME_EDIT,
-            user_id: req.user.sub,
-            game_id: id,
-            edit_record_id: undoRecord.id,
-          },
-          tx,
-        )
-        return
-      }
-      if (action === EditActionType.REMOVE_RELATION) {
-        const removed = (changes as RelationChanges)?.removed ?? []
-        if (removed.length > 0) {
-          await tx.gameCover.createMany({
-            data: removed.map((c: any) => ({
-              game_id: id,
-              language: c.language,
-              url: c.url,
-              type: c.type,
-              dims: c.dims,
-              sexual: c.sexual,
-              violence: c.violence,
-            })),
-          })
-        }
-        const undoRecord = await tx.editRecord.create({
-          data: {
-            entity: PermissionEntity.GAME,
-            target_id: id,
-            action: EditActionType.ADD_RELATION,
-            actor_id: req.user.sub,
-            actor_role: req.user.role,
-            relation_type: EditRelationType.COVER,
-            field_changes: ['covers'],
-            changes: { relation: 'covers', added: removed } as any,
-            note: `undo of #${rec.id}`,
-            undo: true,
-            undo_of_id: rec.id,
-          },
-          select: { id: true },
-        })
-        await this.activityService.create(
-          {
-            type: ActivityType.GAME_EDIT,
-            user_id: req.user.sub,
-            game_id: id,
-            edit_record_id: undoRecord.id,
-          },
-          tx,
-        )
-        return
-      }
       if (action === EditActionType.UPDATE_RELATION) {
         const before = (changes as RelationChanges)?.before?.[0]
         const after = (changes as RelationChanges)?.after?.[0]
@@ -459,7 +374,7 @@ export class UndoService {
               relation: 'covers',
               before: [after],
               after: [before],
-            } as any,
+            },
             note: `undo of #${rec.id}`,
             undo: true,
             undo_of_id: rec.id,
@@ -477,10 +392,10 @@ export class UndoService {
         )
         return
       }
-
-      // TODO: later extend character/developer, can distribute here
-      throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
     }
+
+    // TODO: later extend character/developer, can distribute here
+    throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 
   private async refreshIndex(entity: PermissionEntity, targetId: number) {

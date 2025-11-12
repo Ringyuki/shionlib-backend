@@ -49,6 +49,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 43
   [ShionBizCode.GAME_COVER_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_COVER_MIN_ONE_REQUIRED]: HttpStatus.BAD_REQUEST,
 
   // 44
   [ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_FOUND]: HttpStatus.NOT_FOUND,

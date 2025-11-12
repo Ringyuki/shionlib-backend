@@ -37,6 +37,7 @@
   "GAME_CHARACTER_ALREADY_EXISTS": "character already exists",
 
   "GAME_COVER_ALREADY_EXISTS": "cover already exists",
+  "GAME_COVER_MIN_ONE_REQUIRED": "at least one cover is required",
 
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "download resource not found",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "download resource not owner",

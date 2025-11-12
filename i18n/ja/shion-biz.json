@@ -36,6 +36,7 @@
   "GAME_CHARACTER_ALREADY_EXISTS": "キャラクターがすでに存在します",
 
   "GAME_COVER_ALREADY_EXISTS": "カバーがすでに存在します",
+  "GAME_COVER_MIN_ONE_REQUIRED": "少なくとも1つのカバーが必要です",
 
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "ダウンロードリソースが現在のユーザーに属していません",
