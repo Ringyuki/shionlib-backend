@@ -282,6 +282,16 @@ export class UserService {
           blocked_reason: 'user_banned',
         },
       })
+      const sessions = await tx.userLoginSession.findMany({
+        where: { user_id: id },
+        select: { family_id: true },
+      })
+      for (const session of sessions) {
+        await this.loginSessionService.blockAllSessions(
+          session.family_id,
+          new Date(Date.now() + (banned_duration_days ?? 1) * 24 * 60 * 60 * 1000),
+        )
+      }
     }
 
     if (_tx) return execute(_tx)

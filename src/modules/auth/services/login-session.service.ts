@@ -373,7 +373,7 @@ export class LoginSessionService {
     return null
   }
 
-  private async blockAllSessions(family_id: string, expires_at: Date) {
+  async blockAllSessions(family_id: string, expires_at: Date) {
     const cacheKey = `auth:family:blocked:${family_id}`
     await this.cacheService.set(cacheKey, true, Math.max(expires_at.getTime() - Date.now(), 1000))
   }

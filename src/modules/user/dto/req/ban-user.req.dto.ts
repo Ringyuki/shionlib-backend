@@ -1,4 +1,5 @@
-import { IsNumber, IsString, MaxLength, IsOptional, IsBoolean } from 'class-validator'
+import { IsNumber, IsString, MaxLength, IsOptional, IsBoolean, Min, Max } from 'class-validator'
+import { ValidateIf } from 'class-validator'
 import { ivm } from '../../../../common/validation/i18n'
 
 export class BanUserReqDto {
@@ -20,7 +21,13 @@ export class BanUserReqDto {
     { allowNaN: false, allowInfinity: false },
     { message: ivm('validation.common.IS_NUMBER', { property: 'banned_duration_days' }) },
   )
-  @IsOptional()
+  @Max(999, {
+    message: ivm('validation.common.MAX', { property: 'banned_duration_days', max: 999 }),
+  })
+  @Min(1, { message: ivm('validation.common.MIN', { property: 'banned_duration_days', min: 1 }) })
+  @ValidateIf(o => o.is_permanent !== true, {
+    message: ivm('validation.common.IS_NOT_EMPTY', { property: 'banned_duration_days' }),
+  })
   banned_duration_days?: number
 
   @IsOptional()
