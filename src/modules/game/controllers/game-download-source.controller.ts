@@ -22,7 +22,6 @@ import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-sour
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('game/download-source')
 export class GameDownloadSourceController {
   constructor(private readonly gameDownloadSourceService: GameDownloadSourceService) {}
@@ -32,11 +31,13 @@ export class GameDownloadSourceController {
     return await this.gameDownloadSourceService.getList(getDownloadSourceListReqDto)
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   async deleteDownloadResource(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     return await this.gameDownloadSourceService.delete(id, req)
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   async editDownloadResource(
     @Body() editDownloadResourceReqDto: EditGameDownloadSourceReqDto,
@@ -46,6 +47,7 @@ export class GameDownloadSourceController {
     return await this.gameDownloadSourceService.edit(id, editDownloadResourceReqDto, req)
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.SUPER_ADMIN)
   @Post('migrate/:game-id')
   async createDownloadResource(
@@ -58,6 +60,7 @@ export class GameDownloadSourceController {
     )
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.SUPER_ADMIN)
   @Post('migrate/file/:download-source-id')
   async createDownloadResourceFile(
