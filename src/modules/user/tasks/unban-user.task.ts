@@ -11,7 +11,7 @@ export class UnbanUserTask {
     private readonly userService: UserService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     const now = new Date()
     const users = await this.prisma.user.findMany({

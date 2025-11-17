@@ -9,6 +9,7 @@ import { UserInfoController } from './controllers/user-info.controller'
 import { UserInfoService } from './services/user-info.service'
 import { UserDataController } from './controllers/user-data.controller'
 import { UserDataService } from './services/user-data.service'
+import { UnbanUserTask } from './tasks/unban-user.task'
 
 @Module({
   controllers: [UserController, UserInfoController, UserDataController],
@@ -19,6 +20,7 @@ import { UserDataService } from './services/user-data.service'
     VerificationCodeService,
     UserInfoService,
     UserDataService,
+    UnbanUserTask,
   ],
   imports: [AuthModule],
   exports: [UserService],
