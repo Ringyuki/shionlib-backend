@@ -6,7 +6,8 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import * as fs from 'fs'
 import * as path from 'path'
 import { pipeline } from 'node:stream/promises'
-import { createBLAKE3, createSHA256 } from 'hash-wasm'
+import { createBLAKE3 } from 'hash-wasm'
+import { createHash } from 'node:crypto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 import { GameUploadSessionResDto } from '../dto/res/game-upload-session.res.dto'
@@ -174,7 +175,7 @@ export class LargeFileUploadService {
     const storage_path = session.storage_path
     const offset = index * chunk_size
     if (session.uploaded_chunks.includes(index)) {
-      const hash = await createSHA256()
+      const hash = createHash('sha256')
       const lastChunkSize = Number(session.total_size) - (session.total_chunks - 1) * chunk_size
       const lengthToRead = isLast ? lastChunkSize : chunk_size
       const fd = await fs.promises.open(storage_path, 'r')
@@ -192,7 +193,7 @@ export class LargeFileUploadService {
           'shion-biz.GAME_UPLOAD_INVALID_CHUNK_SHA256',
         )
     } else {
-      const hash = await createSHA256()
+      const hash = createHash('sha256')
       const ws = fs.createWriteStream(storage_path, { flags: 'r+', start: offset })
       const rawBody = (req as any).body as Buffer | undefined
       if (rawBody && Buffer.isBuffer(rawBody)) {
