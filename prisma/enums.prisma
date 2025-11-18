@@ -75,3 +75,8 @@ enum GameUploadSessionStatus {
   ABORTED
   EXPIRED
 }
+
+enum HashAlgorithm {
+  sha256
+  blake3
+}

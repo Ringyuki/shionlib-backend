@@ -6,7 +6,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import * as fs from 'fs'
 import * as path from 'path'
 import { pipeline } from 'node:stream/promises'
-import { createHash } from 'node:crypto'
+import { createBLAKE3, createSHA256 } from 'hash-wasm'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 import { GameUploadSessionResDto } from '../dto/res/game-upload-session.res.dto'
@@ -71,6 +71,7 @@ export class LargeFileUploadService {
           chunk_size,
           total_chunks,
           uploaded_chunks: [],
+          hash_algorithm: 'blake3',
           file_sha256: dto.file_sha256,
           status: 'UPLOADING',
           storage_path: this.destPath('PENDING'),
@@ -173,7 +174,7 @@ export class LargeFileUploadService {
     const storage_path = session.storage_path
     const offset = index * chunk_size
     if (session.uploaded_chunks.includes(index)) {
-      const hash = createHash('sha256')
+      const hash = await createSHA256()
       const lastChunkSize = Number(session.total_size) - (session.total_chunks - 1) * chunk_size
       const lengthToRead = isLast ? lastChunkSize : chunk_size
       const fd = await fs.promises.open(storage_path, 'r')
@@ -191,7 +192,7 @@ export class LargeFileUploadService {
           'shion-biz.GAME_UPLOAD_INVALID_CHUNK_SHA256',
         )
     } else {
-      const hash = createHash('sha256')
+      const hash = await createSHA256()
       const ws = fs.createWriteStream(storage_path, { flags: 'r+', start: offset })
       const rawBody = (req as any).body as Buffer | undefined
       if (rawBody && Buffer.isBuffer(rawBody)) {
@@ -313,7 +314,7 @@ export class LargeFileUploadService {
         'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
       )
 
-    const hash = createHash('sha256')
+    const hash = await createBLAKE3()
     const rs = fs.createReadStream(session.storage_path)
     for await (const chunk of rs) hash.update(chunk as Buffer)
     const actualSha = hash.digest('hex')

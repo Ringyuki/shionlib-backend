@@ -66,6 +66,7 @@ export class GameDownloadSourceService {
                 file_size: true,
                 file_url: true,
                 s3_file_key: true,
+                hash_algorithm: true,
                 file_hash: true,
                 file_status: true,
                 creator: {
@@ -159,6 +160,7 @@ export class GameDownloadSourceService {
           file_name: session.file_name,
           file_path: session.storage_path,
           file_size: session.total_size,
+          hash_algorithm: session.hash_algorithm,
           file_hash: session.file_sha256,
           file_content_type: session.mime_type,
           upload_session_id: dto.upload_session_id,
@@ -409,6 +411,7 @@ export class GameDownloadSourceService {
           game_download_resource_id,
           file_name: dto.file_name,
           file_size: dto.file_size,
+          hash_algorithm: 'blake3',
           file_hash: dto.file_hash,
           file_content_type: dto.file_content_type,
           s3_file_key: dto.s3_file_key,

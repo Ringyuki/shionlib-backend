@@ -34,6 +34,7 @@ model GameDownloadResourceFile {
   file_url          String? // for file type 2 and 3
   s3_file_key       String? // for file type 1
   file_content_type String? // for file type 1
+  hash_algorithm    HashAlgorithm @default(sha256)
   file_hash         String
 
   upload_session_id Int?

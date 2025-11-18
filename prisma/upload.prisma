@@ -13,6 +13,7 @@ model GameUploadSession {
 
   uploaded_chunks Int[] @default([])
 
+  hash_algorithm HashAlgorithm @default(sha256)
   file_sha256  String
   status       GameUploadSessionStatus
   storage_path String
