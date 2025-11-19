@@ -16,7 +16,7 @@ export class UploadQuotaTask {
 
   private readonly logger = new Logger(UploadQuotaTask.name)
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleInitialGrant() {
     try {
       const now = new Date()
