@@ -138,6 +138,10 @@ jobs:
             source ~/.bashrc 2>/dev/null || true
             source ~/.profile 2>/dev/null || true
             set -euo pipefail
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 24 >/dev/null
+            node -v
             DEPLOY_DIR="${{ secrets.DEPLOY_DIR }}"
             KEEP_RELEASES=5
 
