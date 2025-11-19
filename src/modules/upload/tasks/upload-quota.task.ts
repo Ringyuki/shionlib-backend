@@ -20,17 +20,17 @@ export class UploadQuotaTask {
   async handleInitialGrant() {
     try {
       const now = new Date()
+      const cutoff = new Date(
+        now.getTime() -
+          this.configService.get('file_upload.upload_quota.grant_after_days') * 24 * 60 * 60 * 1000,
+      )
       const users = await this.prisma.user.findMany({
         where: {
           status: UserStatus.ACTIVE,
           role: ShionlibUserRoles.USER,
-          upload_quota: { is_first_grant: false },
+          upload_quota: { is: { is_first_grant: false } },
           created: {
-            lte: new Date(
-              now.getFullYear(),
-              now.getMonth(),
-              now.getDate() - this.configService.get('file_upload.upload_quota.grant_after_days'),
-            ),
+            lte: cutoff,
           },
         },
         select: { id: true },
