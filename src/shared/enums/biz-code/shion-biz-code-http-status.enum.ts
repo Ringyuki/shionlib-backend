@@ -76,7 +76,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_SHA256]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_UPLOAD_CHUNK_SHA256_MISMATCH]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_UPLOAD_INCOMPLETE]: HttpStatus.CONFLICT,
-  [ShionBizCode.GAME_UPLOAD_FILE_SHA256_MISMATCH]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_UPLOAD_FILE_BLAKE3_MISMATCH]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_INDEX]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.GAME_UPLOAD_SESSION_EXPIRED]: HttpStatus.GONE,
   [ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER]: HttpStatus.FORBIDDEN,

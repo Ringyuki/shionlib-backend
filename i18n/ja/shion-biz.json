@@ -58,7 +58,7 @@
   "GAME_UPLOAD_INVALID_CHUNK_SHA256": "無効なチャンクSHA256",
   "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": "チャンクSHA256が一致しません",
   "GAME_UPLOAD_INCOMPLETE": "すべてのチャンクがアップロードされていません",
-  "GAME_UPLOAD_FILE_SHA256_MISMATCH": "ファイルSHA256が一致しません",
+  "GAME_UPLOAD_FILE_BLAKE3_MISMATCH": "ファイルBLAKE3が一致しません",
   "GAME_UPLOAD_INVALID_CHUNK_INDEX": "無効なチャンクインデックス",
   "GAME_UPLOAD_SESSION_EXPIRED": "アップロードセッションが期限切れです",
   "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません",

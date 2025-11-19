@@ -75,7 +75,7 @@ export type I18nTranslations = {
         "GAME_UPLOAD_INVALID_CHUNK_SHA256": string;
         "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": string;
         "GAME_UPLOAD_INCOMPLETE": string;
-        "GAME_UPLOAD_FILE_SHA256_MISMATCH": string;
+        "GAME_UPLOAD_FILE_BLAKE3_MISMATCH": string;
         "GAME_UPLOAD_INVALID_CHUNK_INDEX": string;
         "GAME_UPLOAD_SESSION_EXPIRED": string;
         "GAME_UPLOAD_SESSION_NOT_OWNER": string;

@@ -59,7 +59,7 @@
   "GAME_UPLOAD_INVALID_CHUNK_SHA256": "invalid chunk sha256",
   "GAME_UPLOAD_CHUNK_SHA256_MISMATCH": "chunk sha256 mismatch",
   "GAME_UPLOAD_INCOMPLETE": "not all chunks uploaded",
-  "GAME_UPLOAD_FILE_SHA256_MISMATCH": "file sha256 mismatch",
+  "GAME_UPLOAD_FILE_BLAKE3_MISMATCH": "file blake3 mismatch",
   "GAME_UPLOAD_INVALID_CHUNK_INDEX": "invalid chunk index",
   "GAME_UPLOAD_SESSION_EXPIRED": "upload session expired",
   "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner",

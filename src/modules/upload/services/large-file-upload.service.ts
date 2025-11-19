@@ -321,8 +321,8 @@ export class LargeFileUploadService {
     const actualSha = hash.digest('hex')
     if (actualSha !== session.file_sha256) {
       throw new ShionBizException(
-        ShionBizCode.GAME_UPLOAD_FILE_SHA256_MISMATCH,
-        'shion-biz.GAME_UPLOAD_FILE_SHA256_MISMATCH',
+        ShionBizCode.GAME_UPLOAD_FILE_BLAKE3_MISMATCH,
+        'shion-biz.GAME_UPLOAD_FILE_BLAKE3_MISMATCH',
       )
     }
 
