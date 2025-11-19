@@ -2,10 +2,10 @@ import { Injectable, OnModuleInit, Logger, OnModuleDestroy } from '@nestjs/commo
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
-import { env } from 'prisma/config'
 import 'dotenv/config'
+import { withDefault } from './common/utils/env.util'
 
-const pool = new Pool({ connectionString: env('DATABASE_URL') })
+const pool = new Pool({ connectionString: withDefault('DATABASE_URL', '') })
 const adapter = new PrismaPg(pool)
 
 @Injectable()
