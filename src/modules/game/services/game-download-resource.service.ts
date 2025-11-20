@@ -157,7 +157,7 @@ export class GameDownloadSourceService {
       const gameDownloadResourceFile = await tx.gameDownloadResourceFile.create({
         data: {
           game_download_resource_id: gameDownloadResource.id,
-          file_name: session.file_name,
+          file_name: dto.file_name || session.file_name,
           file_path: session.storage_path,
           file_size: session.total_size,
           hash_algorithm: session.hash_algorithm,
@@ -182,7 +182,7 @@ export class GameDownloadSourceService {
           file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
           file_check_status: ActivityFileCheckStatus.PENDING,
           file_size: Number(session.total_size),
-          file_name: session.file_name,
+          file_name: dto.file_name || session.file_name,
         },
         tx,
       )
@@ -216,6 +216,18 @@ export class GameDownloadSourceService {
         platform: dto.platform,
         language: dto.language,
         note: dto.note,
+        // in most situations, if we use this endpoint to edit a download resource, there should be only one file in it
+        // so we update the file name for all files in the download resource
+        files: {
+          updateMany: {
+            where: {
+              game_download_resource_id: id,
+            },
+            data: {
+              file_name: dto.file_name,
+            },
+          },
+        },
       },
     })
   }
