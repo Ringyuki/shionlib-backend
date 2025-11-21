@@ -271,6 +271,61 @@ export class UploadQuotaService {
     }
   }
 
+  async dynamicReduce(user_id: number) {
+    const quota = await this.prisma.userUploadQuota.findUnique({
+      where: { user_id },
+      select: {
+        id: true,
+        size: true,
+        is_first_grant: true,
+      },
+    })
+    if (!quota) {
+      throw new ShionBizException(
+        ShionBizCode.USER_UPLOAD_QUOTA_NOT_FOUND,
+        'shion-biz.USER_UPLOAD_QUOTA_NOT_FOUND',
+      )
+    }
+    if (!quota.is_first_grant) return
+
+    const baseSize = BigInt(this.configService.get('file_upload.upload_quota.base_size_bytes'))
+    if (quota.size <= baseSize) return
+
+    const inactiveDays = this.configService.get(
+      'file_upload.upload_quota.dynamic_reduce_inactive_days',
+    )
+    if (inactiveDays <= 0) return
+
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - inactiveDays)
+
+    const hasRecentApproved = await this.prisma.gameDownloadResourceFile.count({
+      where: {
+        creator_id: user_id,
+        file_check_status: 1,
+        created: { gte: cutoff },
+      },
+    })
+    if (hasRecentApproved > 0) return
+
+    const step = BigInt(
+      this.configService.get('file_upload.upload_quota.dynamic_reduce_step_bytes'),
+    )
+    if (step <= 0n) return
+
+    const reducible = quota.size - baseSize
+    if (reducible <= 0n) return
+
+    const amount = reducible > step ? step : reducible
+    if (amount <= 0n) return
+
+    await this.adjustUploadQuotaSizeAmount(user_id, {
+      action: UserUploadQuotaSizeRecordAction.SUB,
+      amount: Number(amount),
+      action_reason: 'DYNAMIC_REDUCE',
+    })
+  }
+
   async resetQuota(user_id: number) {
     const quota = await this.prisma.userUploadQuota.findUnique({
       where: { user_id },

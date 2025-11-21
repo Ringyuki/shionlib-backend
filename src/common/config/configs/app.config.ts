@@ -81,6 +81,11 @@ export default (): AppConfig => ({
         'UPLOAD_QUOTA_DYNAMIC_THRESHOLD_BYTES',
         1 * 1024 * 1024 * 1024,
       ), // 1GB
+      dynamic_reduce_step_bytes: withDefault(
+        'UPLOAD_QUOTA_DYNAMIC_REDUCE_STEP_BYTES',
+        1 * 1024 * 1024 * 1024,
+      ), // 1GB
+      dynamic_reduce_inactive_days: withDefault('UPLOAD_QUOTA_DYNAMIC_REDUCE_INACTIVE_DAYS', 45),
       grant_after_days: withDefault('UPLOAD_QUOTA_GRANT_AFTER_DAYS', 7),
       longest_inactive_days: withDefault('UPLOAD_QUOTA_LONGEST_INACTIVE_DAYS', 30),
     },

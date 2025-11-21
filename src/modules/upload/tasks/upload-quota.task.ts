@@ -42,7 +42,7 @@ export class UploadQuotaTask {
     }
   }
 
-  @Cron(CronExpression.EVERY_WEEK)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleDynamicTopup() {
     try {
       const users = await this.prisma.user.findMany({
@@ -52,6 +52,23 @@ export class UploadQuotaTask {
       for (const u of users) await this.uploadQuotaService.dynamicTopup(u.id)
     } catch (error) {
       this.logger.error('Error running upload quota cron', error)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleDynamicReduce() {
+    try {
+      const users = await this.prisma.user.findMany({
+        where: {
+          status: UserStatus.ACTIVE,
+          role: ShionlibUserRoles.USER,
+          upload_quota: { isNot: null },
+        },
+        select: { id: true },
+      })
+      for (const u of users) await this.uploadQuotaService.dynamicReduce(u.id)
+    } catch (error) {
+      this.logger.error('Error running upload quota dynamic reduce cron', error)
     }
   }
 
@@ -80,6 +97,7 @@ export class UploadQuotaTask {
         where: {
           status: UserStatus.ACTIVE,
           role: ShionlibUserRoles.USER,
+          upload_quota: { isNot: null },
           NOT: { sessions: { some: { updated: { gte: cutoff } } } },
         },
         select: { id: true },

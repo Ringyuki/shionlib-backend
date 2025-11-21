@@ -61,6 +61,8 @@ export interface AppConfig {
       cap_size_bytes: number
       dynamic_step_bytes: number
       dynamic_threshold_bytes: number
+      dynamic_reduce_step_bytes: number
+      dynamic_reduce_inactive_days: number
       grant_after_days: number
       longest_inactive_days: number
     }
