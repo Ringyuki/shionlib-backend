@@ -46,7 +46,11 @@ export class UploadQuotaTask {
   async handleDynamicTopup() {
     try {
       const users = await this.prisma.user.findMany({
-        where: { status: UserStatus.ACTIVE, role: ShionlibUserRoles.USER },
+        where: {
+          status: UserStatus.ACTIVE,
+          role: ShionlibUserRoles.USER,
+          upload_quota: { isNot: null },
+        },
         select: { id: true },
       })
       for (const u of users) await this.uploadQuotaService.dynamicTopup(u.id)
