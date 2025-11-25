@@ -79,8 +79,8 @@ export default (): AppConfig => ({
       dynamic_step_bytes: withDefault('UPLOAD_QUOTA_DYNAMIC_STEP_BYTES', 2 * 1024 * 1024 * 1024), // 2GB
       dynamic_threshold_bytes: withDefault(
         'UPLOAD_QUOTA_DYNAMIC_THRESHOLD_BYTES',
-        1 * 1024 * 1024 * 1024,
-      ), // 1GB
+        2.5 * 1024 * 1024 * 1024,
+      ), // 2.5GB
       dynamic_reduce_step_bytes: withDefault(
         'UPLOAD_QUOTA_DYNAMIC_REDUCE_STEP_BYTES',
         1 * 1024 * 1024 * 1024,
