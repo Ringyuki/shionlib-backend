@@ -573,6 +573,16 @@ export class GameDataFetcherService {
   }
 
   private consistencyCheck(b_data: BangumiGameItemRes, v_data: VNDBGameItemRes) {
+    if (!b_data)
+      throw new ShionBizException(
+        ShionBizCode.GAME_BANGUMI_REQUEST_FAILED,
+        'shion-biz.GAME_BANGUMI_REQUEST_FAILED',
+      )
+    if (!v_data)
+      throw new ShionBizException(
+        ShionBizCode.GAME_VNDB_REQUEST_FAILED,
+        'shion-biz.GAME_VNDB_REQUEST_FAILED',
+      )
     const bTitles = this.collectBangumiTitles(b_data)
     const vTitles = this.collectVNDBTitles(v_data)
 
