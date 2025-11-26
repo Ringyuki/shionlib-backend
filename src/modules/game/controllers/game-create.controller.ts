@@ -26,7 +26,7 @@ import {
 } from '../dto/req/create-game.req.dto'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(ShionlibUserRoles.ADMIN)
+@Roles(ShionlibUserRoles.USER)
 @Controller('game/create')
 export class GameCreateController {
   constructor(
@@ -34,7 +34,6 @@ export class GameCreateController {
     private readonly gameService: GameCreateService,
   ) {}
 
-  @Roles(ShionlibUserRoles.USER)
   @Get('fetch')
   async fetchData(@Query() fetchGameDataReqDto: FetchGameDataReqDto) {
     return await this.gameDataFetcherService.fetchData(
@@ -51,7 +50,7 @@ export class GameCreateController {
     return await this.gameService.createFromBangumiAndVNDB(
       createGameReqDto.b_id.toString(),
       createGameReqDto.v_id?.toString(),
-      req.user.sub,
+      req,
     )
   }
 

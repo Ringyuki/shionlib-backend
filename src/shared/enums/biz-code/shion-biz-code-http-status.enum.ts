@@ -38,6 +38,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_VNDB_REQUEST_FAILED]: HttpStatus.BAD_GATEWAY,
   [ShionBizCode.GAME_ALREADY_EXISTS]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_DATA_CONSISTENCY_CHECK_FAILED]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_MISSING_BANGUMI_OR_VNDB_ID]: HttpStatus.BAD_REQUEST,
 
   // 41
   [ShionBizCode.GAME_DEVELOPER_NOT_FOUND]: HttpStatus.NOT_FOUND,
@@ -99,4 +100,8 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.EDIT_RECORD_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.EDIT_RECORD_ALREADY_UNDONE]: HttpStatus.CONFLICT,
   [ShionBizCode.EDIT_RECORD_CONFLICT]: HttpStatus.CONFLICT,
+
+  // 53
+  [ShionBizCode.MESSAGE_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.MESSAGE_FORBIDDEN]: HttpStatus.FORBIDDEN,
 } as const satisfies Record<ShionBizCode, HttpStatus>

@@ -39,6 +39,8 @@ model User {
   edit_records         EditRecord[]          @relation("user_edit_record")
   activities           Activity[]            @relation("user_activity")
   liked_comments       Comment[]             @relation("user_like_comment")
+  messages             Message[]             @relation("user_message_receiver")
+  messages_sent        Message[]             @relation("user_message_sender")
 
   @@index([email])
   @@index([name])

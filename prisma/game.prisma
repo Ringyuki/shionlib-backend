@@ -41,6 +41,8 @@ model Game {
 
   comments Comment[] @relation("game_comment")
 
+  messages Message[] @relation("game_message")
+
   status  Int      @default(1)
   created DateTime @default(now())
   updated DateTime @updatedAt

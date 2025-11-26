@@ -20,6 +20,10 @@ import {
 } from '../dto/req/create-game.req.dto'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
 import { formatDoc, rawDataQuery } from '../../search/helpers/format-doc'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
+import { ActivityService } from '../../activity/services/activity.service'
+import { ActivityType } from '../../activity/dto/create-activity.dto'
 
 @Injectable()
 export class GameCreateService {
@@ -27,13 +31,18 @@ export class GameCreateService {
     private readonly gameDataFetcherService: GameDataFetcherService,
     private readonly prisma: PrismaService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
+    private readonly activityService: ActivityService,
   ) {}
 
   async createFromBangumiAndVNDB(
     b_id: string,
     v_id: string | undefined,
-    creator_id: number,
+    req: RequestWithUser,
   ): Promise<number> {
+    if (req.user.role < ShionlibUserRoles.ADMIN && !(b_id && v_id)) {
+      throw new ShionBizException(ShionBizCode.GAME_MISSING_BANGUMI_OR_VNDB_ID)
+    }
+
     const existing = await this.prisma.game.findFirst({
       where: {
         OR: [{ b_id }, { v_id }],
@@ -66,7 +75,7 @@ export class GameCreateService {
           type: finalGameData.type,
           platform: this.dataOrEmpty(finalGameData.platform, []),
           release_date: finalGameData.release_date,
-          creator_id,
+          creator_id: req.user.sub,
         }
         const game = await tx.game.create({ data: gameCreateData })
 
@@ -102,6 +111,14 @@ export class GameCreateService {
         }
         const check = await tx.game.findUnique({ where: { id: game.id }, select: { id: true } })
         if (!check) throw new Error('Row not visible inside tx')
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_CREATE,
+            user_id: req.user.sub,
+            game_id: game.id,
+          },
+          tx,
+        )
         return game.id
       })
 
@@ -117,6 +134,7 @@ export class GameCreateService {
     if (gameId === 0) {
       throw new Error('Game creation failed')
     }
+
     return gameId
   }
 

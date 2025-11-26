@@ -28,6 +28,7 @@
   "GAME_VNDB_REQUEST_FAILED": "vndbリクエストに失敗しました。メッセージ: {message}",
   "GAME_ALREADY_EXISTS": "ゲームがすでに存在します",
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "ゲームデータの一貫性チェックに失敗しました",
+  "GAME_MISSING_BANGUMI_OR_VNDB_ID": "bangumi idまたはvndb idが不足しています",
 
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
   "GAME_DEVELOPER_ALREADY_EXISTS": "開発者がすでに存在します",
@@ -76,5 +77,8 @@
 
   "EDIT_RECORD_NOT_FOUND": "編集レコードが見つかりません",
   "EDIT_RECORD_ALREADY_UNDONE": "編集レコードはすでに取り消されています",
-  "EDIT_RECORD_CONFLICT": "編集レコードが競合しています"
+  "EDIT_RECORD_CONFLICT": "編集レコードが競合しています",
+
+  "MESSAGE_NOT_FOUND": "メッセージが見つかりません",
+  "MESSAGE_FORBIDDEN": "あなたはこのメッセージを表示する権限がありません"
 }

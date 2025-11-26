@@ -29,6 +29,7 @@
   "GAME_VNDB_REQUEST_FAILED": "vndb request failed, message: {message}",
   "GAME_ALREADY_EXISTS": "game already exists",
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "game data consistency check failed",
+  "GAME_MISSING_BANGUMI_OR_VNDB_ID": "missing bangumi id or vndb id",
 
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
   "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
@@ -77,5 +78,8 @@
 
   "EDIT_RECORD_NOT_FOUND": "edit record not found",
   "EDIT_RECORD_ALREADY_UNDONE": "edit record already undone",
-  "EDIT_RECORD_CONFLICT": "edit record conflict"
+  "EDIT_RECORD_CONFLICT": "edit record conflict",
+
+  "MESSAGE_NOT_FOUND": "message not found",
+  "MESSAGE_FORBIDDEN": "you don't have permission to view this message"
 }

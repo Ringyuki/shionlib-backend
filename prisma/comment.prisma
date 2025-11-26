@@ -24,6 +24,8 @@ model Comment {
   status Int     @default(1)
   edited Boolean @default(false)
 
+  messages Message[] @relation("comment_message")
+
   created DateTime @default(now())
   updated DateTime @updatedAt
 

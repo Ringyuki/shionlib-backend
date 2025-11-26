@@ -32,6 +32,7 @@ import { DeveloperModule } from './modules/developer/developer.module'
 import { SearchModule } from './modules/search/search.module'
 import { ActivityModule } from './modules/activity/activity.module'
 import { SiteModule } from './modules/site/site.module'
+import { MessageModule } from './modules/message/message.module'
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { SiteModule } from './modules/site/site.module'
     SearchModule,
     ActivityModule,
     SiteModule,
+    MessageModule,
   ],
   controllers: [],
   providers: [
