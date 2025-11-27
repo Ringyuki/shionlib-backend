@@ -8,6 +8,7 @@ export interface BangumiGameItemRes {
   name_cn: string
   tags: Tag[]
   infobox: Infobox[]
+  type: number
 }
 
 export interface Image {

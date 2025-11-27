@@ -59,6 +59,14 @@ export class GameDataFetcherService {
       ),
     ])
 
+    if (rawGameData.type !== 4) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_BANGUMI_REQUEST_FAILED,
+        'shion-biz.GAME_BANGUMI_REQUEST_FAILED',
+        { message: 'invalid subject type' },
+      )
+    }
+
     const finalGameData: GameData = {} as GameData
     const finalProducersData: GameDeveloper[] = []
     const finalCharactersData: GameCharacter[] = []
