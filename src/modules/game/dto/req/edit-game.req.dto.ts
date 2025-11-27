@@ -36,6 +36,7 @@ enum GamePlatformEnum {
   WEB = 'web',
   VND = 'vnd',
   DRC = 'drc',
+  GBC = 'gbc',
   GBA = 'gba',
   NDS = 'nds',
 }
