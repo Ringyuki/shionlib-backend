@@ -33,6 +33,7 @@ import { SearchModule } from './modules/search/search.module'
 import { ActivityModule } from './modules/activity/activity.module'
 import { SiteModule } from './modules/site/site.module'
 import { MessageModule } from './modules/message/message.module'
+import { DatabaseModule } from './modules/database/database.module'
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { MessageModule } from './modules/message/message.module'
     ActivityModule,
     SiteModule,
     MessageModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [

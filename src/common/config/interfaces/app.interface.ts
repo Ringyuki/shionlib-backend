@@ -39,6 +39,13 @@ export interface AppConfig {
       accessKeyId: string
       secretAccessKey: string
     }
+    backup: {
+      bucket: string
+      region: string
+      endpoint: string
+      accessKeyId: string
+      secretAccessKey: string
+    }
   }
   b2: {
     applicationKeyId: string

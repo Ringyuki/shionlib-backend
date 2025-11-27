@@ -4,6 +4,8 @@ import { withDefault } from '../../utils/env.util'
 export default (): DatabaseConfig => ({
   database: {
     url: withDefault('DATABASE_URL', ''),
+    enable_backup: withDefault('ENABLE_BACKUP', false),
+    backup_retention: withDefault('DATABASE_BACKUP_RETENTION', 5),
   },
 
   redis: {

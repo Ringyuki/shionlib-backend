@@ -53,6 +53,13 @@ export default (): AppConfig => ({
       accessKeyId: withDefault('S3_FILE_ACCESS_KEY_ID', ''),
       secretAccessKey: withDefault('S3_FILE_SECRET_ACCESS_KEY', ''),
     },
+    backup: {
+      bucket: withDefault('S3_BACKUP_BUCKET', ''),
+      region: withDefault('S3_BACKUP_REGION', ''),
+      endpoint: withDefault('S3_BACKUP_ENDPOINT', ''),
+      accessKeyId: withDefault('S3_BACKUP_ACCESS_KEY_ID', ''),
+      secretAccessKey: withDefault('S3_BACKUP_SECRET_ACCESS_KEY', ''),
+    },
   },
 
   b2: {

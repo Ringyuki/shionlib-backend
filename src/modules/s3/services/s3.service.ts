@@ -52,10 +52,14 @@ export class S3Service implements OnModuleInit {
     key: string,
     stream: Readable,
     contentType: string,
-    game_id: number,
-    uploader_id: number,
-    file_hash: string,
+    game_id?: number,
+    uploader_id?: number,
+    file_hash?: string,
   ) {
+    const metadata: Record<string, string> = {}
+    if (game_id) metadata['game-id'] = game_id.toString()
+    if (uploader_id) metadata['uploader-id'] = uploader_id.toString()
+    if (file_hash) metadata['file-sha256'] = file_hash
     const uploader = new Upload({
       client: this.s3Client,
       params: {
@@ -63,12 +67,7 @@ export class S3Service implements OnModuleInit {
         Key: key,
         Body: stream,
         ContentType: contentType,
-        Metadata: {
-          'game-id': game_id.toString(),
-          'uploader-id': uploader_id.toString(),
-          scan: 'ok',
-          'file-sha256': file_hash,
-        },
+        Metadata: metadata,
       },
       queueSize: 4,
       partSize: 1024 * 1024 * 32,
@@ -94,9 +93,12 @@ export class S3Service implements OnModuleInit {
     await this.s3Client.send(command)
   }
 
-  async getFileList() {
+  async getFileList(options?: { prefix?: string; continuationToken?: string; maxKeys?: number }) {
     const command = new ListObjectsV2Command({
       Bucket: this.bucket,
+      Prefix: options?.prefix,
+      ContinuationToken: options?.continuationToken,
+      MaxKeys: options?.maxKeys,
     })
     const result = await this.s3Client.send(command)
     return result
