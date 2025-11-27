@@ -119,6 +119,7 @@ export class ActivityService {
         file:
           a.file || a.file_name || a.file_size
             ? {
+                id: a.file?.id ?? 0,
                 file_name: a.file?.file_name ?? a.file_name ?? '',
                 file_size: Number(a.file?.file_size ?? a.file_size ?? 0),
                 file_status: a.file_status,
