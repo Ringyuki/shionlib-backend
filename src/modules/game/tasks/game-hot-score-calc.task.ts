@@ -6,7 +6,7 @@ import { GameHotScoreService } from '../services/game-hot-score.service'
 export class GameHotScoreCalcTask {
   constructor(private readonly gameHotScoreService: GameHotScoreService) {}
 
-  @Cron(CronExpression.EVERY_12_HOURS)
+  @Cron(CronExpression.EVERY_HOUR)
   async handle() {
     await this.gameHotScoreService.refreshScore()
   }
