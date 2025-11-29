@@ -24,6 +24,13 @@ export type I18nTranslations = {
         "EMAIL_VERIFICATION_CODE_PREFIX": string;
         "EMAIL_VERIFICATION_CODE_SUFFIX": string;
         "EMAIL_VERIFICATION_CODE_IGNORE": string;
+        "EMAIL_PASSWORD_RESET_SUBJECT": string;
+        "EMAIL_PASSWORD_RESET_GREETING": string;
+        "EMAIL_PASSWORD_RESET_INSTRUCTION": string;
+        "EMAIL_PASSWORD_RESET_BUTTON": string;
+        "EMAIL_PASSWORD_RESET_LINK_EXPIRES": string;
+        "EMAIL_PASSWORD_RESET_COPY_LINK": string;
+        "EMAIL_PASSWORD_RESET_IGNORE": string;
     };
     "shion-biz": {
         "COMMON_VALIDATION_FAILED": string;
@@ -36,6 +43,7 @@ export type I18nTranslations = {
         "AUTH_FAMILY_BLOCKED": string;
         "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": string;
         "AUTH_VERIFICATION_CODE_ERROR": string;
+        "AUTH_INVALID_RESET_PASSWORD_TOKEN": string;
         "USER_NOT_FOUND": string;
         "USER_EMAIL_ALREADY_EXISTS": string;
         "USER_NAME_ALREADY_EXISTS": string;

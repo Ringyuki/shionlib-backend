@@ -10,6 +10,7 @@
   "AUTH_FAMILY_BLOCKED": "トークンがブロックされました",
   "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "検証コードが見つかりませんか、期限切れです",
   "AUTH_VERIFICATION_CODE_ERROR": "検証コードが間違っています",
+  "AUTH_INVALID_RESET_PASSWORD_TOKEN": "無効なパスワード再設定トークン",
 
   "USER_NOT_FOUND": "ユーザーが見つかりません",
   "USER_EMAIL_ALREADY_EXISTS": "メールアドレスがすでに存在します",

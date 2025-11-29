@@ -17,6 +17,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.AUTH_FAMILY_BLOCKED]: HttpStatus.FORBIDDEN,
   [ShionBizCode.AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED]: HttpStatus.UNAUTHORIZED,
   [ShionBizCode.AUTH_VERIFICATION_CODE_ERROR]: HttpStatus.UNAUTHORIZED,
+  [ShionBizCode.AUTH_INVALID_RESET_PASSWORD_TOKEN]: HttpStatus.FORBIDDEN,
 
   // 30
   [ShionBizCode.USER_NOT_FOUND]: HttpStatus.NOT_FOUND,

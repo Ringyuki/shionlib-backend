@@ -6,6 +6,7 @@ import { EmailConfig } from '../interfaces/email.interface'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { isArray } from 'class-validator'
 import { I18nService } from 'nestjs-i18n'
+import { generatePasswordResetTemplate, generateVerificationCodeTemplate } from '../templates'
 
 @Injectable()
 export class EmailService {
@@ -91,23 +92,23 @@ export class EmailService {
     const emailData: SendEmailDto = {
       subject: this.i18nService.t('message.EMAIL_VERIFICATION_CODE_SUBJECT'),
       to: email,
-      bodyHtml: this.generateVerificationCodeTemplate(code, expSeconds),
+      bodyHtml: generateVerificationCodeTemplate(this.i18nService, code, expSeconds),
     }
 
     return this.sendEmail(emailData)
   }
 
-  private generateVerificationCodeTemplate(code: string, expSeconds?: number): string {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">${this.i18nService.t('message.EMAIL_VERIFICATION_CODE_SUBJECT')}</h2>
-        <p>${this.i18nService.t('message.EMAIL_VERIFICATION_CODE_PREFIX')}</p>
-        <div style="background-color: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0;">
-          <span style="font-size: 24px; font-weight: bold; color: #34a2d5;">${code}</span>
-        </div>
-        <p style="color: #666;">${this.i18nService.t('message.EMAIL_VERIFICATION_CODE_SUFFIX', { args: { exp: expSeconds ? expSeconds / 60 : 10 } })}</p>
-        <p style="color: #999; font-size: 12px;">${this.i18nService.t('message.EMAIL_VERIFICATION_CODE_IGNORE')}</p>
-      </div>
-    `
+  async sendPasswordResetLink(
+    email: string,
+    resetLink: string,
+    expSeconds = 600,
+  ): Promise<boolean> {
+    const emailData: SendEmailDto = {
+      subject: this.i18nService.t('message.EMAIL_PASSWORD_RESET_SUBJECT'),
+      to: email,
+      bodyHtml: generatePasswordResetTemplate(this.i18nService, resetLink, expSeconds),
+    }
+
+    return this.sendEmail(emailData)
   }
 }

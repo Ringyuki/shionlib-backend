@@ -2,5 +2,12 @@
   "EMAIL_VERIFICATION_CODE_SUBJECT": "Shionlib 验证码",
   "EMAIL_VERIFICATION_CODE_PREFIX": "您的验证码是: ",
   "EMAIL_VERIFICATION_CODE_SUFFIX": "请在{exp}分钟内使用。",
-  "EMAIL_VERIFICATION_CODE_IGNORE": "如果您没有请求此验证码，请忽略此邮件。"
+  "EMAIL_VERIFICATION_CODE_IGNORE": "如果您没有请求此验证码，请忽略此邮件。",
+  "EMAIL_PASSWORD_RESET_SUBJECT": "找回您的 Shionlib 密码",
+  "EMAIL_PASSWORD_RESET_GREETING": "我们收到了一个找回您 Shionlib 密码的请求。",
+  "EMAIL_PASSWORD_RESET_INSTRUCTION": "点击下方按钮即可设置新的密码。",
+  "EMAIL_PASSWORD_RESET_BUTTON": "重置密码",
+  "EMAIL_PASSWORD_RESET_LINK_EXPIRES": "该链接将在 {exp} 分钟后失效。",
+  "EMAIL_PASSWORD_RESET_COPY_LINK": "如果按钮无法点击，请复制下面的链接到浏览器：",
+  "EMAIL_PASSWORD_RESET_IGNORE": "如果这不是您本人的操作，请忽略此邮件。"
 }

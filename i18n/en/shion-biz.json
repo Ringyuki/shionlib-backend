@@ -10,6 +10,7 @@
   "AUTH_FAMILY_BLOCKED": "token blocked",
   "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "verification code not found or expired",
   "AUTH_VERIFICATION_CODE_ERROR": "verification code error",
+  "AUTH_INVALID_RESET_PASSWORD_TOKEN": "invalid reset password token",
 
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",
