@@ -12,6 +12,7 @@ import { UploadQuotaController } from './controllers/upload-quota.controller'
 import { FileCleanService } from './services/file-clean.service'
 import { FileCleanTask } from './tasks/file-clean.task'
 import { UploadQuotaTask } from './tasks/upload-quota.task'
+import { HashWorkerService } from './services/hash-worker.service'
 
 @Global()
 @Module({
@@ -24,6 +25,7 @@ import { UploadQuotaTask } from './tasks/upload-quota.task'
     FileCleanService,
     FileCleanTask,
     UploadQuotaTask,
+    HashWorkerService,
   ],
   imports: [S3Module, BullModule.registerQueue({ name: LARGE_FILE_UPLOAD_QUEUE })],
   exports: [BullModule, SmallFileUploadService],

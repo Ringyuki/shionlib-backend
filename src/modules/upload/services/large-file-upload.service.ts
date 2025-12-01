@@ -5,9 +5,6 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import * as fs from 'fs'
 import * as path from 'path'
-import { pipeline } from 'node:stream/promises'
-import { createBLAKE3 } from 'hash-wasm'
-import { createHash } from 'node:crypto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameUploadReqDto } from '../dto/req/game-upload.req.dto'
 import { GameUploadSessionResDto } from '../dto/res/game-upload-session.res.dto'
@@ -15,6 +12,7 @@ import { GameUploadSession } from '@prisma/client'
 import mime from 'mime-types'
 import { UploadQuotaService } from './upload-quota.service'
 import { UserUploadQuotaUsedAmountRecordAction } from '../dto/req/adjust-quota.req.dto'
+import { HashWorkerService } from './hash-worker.service'
 
 @Injectable()
 export class LargeFileUploadService {
@@ -22,6 +20,7 @@ export class LargeFileUploadService {
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
     private readonly uploadQuotaService: UploadQuotaService,
+    private readonly hashWorkerService: HashWorkerService,
   ) {}
 
   private get rootDir() {
@@ -174,54 +173,46 @@ export class LargeFileUploadService {
 
     const storage_path = session.storage_path
     const offset = index * chunk_size
+    let actualSha: string
     if (session.uploaded_chunks.includes(index)) {
-      const hash = createHash('sha256')
       const lastChunkSize = Number(session.total_size) - (session.total_chunks - 1) * chunk_size
       const lengthToRead = isLast ? lastChunkSize : chunk_size
       const fd = await fs.promises.open(storage_path, 'r')
       try {
         const buffer = Buffer.alloc(Number(lengthToRead))
         const { bytesRead } = await fd.read(buffer, 0, Number(lengthToRead), Number(offset))
-        hash.update(buffer.subarray(0, Number(bytesRead)))
+        actualSha = await this.hashWorkerService.calculateHash({
+          algorithm: 'sha256',
+          data: buffer.subarray(0, Number(bytesRead)),
+        })
       } finally {
         await fd.close()
       }
-      const actualSha = hash.digest('hex')
       if (actualSha !== chunk_sha256)
         throw new ShionBizException(
           ShionBizCode.GAME_UPLOAD_INVALID_CHUNK_SHA256,
           'shion-biz.GAME_UPLOAD_INVALID_CHUNK_SHA256',
         )
     } else {
-      const hash = createHash('sha256')
       const ws = fs.createWriteStream(storage_path, { flags: 'r+', start: offset })
       const rawBody = (req as any).body as Buffer | undefined
-      if (rawBody && Buffer.isBuffer(rawBody)) {
-        // for express.raw has already parsed the body, hash and write from the buffer
-        // ref: https://expressjs.com/en/resources/middleware/body-parser.html#bodyparserrawoptions
-        // ref: @/main.ts
-        hash.update(rawBody)
-        await new Promise<void>((resolve, reject) => {
-          ws.write(rawBody, err => {
-            if (err) reject(err)
-            else {
-              ws.end(() => resolve())
-            }
-          })
+      // for express.raw has already parsed the body, hash and write from the buffer
+      // ref: https://expressjs.com/en/resources/middleware/body-parser.html#bodyparserrawoptions
+      // ref: @/main.ts
+      // hash.update(rawBody as Buffer)
+      await new Promise<void>((resolve, reject) => {
+        ws.write(rawBody, err => {
+          if (err) reject(err)
+          else {
+            ws.end(() => resolve())
+          }
         })
-      } else {
-        const { Transform } = await import('node:stream')
-        const hasher = new Transform({
-          transform(chunk, _enc, cb) {
-            hash.update(chunk as Buffer)
-            this.push(chunk)
-            cb()
-          },
-        })
+      })
 
-        await pipeline(req, hasher, ws)
-      }
-      const actualSha = hash.digest('hex')
+      const actualSha = await this.hashWorkerService.calculateHash({
+        algorithm: 'sha256',
+        data: rawBody,
+      })
       if (actualSha !== chunk_sha256)
         throw new ShionBizException(
           ShionBizCode.GAME_UPLOAD_CHUNK_SHA256_MISMATCH,
@@ -315,10 +306,10 @@ export class LargeFileUploadService {
         'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
       )
 
-    const hash = await createBLAKE3()
-    const rs = fs.createReadStream(session.storage_path)
-    for await (const chunk of rs) hash.update(chunk as Buffer)
-    const actualSha = hash.digest('hex')
+    const actualSha = await this.hashWorkerService.calculateHash({
+      filePath: session.storage_path,
+      algorithm: 'blake3',
+    })
     if (actualSha !== session.file_sha256) {
       throw new ShionBizException(
         ShionBizCode.GAME_UPLOAD_FILE_BLAKE3_MISMATCH,
