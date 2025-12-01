@@ -129,7 +129,6 @@ export class GameService {
           name: true,
         },
       },
-      download_resources: true,
       comments: true,
       creator: {
         select: {
@@ -203,7 +202,7 @@ export class GameService {
     filter?: GetGameListFilterReqDto,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
-    const { tags, years, months, sort_by, sort_order } = filter ?? {}
+    const { tags, years, months, sort_by, sort_order, start_date, end_date } = filter ?? {}
 
     let where: Prisma.GameWhereInput = {}
     let orderBy: Prisma.GameOrderByWithRelationInput = {
@@ -235,7 +234,13 @@ export class GameService {
         hasSome: tags,
       }
 
-    if (years || months) where = applyDate(where, { years, months })
+    if (start_date && end_date) {
+      const [from, to] = start_date <= end_date ? [start_date, end_date] : [end_date, start_date]
+      where.release_date = {
+        gte: new Date(from),
+        lte: new Date(to),
+      }
+    } else if (years || months) where = applyDate(where, { years, months })
 
     if (sort_by)
       orderBy = {

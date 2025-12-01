@@ -8,6 +8,7 @@ import {
   Min,
   Max,
   IsEnum,
+  IsDate,
 } from 'class-validator'
 import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 import { Type } from 'class-transformer'
@@ -61,6 +62,16 @@ export class GetGameListFilterReqDto {
     message: ivmEnum('validation.common.IS_ENUM', SortOrder, { property: 'sort_order' }),
   })
   sort_order: SortOrder = SortOrder.DESC
+
+  @IsDate({ message: ivm('validation.common.IS_DATE', { property: 'start_date' }) })
+  @IsOptional()
+  @Type(() => Date)
+  start_date?: Date
+
+  @IsDate({ message: ivm('validation.common.IS_DATE', { property: 'end_date' }) })
+  @IsOptional()
+  @Type(() => Date)
+  end_date?: Date
 }
 
 export class GetGameListReqDto extends PaginationReqDto {
