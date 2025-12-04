@@ -41,7 +41,7 @@ export class B2Service {
     }
   }
 
-  private async getDownloadAuthorizationToken(key: string) {
+  private async getDownloadAuthorizationToken(key: string, expiresIn?: number) {
     const authInfo = await this.getAuthorizationToken()
     const response = await firstValueFrom(
       this.httpService.post<B2DownloadAuth>(
@@ -49,7 +49,8 @@ export class B2Service {
         {
           bucketId: authInfo.bucketId,
           fileNamePrefix: key,
-          validDurationInSeconds: this.configService.get('file_download.download_expires_in'),
+          validDurationInSeconds:
+            expiresIn ?? this.configService.get('file_download.download_expires_in'),
         },
         {
           headers: {
@@ -63,9 +64,9 @@ export class B2Service {
     return response.data.authorizationToken
   }
 
-  async getDownloadUrl(key: string) {
+  async getDownloadUrl(key: string, expiresIn?: number) {
     try {
-      const authToken = await this.getDownloadAuthorizationToken(key)
+      const authToken = await this.getDownloadAuthorizationToken(key, expiresIn)
       const cdn = this.configService.get('file_download.download_cdn_host')
       const cdnHost = cdn.endsWith('/') ? cdn : `${cdn}/`
       return `${cdnHost}${encodeURIComponent(key)}?Authorization=${authToken}`
