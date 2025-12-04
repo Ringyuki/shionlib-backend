@@ -278,6 +278,7 @@ export class GameDownloadSourceService {
       select: {
         game_download_resource_id: true,
         s3_file_key: true,
+        file_size: true,
       },
     })
     if (!file) {
@@ -309,9 +310,13 @@ export class GameDownloadSourceService {
       })
     })
 
+    let expiresIn = this.configService.get('file_download.download_expires_in')
+    if (file.file_size > 1024 * 1024 * 1024 * 10) expiresIn = 4 * 60 * 60 // 4 hours
+    if (file.file_size > 1024 * 1024 * 1024 * 20) expiresIn = 6 * 60 * 60 // 6 hours
+
     return {
-      file_url: await this.b2Service.getDownloadUrl(file.s3_file_key!),
-      expires_in: this.configService.get('file_download.download_expires_in'),
+      file_url: await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn),
+      expires_in: expiresIn,
     }
   }
 
