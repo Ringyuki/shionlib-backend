@@ -8,7 +8,6 @@ import { ForgetPasswordReqDto } from '../dto/req/forget-password.req.dto'
 import { PasswordService } from '../services/password.service'
 import { CheckForgetPasswordReqDto } from '../dto/req/check.req.dto'
 import { ResetPasswordReqDto } from '../dto/req/reset-password.req.dto'
-import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 @Controller('auth')
 export class AuthController {
@@ -30,8 +29,8 @@ export class AuthController {
     )
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; ${this.configService.get('environment') === 'production' && request.user?.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; ${this.configService.get('environment') === 'production' && request.user?.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+      `shionlib_access_token=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
   }
 
