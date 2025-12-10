@@ -41,8 +41,8 @@ export class AuthController {
     await this.loginSessionService.logout(request.cookies['shionlib_refresh_token'])
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
-      `shionlib_refresh_token=; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
+      'shionlib_access_token=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0',
+      'shionlib_refresh_token=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0',
     ])
   }
 
