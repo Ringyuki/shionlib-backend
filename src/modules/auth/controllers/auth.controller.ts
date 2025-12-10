@@ -8,6 +8,7 @@ import { ForgetPasswordReqDto } from '../dto/req/forget-password.req.dto'
 import { PasswordService } from '../services/password.service'
 import { CheckForgetPasswordReqDto } from '../dto/req/check.req.dto'
 import { ResetPasswordReqDto } from '../dto/req/reset-password.req.dto'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +30,8 @@ export class AuthController {
     )
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+      `shionlib_access_token=${token}; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
   }
 
@@ -40,8 +41,8 @@ export class AuthController {
     await this.loginSessionService.logout(request.cookies['shionlib_refresh_token'])
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
-      `shionlib_refresh_token=; HttpOnly; ${this.configService.get('environment') === 'production' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
+      `shionlib_access_token=; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
+      `shionlib_refresh_token=; HttpOnly; ${this.configService.get('environment') === 'production' && request.user.role !== ShionlibUserRoles.SUPER_ADMIN ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=0`,
     ])
   }
 
