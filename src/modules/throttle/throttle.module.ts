@@ -1,6 +1,6 @@
 import { ThrottlerGuard, ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
-import IORedis from 'ioredis'
+import { Redis } from 'ioredis'
 import { Module } from '@nestjs/common'
 import { ShionConfigService } from '../../common/config/services/config.service'
 import { APP_GUARD } from '@nestjs/core'
@@ -8,8 +8,8 @@ import { APP_GUARD } from '@nestjs/core'
 @Module({
   imports: [
     ThrottlerModule.forRootAsync({
-      inject: [ShionConfigService],
-      useFactory: (configService: ShionConfigService): ThrottlerModuleOptions => ({
+      inject: [ShionConfigService, Redis],
+      useFactory: (configService: ShionConfigService, redis: Redis): ThrottlerModuleOptions => ({
         throttlers: [
           {
             ttl: configService.get('throttle.ttl'),
@@ -28,15 +28,7 @@ import { APP_GUARD } from '@nestjs/core'
             skipIf: ctx => !ctx.switchToHttp().getRequest().path.startsWith('/game/download'),
           },
         ],
-        storage: new ThrottlerStorageRedisService(
-          new IORedis({
-            host: configService.get('redis.host'),
-            port: configService.get('redis.port'),
-            password: configService.get('redis.password'),
-            keyPrefix: configService.get('redis.keyPrefix'),
-            db: configService.get('redis.database'),
-          }),
-        ),
+        storage: new ThrottlerStorageRedisService(redis),
       }),
     }),
   ],
