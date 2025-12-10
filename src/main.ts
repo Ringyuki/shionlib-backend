@@ -22,6 +22,18 @@ async function bootstrap() {
   app.set('query parser', 'extended')
   app.set('trust proxy', true)
   const configService = app.get(ShionConfigService)
+
+  // debug: print redis config
+  const redisHost = configService.get('redis.host')
+  const redisPort = configService.get('redis.port')
+  const redisKeyPrefix = configService.get('redis.keyPrefix')
+  const redisDb = configService.get('redis.database')
+  Logger.log(
+    `Redis config: host=${redisHost}; port=${redisPort}; keyPrefix=${redisKeyPrefix}; db=${redisDb}`,
+    'Bootstrap',
+  )
+  // end debug
+
   app.use(
     '/uploads/large',
     express.raw({
