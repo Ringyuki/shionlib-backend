@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import IORedis, { Redis } from 'ioredis'
 import { ShionConfigService } from '../../../common/config/services/config.service'
@@ -7,6 +7,7 @@ import { Inject } from '@nestjs/common'
 
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(CacheService.name)
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
     private redis: Redis,
@@ -14,12 +15,25 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
+    const host = this.configService.get('redis.host')
+    const port = this.configService.get('redis.port')
+    const password = this.configService.get('redis.password')
+    const database = this.configService.get('redis.database')
+    const keyPrefix = this.configService.get('redis.keyPrefix')
+
+    if (!host || !port || !database) {
+      throw new Error('Redis host, port and database are required')
+    }
+    this.logger.log(
+      `Redis config: host=${host}; port=${port}; password=${password}; database=${database}`,
+    )
+
     this.redis = new IORedis({
-      host: this.configService.get('redis.host'),
-      port: this.configService.get('redis.port'),
-      password: this.configService.get('redis.password'),
-      keyPrefix: this.configService.get('redis.keyPrefix'),
-      db: this.configService.get('redis.database'),
+      host,
+      port,
+      password,
+      keyPrefix,
+      db: database,
     })
   }
 
