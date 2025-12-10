@@ -23,6 +23,12 @@ async function bootstrap() {
   app.set('trust proxy', true)
   const configService = app.get(ShionConfigService)
 
+  const redisHost = configService.get('redis.host')
+  const redisPort = configService.get('redis.port')
+  console.log('------------------------------------------------')
+  console.log(`[DEBUG] Loading Redis Config: ${redisHost}:${redisPort}`)
+  console.log('------------------------------------------------')
+
   app.use(
     '/uploads/large',
     express.raw({
