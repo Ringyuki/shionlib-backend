@@ -20,17 +20,19 @@ export type I18nTranslations = {
         "500": string;
     };
     "message": {
-        "EMAIL_VERIFICATION_CODE_SUBJECT": string;
-        "EMAIL_VERIFICATION_CODE_PREFIX": string;
-        "EMAIL_VERIFICATION_CODE_SUFFIX": string;
-        "EMAIL_VERIFICATION_CODE_IGNORE": string;
-        "EMAIL_PASSWORD_RESET_SUBJECT": string;
-        "EMAIL_PASSWORD_RESET_GREETING": string;
-        "EMAIL_PASSWORD_RESET_INSTRUCTION": string;
-        "EMAIL_PASSWORD_RESET_BUTTON": string;
-        "EMAIL_PASSWORD_RESET_LINK_EXPIRES": string;
-        "EMAIL_PASSWORD_RESET_COPY_LINK": string;
-        "EMAIL_PASSWORD_RESET_IGNORE": string;
+        "email": {
+            "VERIFICATION_CODE_SUBJECT": string;
+            "VERIFICATION_CODE_PREFIX": string;
+            "VERIFICATION_CODE_SUFFIX": string;
+            "VERIFICATION_CODE_IGNORE": string;
+            "PASSWORD_RESET_SUBJECT": string;
+            "PASSWORD_RESET_GREETING": string;
+            "PASSWORD_RESET_INSTRUCTION": string;
+            "PASSWORD_RESET_BUTTON": string;
+            "PASSWORD_RESET_LINK_EXPIRES": string;
+            "PASSWORD_RESET_COPY_LINK": string;
+            "PASSWORD_RESET_IGNORE": string;
+        };
     };
     "shion-biz": {
         "COMMON_VALIDATION_FAILED": string;
