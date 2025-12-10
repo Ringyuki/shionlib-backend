@@ -7,12 +7,13 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { MessageListItemResDto } from '../dto/res/message-list.res.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class MessageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async send(sendMessageReqDto: SendMessageReqDto) {
+  async send(sendMessageReqDto: SendMessageReqDto, tx?: Prisma.TransactionClient) {
     const {
       type,
       title,
@@ -26,7 +27,7 @@ export class MessageService {
       receiver_id,
     } = sendMessageReqDto
 
-    await this.prisma.message.create({
+    await (tx || this.prisma).message.create({
       data: {
         type,
         title,
@@ -94,6 +95,15 @@ export class MessageService {
         currentPage: page,
       },
     }
+  }
+
+  async getUnreadCount(req: RequestWithUser) {
+    return await this.prisma.message.count({
+      where: {
+        receiver_id: req.user.sub,
+        read: false,
+      },
+    })
   }
 
   async getById(id: number, req: RequestWithUser) {

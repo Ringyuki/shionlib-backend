@@ -12,7 +12,6 @@ export class BackupTask {
     try {
       this.logger.log('Starting database backup')
       await this.backupService.backupToS3()
-      this.logger.log('Database backup completed')
     } catch (error) {
       this.logger.error('Error running database backup', error)
     }

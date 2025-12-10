@@ -14,6 +14,11 @@ export class MessageController {
     return this.messageService.getList(paginationReqDto, req)
   }
 
+  @Get('unread')
+  async getUnreadCount(@Req() req: RequestWithUser) {
+    return this.messageService.getUnreadCount(req)
+  }
+
   @Get(':id')
   async getById(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     return this.messageService.getById(id, req)

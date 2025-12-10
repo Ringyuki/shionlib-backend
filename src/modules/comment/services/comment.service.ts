@@ -13,6 +13,8 @@ import { LexicalRendererService } from '../../render/services/lexical-renderer.s
 import { SerializedEditorState } from 'lexical'
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
+import { MessageService } from '../../message/services/message.service'
+import { MessageType } from '../../message/dto/req/send-message.req.dto'
 
 @Injectable()
 export class CommentServices {
@@ -20,6 +22,7 @@ export class CommentServices {
     private readonly prismaService: PrismaService,
     private readonly renderService: LexicalRendererService,
     private readonly activityService: ActivityService,
+    private readonly messageService: MessageService,
   ) {}
 
   async createGameComment(game_id: number, dto: CreateCommentReqDto, req: RequestWithUser) {
@@ -106,6 +109,20 @@ export class CommentServices {
         },
         tx,
       )
+      if (parent_id && comment.parent?.creator?.id && comment.parent.creator.id !== req.user.sub)
+        await this.messageService.send(
+          {
+            type: MessageType.COMMENT_REPLY,
+            title: 'Messages.Comment.Reply.Title',
+            content: 'Messages.Comment.Reply.Content',
+            receiver_id: comment.parent.creator.id,
+            comment_id: comment.id,
+            game_id,
+            sender_id: req.user.sub,
+          },
+          tx,
+        )
+
       return {
         ...comment,
         root_id: root_id || comment.id,
@@ -301,22 +318,40 @@ export class CommentServices {
     const comment = await this.prismaService.comment.findUnique({
       where: { id },
       select: {
+        id: true,
         liked_users: { where: { id: req.user.sub }, select: { id: true }, take: 1 },
+        creator_id: true,
+        game_id: true,
       },
     })
     if (!comment) {
       throw new ShionBizException(ShionBizCode.COMMENT_NOT_FOUND)
     }
-    if (comment.liked_users.length > 0) {
-      await this.prismaService.comment.update({
-        where: { id },
-        data: { liked_users: { disconnect: { id: req.user.sub } } },
-      })
-    } else {
-      await this.prismaService.comment.update({
-        where: { id },
-        data: { liked_users: { connect: { id: req.user.sub } } },
-      })
-    }
+
+    await this.prismaService.$transaction(async tx => {
+      if (comment.liked_users.length > 0) {
+        await tx.comment.update({
+          where: { id },
+          data: { liked_users: { disconnect: { id: req.user.sub } } },
+        })
+      } else {
+        await tx.comment.update({
+          where: { id },
+          data: { liked_users: { connect: { id: req.user.sub } } },
+        })
+        await this.messageService.send(
+          {
+            type: MessageType.COMMENT_LIKE,
+            title: 'Messages.Comment.Like.Title',
+            content: 'Messages.Comment.Like.Content',
+            receiver_id: comment.creator_id,
+            comment_id: comment.id,
+            game_id: comment.game_id,
+            sender_id: req.user.sub,
+          },
+          tx,
+        )
+      }
+    })
   }
 }

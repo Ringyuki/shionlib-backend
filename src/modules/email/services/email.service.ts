@@ -90,7 +90,7 @@ export class EmailService {
 
   async sendVerificationCode(email: string, code: string, expSeconds?: number): Promise<boolean> {
     const emailData: SendEmailDto = {
-      subject: this.i18nService.t('message.EMAIL_VERIFICATION_CODE_SUBJECT'),
+      subject: this.i18nService.t('message.email.VERIFICATION_CODE_SUBJECT'),
       to: email,
       bodyHtml: generateVerificationCodeTemplate(this.i18nService, code, expSeconds),
     }
@@ -104,7 +104,7 @@ export class EmailService {
     expSeconds = 600,
   ): Promise<boolean> {
     const emailData: SendEmailDto = {
-      subject: this.i18nService.t('message.EMAIL_PASSWORD_RESET_SUBJECT'),
+      subject: this.i18nService.t('message.email.PASSWORD_RESET_SUBJECT'),
       to: email,
       bodyHtml: generatePasswordResetTemplate(this.i18nService, resetLink, expSeconds),
     }
