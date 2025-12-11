@@ -112,6 +112,9 @@ export interface AppConfig {
       weight_downloads: number
       weight_release: number
       weight_created: number
+      recent_window_days: number
+      weight_recent_views: number
+      weight_recent_downloads: number
     }
   }
 }

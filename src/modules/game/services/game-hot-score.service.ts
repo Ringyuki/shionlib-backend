@@ -18,26 +18,40 @@ export class GameHotScoreService {
     const weightDownloads = this.configService.get('game.hot_score.weight_downloads')
     const weightRelease = this.configService.get('game.hot_score.weight_release')
     const weightCreated = this.configService.get('game.hot_score.weight_created')
+    const recentWindowDays = this.configService.get('game.hot_score.recent_window_days')
+    const weightRecentViews = this.configService.get('game.hot_score.weight_recent_views')
+    const weightRecentDownloads = this.configService.get('game.hot_score.weight_recent_downloads')
 
     const sql = `
       WITH base AS (
         SELECT
           g.id,
-          (
-            ${weightViews}     * LN(g.views + 1) +
-            ${weightDownloads} * LN(g.downloads + 1) +
-            ${weightRelease}   * EXP(- GREATEST(0, EXTRACT(EPOCH FROM (NOW() - COALESCE(g.release_date, g.created))) / 86400.0) / ${halfLifeReleaseDays}) +
-            ${weightCreated}   * EXP(- GREATEST(0, EXTRACT(EPOCH FROM (NOW() - g.created)) / 86400.0) / ${halfLifeCreatedDays})
-          ) AS new_score
+          GREATEST(1.0, EXTRACT(EPOCH FROM (NOW() - g.created)) / 86400.0) AS age_days,
+          GREATEST(0.0, EXTRACT(EPOCH FROM (NOW() - COALESCE(g.release_date, g.created))) / 86400.0) AS release_age_days,
+          g.views,
+          g.downloads
         FROM "games" g
         WHERE g.status = 1
           AND COALESCE(g.release_date, g.created) <= NOW()
+      ),
+      scores AS (
+        SELECT
+          b.id,
+          (
+            ${weightViews}             * LN(b.views + 1) +
+            ${weightDownloads}         * LN(b.downloads + 1) +
+            ${weightRecentViews}       * LN((${recentWindowDays} * b.views) / b.age_days + 1) +
+            ${weightRecentDownloads}   * LN((${recentWindowDays} * b.downloads) / b.age_days + 1) +
+            ${weightRelease}           * EXP(- b.release_age_days / ${halfLifeReleaseDays}) +
+            ${weightCreated}           * EXP(- b.age_days / ${halfLifeCreatedDays})
+          ) AS new_score
+        FROM base b
       )
       UPDATE "games" AS g
-      SET "hot_score" = b.new_score
-      FROM base b
-      WHERE g.id = b.id
-        AND g."hot_score" IS DISTINCT FROM b.new_score;
+      SET "hot_score" = s.new_score
+      FROM scores s
+      WHERE g.id = s.id
+        AND g."hot_score" IS DISTINCT FROM s.new_score;
     `
     const started = Date.now()
     const result = await this.prisma.$executeRawUnsafe(sql)

@@ -142,6 +142,9 @@ export default (): AppConfig => ({
       weight_downloads: withDefault('GAME_HOT_SCORE_WEIGHT_DOWNLOADS', 1.0),
       weight_release: withDefault('GAME_HOT_SCORE_WEIGHT_RELEASE', 0.8),
       weight_created: withDefault('GAME_HOT_SCORE_WEIGHT_CREATED', 0.4),
+      recent_window_days: withDefault('GAME_HOT_SCORE_RECENT_WINDOW_DAYS', 7),
+      weight_recent_views: withDefault('GAME_HOT_SCORE_WEIGHT_RECENT_VIEWS', 0.6),
+      weight_recent_downloads: withDefault('GAME_HOT_SCORE_WEIGHT_RECENT_DOWNLOADS', 0.9),
     },
   },
 })
