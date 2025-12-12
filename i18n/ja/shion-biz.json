@@ -44,6 +44,8 @@
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "ダウンロードリソースが現在のユーザーに属していません",
 
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "ダウンロードリソースファイルが見つかりません",
+  "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token が必要です",
+  "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "検証に失敗しました, エラーコード: {errorCodes}",
 
   "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
 

@@ -24,6 +24,9 @@ import {
 } from '../../activity/dto/create-activity.dto'
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
+import { HttpService } from '@nestjs/axios'
+import { firstValueFrom } from 'rxjs'
+import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.interface'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -33,6 +36,7 @@ export class GameDownloadSourceService {
     private readonly b2Service: B2Service,
     private readonly configService: ShionConfigService,
     private readonly activityService: ActivityService,
+    private readonly httpService: HttpService,
   ) {}
 
   async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
@@ -270,7 +274,41 @@ export class GameDownloadSourceService {
     })
   }
 
-  async getDownloadLink(id: number) {
+  private async validateToken(token: string) {
+    const data = await firstValueFrom(
+      this.httpService.post<TurnstileResInterface>(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        {
+          response: token,
+          secret: this.configService.get('cloudflare.turnstile.secret'),
+        },
+      ),
+    )
+
+    return {
+      success: data.data.success,
+      error_codes: data.data['error-codes'] as string[],
+    }
+  }
+
+  async getDownloadLink(id: number, token: string) {
+    if (!token) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED',
+      )
+    }
+    const { success, error_codes } = await this.validateToken(token)
+    if (!success) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN',
+        {
+          errorCodes: error_codes,
+        },
+      )
+    }
+
     const file = await this.prismaService.gameDownloadResourceFile.findUnique({
       where: {
         id,

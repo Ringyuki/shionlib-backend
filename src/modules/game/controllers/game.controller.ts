@@ -52,8 +52,11 @@ export class GameController {
 
   @SkipThrottle({ default: true })
   @Get('download/:id/link')
-  async getDownloadSourceLink(@Param('id', ParseIntPipe) id: number) {
-    return await this.gameDownloadSourceService.getDownloadLink(id)
+  async getDownloadSourceLink(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('token') token: string,
+  ) {
+    return await this.gameDownloadSourceService.getDownloadLink(id, token)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -10,4 +10,9 @@ export interface AuthConfig {
     rotationGraceSec: number
     algorithmVersion: string
   }
+  cloudflare: {
+    turnstile: {
+      secret: string
+    }
+  }
 }

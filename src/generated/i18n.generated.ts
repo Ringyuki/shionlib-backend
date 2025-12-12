@@ -73,6 +73,8 @@ export type I18nTranslations = {
         "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": string;
         "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": string;
+        "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": string;
+        "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
         "COMMENT_NOT_OWNER": string;

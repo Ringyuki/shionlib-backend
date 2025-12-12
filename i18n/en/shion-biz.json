@@ -45,6 +45,8 @@
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "download resource not owner",
 
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
+  "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",
+  "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "validation failed, error codes: {errorCodes}",
 
   "FAVORITE_ALREADY_EXISTS": "already in favorites",
 
