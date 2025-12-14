@@ -7,7 +7,7 @@ export class FileScanTask {
   private readonly logger = new Logger(FileScanTask.name)
   constructor(private readonly fileScanService: FileScanService) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     try {
       const count = await this.fileScanService.scanFiles()
