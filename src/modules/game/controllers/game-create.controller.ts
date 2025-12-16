@@ -50,6 +50,7 @@ export class GameCreateController {
     return await this.gameService.createFromBangumiAndVNDB(
       createGameReqDto.b_id.toString(),
       createGameReqDto.v_id?.toString(),
+      createGameReqDto.skip_consistency_check ?? false,
       req,
     )
   }

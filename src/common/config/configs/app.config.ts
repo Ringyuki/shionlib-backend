@@ -68,8 +68,8 @@ export default (): AppConfig => ({
   },
 
   bangumi: {
-    clientId: withDefault('CLIENT_ID', ''),
-    clientSecret: withDefault('CLIENT_SECRET', ''),
+    clientId: withDefault('BANGUMI_CLIENT_ID', ''),
+    clientSecret: withDefault('BANGUMI_CLIENT_SECRET', ''),
   },
 
   file_upload: {

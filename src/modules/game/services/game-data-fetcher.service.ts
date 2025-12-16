@@ -34,6 +34,7 @@ export class GameDataFetcherService {
   async fetchData(
     b_id: string,
     v_id?: string,
+    skip_consistency_check?: boolean,
   ): Promise<{
     finalGameData: GameData
     finalCharactersData: GameCharacter[]
@@ -43,10 +44,14 @@ export class GameDataFetcherService {
     if (v_id && v_id.startsWith('v')) {
       throw new ShionBizException(ShionBizCode.GAME_INVALID_VNDB_ID)
     }
-    return this.fetchDatafromBangumi(b_id, `v${v_id}`)
+    return this.fetchDatafromBangumi(b_id, `v${v_id}`, skip_consistency_check)
   }
 
-  private async fetchDatafromBangumi(b_id: string, v_id?: string) {
+  private async fetchDatafromBangumi(
+    b_id: string,
+    v_id?: string,
+    skip_consistency_check?: boolean,
+  ) {
     const [rawGameData, rawCharacterData, rawPersonData] = await Promise.all([
       this.bangumiService.bangumiRequest<BangumiGameItemRes>(
         `https://api.bgm.tv/v0/subjects/${b_id}`,
@@ -195,6 +200,7 @@ export class GameDataFetcherService {
         finalCharactersData,
         finalProducersData,
         rawGameData,
+        skip_consistency_check,
       )
     }
     dedupeCharactersInPlace(finalCharactersData)
@@ -239,6 +245,7 @@ export class GameDataFetcherService {
     finalCharactersData: GameCharacter[],
     finalProducersData: GameDeveloper[],
     bangumiRawGameData?: BangumiGameItemRes,
+    skip_consistency_check?: boolean,
   ) {
     const [rawGameData, rawReleasesData] = await Promise.all([
       await this.vndbService.vndbRequest<VNDBGameItemRes>(
@@ -273,7 +280,7 @@ export class GameDataFetcherService {
         100,
       ),
     ])
-    if (bangumiRawGameData) {
+    if (bangumiRawGameData && !skip_consistency_check) {
       this.consistencyCheck(bangumiRawGameData, rawGameData)
     }
 

@@ -37,6 +37,7 @@ export class GameCreateService {
   async createFromBangumiAndVNDB(
     b_id: string,
     v_id: string | undefined,
+    skip_consistency_check: boolean,
     req: RequestWithUser,
   ): Promise<number> {
     if (req.user.role < ShionlibUserRoles.ADMIN && !(b_id && v_id)) {
@@ -53,7 +54,7 @@ export class GameCreateService {
     }
 
     const { finalGameData, finalCharactersData, finalProducersData, finalCoversData } =
-      await this.gameDataFetcherService.fetchData(b_id, v_id)
+      await this.gameDataFetcherService.fetchData(b_id, v_id, skip_consistency_check)
 
     let gameId = 0
     try {

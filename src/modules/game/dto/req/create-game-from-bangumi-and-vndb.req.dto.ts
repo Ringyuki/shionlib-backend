@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsNumber, IsBoolean } from 'class-validator'
 import { ivm } from '../../../../common/validation/i18n'
 
 export class CreateGameFromBangumiAndVNDBReqDto {
@@ -15,4 +15,10 @@ export class CreateGameFromBangumiAndVNDBReqDto {
   )
   @IsOptional()
   v_id?: number
+
+  @IsBoolean({
+    message: ivm('validation.common.IS_BOOLEAN', { property: 'skip_consistency_check' }),
+  })
+  @IsOptional()
+  skip_consistency_check?: boolean
 }
