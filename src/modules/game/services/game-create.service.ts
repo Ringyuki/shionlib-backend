@@ -54,7 +54,9 @@ export class GameCreateService {
     }
 
     const { finalGameData, finalCharactersData, finalProducersData, finalCoversData } =
-      await this.gameDataFetcherService.fetchData(b_id, v_id, skip_consistency_check)
+      skip_consistency_check && req.user.role >= ShionlibUserRoles.ADMIN
+        ? await this.gameDataFetcherService.fetchData(b_id, v_id, true)
+        : await this.gameDataFetcherService.fetchData(b_id, v_id, false)
 
     let gameId = 0
     try {
