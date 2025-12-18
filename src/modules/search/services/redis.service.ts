@@ -17,10 +17,6 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
     if (!host || !port || !database) {
       throw new Error('Redis host, port and database are required')
     }
-    this.logger.log(
-      `Redis config: host=${host}; port=${port}; password=${password}; database=${database}`,
-    )
-
     this.client = new IORedis({
       host,
       port,

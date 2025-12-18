@@ -11,8 +11,10 @@ import { ShionBizException } from './common/exceptions/shion-business.exception'
 import { ShionBizCode } from './shared/enums/biz-code/shion-biz-code.enum'
 import { flattenValidationErrors } from './common/validation/flatten-validation.util'
 import { HttpStatus } from '@nestjs/common'
+import { ShionWsAdapter } from './common/ws/ws.adapter'
 import cookieParser from 'cookie-parser'
 import * as express from 'express'
+import { Redis } from 'ioredis'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -23,11 +25,8 @@ async function bootstrap() {
   app.set('trust proxy', true)
   const configService = app.get(ShionConfigService)
 
-  const redisHost = configService.get('redis.host')
-  const redisPort = configService.get('redis.port')
-  console.log('------------------------------------------------')
-  console.log(`[DEBUG] Loading Redis Config: ${redisHost}:${redisPort}`)
-  console.log('------------------------------------------------')
+  const redis = app.get<Redis>(Redis)
+  app.useWebSocketAdapter(new ShionWsAdapter(app, configService, redis))
 
   app.use(
     '/uploads/large',

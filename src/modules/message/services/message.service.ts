@@ -8,10 +8,15 @@ import { MessageListItemResDto } from '../dto/res/message-list.res.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { Prisma } from '@prisma/client'
+import { MessageNotifier } from './message-notifier.service'
+import { MessageType } from '../dto/req/send-message.req.dto'
 
 @Injectable()
 export class MessageService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messageNotifier: MessageNotifier,
+  ) {}
 
   async send(sendMessageReqDto: SendMessageReqDto, tx?: Prisma.TransactionClient) {
     const {
@@ -27,7 +32,7 @@ export class MessageService {
       receiver_id,
     } = sendMessageReqDto
 
-    await (tx || this.prisma).message.create({
+    const message = await (tx || this.prisma).message.create({
       data: {
         type,
         title,
@@ -40,6 +45,18 @@ export class MessageService {
         sender_id,
         receiver_id,
       },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        created: true,
+      },
+    })
+    this.messageNotifier.notifyNewMessage(receiver_id, {
+      id: message.id,
+      title: message.title,
+      type: message.type as MessageType,
+      created: message.created,
     })
   }
 
@@ -165,6 +182,10 @@ export class MessageService {
       where: { id, receiver_id: req.user.sub },
       data: { read: true, read_at: new Date() },
     })
+    const unread = await this.prisma.message.count({
+      where: { receiver_id: req.user.sub, read: false },
+    })
+    this.messageNotifier.notifyUnreadCount(req.user.sub, unread)
   }
 
   async markAllAsRead(req: RequestWithUser) {
@@ -172,5 +193,6 @@ export class MessageService {
       where: { receiver_id: req.user.sub, read: false },
       data: { read: true, read_at: new Date() },
     })
+    this.messageNotifier.notifyUnreadCount(req.user.sub, 0)
   }
 }
