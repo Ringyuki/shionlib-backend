@@ -34,17 +34,20 @@ export class GameScoreService {
     }
 
     const cacheKey = `game:score:bangumi:${game.b_id}`
-    const cachedScore = await this.cacheService.get<BangumiGameItemRes['rating']>(cacheKey)
+    const cachedScore = await this.cacheService.get<{
+      rating: BangumiGameItemRes['rating']
+      id: number
+    }>(cacheKey)
     if (cachedScore) {
       return cachedScore
     }
 
-    const { rating } = await this.bangumiService.bangumiRequest<BangumiGameItemRes>(
+    const { rating, id: b_id } = await this.bangumiService.bangumiRequest<BangumiGameItemRes>(
       `https://api.bgm.tv/v0/subjects/${game.b_id}`,
     )
-    await this.cacheService.set(cacheKey, rating, 60 * 60 * 24 * 7 * 1000) // 7 days
+    await this.cacheService.set(cacheKey, { rating, id: b_id }, 60 * 60 * 24 * 7 * 1000) // 7 days
 
-    return rating
+    return { rating, id: b_id }
   }
 
   async getVNDBScore(id: number) {
