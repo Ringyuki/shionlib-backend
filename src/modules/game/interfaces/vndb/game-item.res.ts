@@ -18,7 +18,14 @@ export interface VNDBGameItemRes {
   extlinks: GameLink[]
   image: Image
   olang: string
+
+  rating: number
+  length_votes: number
+  average: number
+  votecount: number
 }
+
+export type VNDBGameItemRating = Pick<VNDBGameItemRes, 'rating' | 'average' | 'votecount'>
 
 interface Title {
   lang: string

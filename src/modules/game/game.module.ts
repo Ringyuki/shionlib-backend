@@ -12,6 +12,8 @@ import { GameHotScoreService } from './services/game-hot-score.service'
 import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
 import { GameDownloadSourceController } from './controllers/game-download-source.controller'
 import { HttpModule } from '@nestjs/axios'
+import { GameScoreService } from './services/game-score.service'
+import { GameScoreController } from './controllers/game-score.controller'
 
 @Module({
   controllers: [
@@ -19,6 +21,7 @@ import { HttpModule } from '@nestjs/axios'
     GameController,
     GameEditController,
     GameDownloadSourceController,
+    GameScoreController,
   ],
   imports: [B2Module, HttpModule],
   providers: [
@@ -30,6 +33,7 @@ import { HttpModule } from '@nestjs/axios'
     GameEditService,
     GameHotScoreService,
     GameHotScoreCalcTask,
+    GameScoreService,
   ],
 })
 export class GameModule {}
