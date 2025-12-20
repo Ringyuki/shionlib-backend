@@ -52,12 +52,13 @@ export class MessageService {
         created: true,
       },
     })
-    this.messageNotifier.notifyNewMessage(receiver_id, {
-      id: message.id,
-      title: message.title,
-      type: message.type as MessageType,
-      created: message.created,
-    })
+    if (receiver_id !== sender_id)
+      this.messageNotifier.notifyNewMessage(receiver_id, {
+        id: message.id,
+        title: message.title,
+        type: message.type as MessageType,
+        created: message.created,
+      })
   }
 
   async getList(
