@@ -72,7 +72,7 @@ export class UserService {
         email,
         password: passwordHash,
         lang,
-        content_limit: UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
+        content_limit: UserContentLimit.SHOW_WITH_SPOILER,
         upload_quota: {
           create: {
             size: 0n,
