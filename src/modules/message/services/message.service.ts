@@ -32,6 +32,12 @@ export class MessageService {
       receiver_id,
     } = sendMessageReqDto
 
+    if (type === MessageType.COMMENT_LIKE || type === MessageType.COMMENT_REPLY) {
+      if (receiver_id === sender_id) {
+        return
+      }
+    }
+
     const message = await (tx || this.prisma).message.create({
       data: {
         type,
@@ -52,13 +58,12 @@ export class MessageService {
         created: true,
       },
     })
-    if (receiver_id !== sender_id)
-      this.messageNotifier.notifyNewMessage(receiver_id, {
-        id: message.id,
-        title: message.title,
-        type: message.type as MessageType,
-        created: message.created,
-      })
+    this.messageNotifier.notifyNewMessage(receiver_id, {
+      id: message.id,
+      title: message.title,
+      type: message.type as MessageType,
+      created: message.created,
+    })
   }
 
   async getList(
