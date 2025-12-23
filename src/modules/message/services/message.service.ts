@@ -127,62 +127,65 @@ export class MessageService {
   }
 
   async getById(id: number, req: RequestWithUser) {
-    const message = await this.prisma.message.update({
-      where: { id, receiver_id: req.user.sub },
-      data: { read: true, read_at: new Date() },
-      select: {
-        id: true,
-        type: true,
-        title: true,
-        content: true,
-        link_text: true,
-        link_url: true,
-        external_link: true,
-        comment: {
-          select: {
-            id: true,
-            html: true,
+    const message = await this.prisma.$transaction(async tx => {
+      const message = await this.prisma.message.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          content: true,
+          link_text: true,
+          link_url: true,
+          external_link: true,
+          comment: {
+            select: {
+              id: true,
+              html: true,
+            },
           },
-        },
-        game: {
-          select: {
-            id: true,
-            title_zh: true,
-            title_en: true,
-            title_jp: true,
+          game: {
+            select: {
+              id: true,
+              title_zh: true,
+              title_en: true,
+              title_jp: true,
+            },
           },
-        },
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
           },
-        },
-        receiver: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
           },
+          read: true,
+          read_at: true,
+          created: true,
+          updated: true,
         },
-        read: true,
-        read_at: true,
-        created: true,
-        updated: true,
-      },
+      })
+      if (!message) {
+        throw new ShionBizException(ShionBizCode.MESSAGE_NOT_FOUND, 'shion-biz.MESSAGE_NOT_FOUND')
+      }
+      if (message.receiver.id !== req.user.sub) {
+        throw new ShionBizException(ShionBizCode.MESSAGE_FORBIDDEN, 'shion-biz.MESSAGE_FORBIDDEN')
+      }
+      await this.markAsRead(id, req, tx)
+      return message
     })
-    if (!message) {
-      throw new ShionBizException(ShionBizCode.MESSAGE_NOT_FOUND, 'shion-biz.MESSAGE_NOT_FOUND')
-    }
-    if (message.receiver.id !== req.user.sub) {
-      throw new ShionBizException(ShionBizCode.MESSAGE_FORBIDDEN, 'shion-biz.MESSAGE_FORBIDDEN')
-    }
     return message
   }
 
-  async markAsRead(id: number, req: RequestWithUser) {
-    await this.prisma.message.update({
+  async markAsRead(id: number, req: RequestWithUser, tx?: Prisma.TransactionClient) {
+    await (tx || this.prisma).message.update({
       where: { id, receiver_id: req.user.sub },
       data: { read: true, read_at: new Date() },
     })
