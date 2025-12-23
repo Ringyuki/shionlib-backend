@@ -67,29 +67,31 @@ export class MessageService {
   ): Promise<PaginatedResult<MessageListItemResDto>> {
     const { page, pageSize, unread, type } = paginationReqDto
 
-    const total = await this.prisma.message.count({
-      where: {
-        receiver_id: req.user.sub,
-        ...(unread ? { read: false } : {}),
-        ...(type ? { type } : {}),
-      },
-    })
+    const where: Prisma.MessageWhereInput = {
+      receiver_id: req.user.sub,
+      ...(unread !== undefined ? { read: !unread } : {}),
+      ...(type ? { type } : {}),
+    }
+    const total = await this.prisma.message.count({ where })
     const messages = await this.prisma.message.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: {
         created: 'desc',
       },
-      where: {
-        receiver_id: req.user.sub,
-        ...(unread ? { read: false } : {}),
-        ...(type ? { type } : {}),
-      },
+      where,
       select: {
         id: true,
         type: true,
         title: true,
         receiver: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        sender: {
           select: {
             id: true,
             name: true,
@@ -125,8 +127,9 @@ export class MessageService {
   }
 
   async getById(id: number, req: RequestWithUser) {
-    const message = await this.prisma.message.findUnique({
+    const message = await this.prisma.message.update({
       where: { id, receiver_id: req.user.sub },
+      data: { read: true, read_at: new Date() },
       select: {
         id: true,
         type: true,
