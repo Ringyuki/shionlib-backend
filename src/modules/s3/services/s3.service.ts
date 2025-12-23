@@ -5,6 +5,8 @@ import {
   PutObjectCommand,
   ListObjectsV2Command,
   DeleteObjectCommand,
+  ListObjectVersionsCommand,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { Readable } from 'node:stream'
@@ -85,12 +87,41 @@ export class S3Service implements OnModuleInit {
     return result
   }
 
-  async deleteFile(key: string) {
-    const command = new DeleteObjectCommand({
+  async deleteFile(key: string, hard: boolean = true) {
+    if (hard) {
+      const { versions, deleteMarkers } = await this.listObjectVersions(key)
+      const allIds = [...versions, ...deleteMarkers]
+      if (allIds.length === 0) return
+      const command = new DeleteObjectsCommand({
+        Bucket: this.bucket,
+        Delete: {
+          Objects: allIds.map(id => ({ Key: key, VersionId: id })),
+          Quiet: true,
+        },
+      })
+      await this.s3Client.send(command)
+    } else {
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      })
+      await this.s3Client.send(command)
+    }
+  }
+
+  private async listObjectVersions(key: string) {
+    const command = new ListObjectVersionsCommand({
       Bucket: this.bucket,
-      Key: key,
+      Prefix: key,
     })
-    await this.s3Client.send(command)
+    const result = await this.s3Client.send(command)
+
+    const versions = (result.Versions || []).filter(v => v.Key === key).map(v => v.VersionId)
+    const deleteMarkers = (result.DeleteMarkers || [])
+      .filter(m => m.Key === key)
+      .map(m => m.VersionId)
+
+    return { versions, deleteMarkers }
   }
 
   async getFileList(options?: { prefix?: string; continuationToken?: string; maxKeys?: number }) {
