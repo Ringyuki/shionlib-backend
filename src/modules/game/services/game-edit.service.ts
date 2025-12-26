@@ -371,7 +371,7 @@ export class GameEditService {
     })
 
     for (const cover of coversToRemove) {
-      await this.imageStorage.deleteFile(cover.url, true)
+      await this.imageStorage.deleteFile(cover.url, false)
     }
 
     const updated = await this.prisma.game.findUnique({
