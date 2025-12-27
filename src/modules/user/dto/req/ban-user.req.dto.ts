@@ -33,4 +33,8 @@ export class BanUserReqDto {
   @IsOptional()
   @IsBoolean({ message: ivm('validation.common.IS_BOOLEAN', { property: 'is_permanent' }) })
   is_permanent?: boolean
+
+  @IsOptional()
+  @IsBoolean({ message: ivm('validation.common.IS_BOOLEAN', { property: 'delete_user_content' }) })
+  delete_user_comments?: boolean
 }

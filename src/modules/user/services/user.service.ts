@@ -263,7 +263,8 @@ export class UserService {
         )
       }
 
-      const { banned_by, banned_reason, banned_duration_days, is_permanent } = dto
+      const { banned_by, banned_reason, banned_duration_days, is_permanent, delete_user_comments } =
+        dto
       if (!is_permanent && (banned_duration_days == null || banned_duration_days <= 0))
         throw new ShionBizException(
           ShionBizCode.USER_INVALID_BAN_DURATION,
@@ -292,6 +293,7 @@ export class UserService {
           new Date(Date.now() + (banned_duration_days ?? 1) * 24 * 60 * 60 * 1000),
         )
       }
+      if (delete_user_comments) await tx.comment.deleteMany({ where: { creator_id: id } })
     }
 
     if (_tx) return execute(_tx)
