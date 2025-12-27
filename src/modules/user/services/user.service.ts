@@ -213,6 +213,7 @@ export class UserService {
         avatar: true,
         role: true,
         created: true,
+        status: true,
       },
     })
     if (!user) {
