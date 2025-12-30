@@ -7,7 +7,7 @@ export class FileCleanTask {
   constructor(private readonly fileCleanService: FileCleanService) {}
   private readonly logger = new Logger(FileCleanTask.name)
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     try {
       await this.fileCleanService.clean()

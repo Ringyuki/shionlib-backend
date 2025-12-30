@@ -1,4 +1,4 @@
-import { MessageType } from '../req/send-message.req.dto'
+import { MessageType, MessageMeta } from '../req/send-message.req.dto'
 
 export class MessageResDto {
   id: number
@@ -8,6 +8,7 @@ export class MessageResDto {
   link_text: string | null
   link_url: string | null
   external_link: boolean
+  meta: MessageMeta | null
   comment?: {
     id: number
     html: string

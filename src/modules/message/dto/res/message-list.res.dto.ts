@@ -9,6 +9,11 @@ export class MessageListItemResDto {
     name: string
     avatar: string
   }
+  receiver?: {
+    id: number
+    name: string
+    avatar: string
+  }
 
   read: boolean
   read_at?: Date

@@ -26,6 +26,7 @@ export class MessageService {
       link_text,
       link_url,
       external_link,
+      meta,
       comment_id,
       game_id,
       sender_id,
@@ -46,6 +47,7 @@ export class MessageService {
         link_text,
         link_url,
         external_link,
+        meta: meta as Prisma.InputJsonValue,
         comment_id,
         game_id,
         sender_id,
@@ -143,6 +145,7 @@ export class MessageService {
           link_text: true,
           link_url: true,
           external_link: true,
+          meta: true,
           comment: {
             select: {
               id: true,

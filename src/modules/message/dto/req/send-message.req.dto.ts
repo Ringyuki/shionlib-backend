@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsBoolean,
   IsNumber,
+  IsObject,
 } from 'class-validator'
 import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 
@@ -13,6 +14,13 @@ export enum MessageType {
   COMMENT_REPLY = 'COMMENT_REPLY',
   COMMENT_LIKE = 'COMMENT_LIKE',
   SYSTEM = 'SYSTEM',
+}
+
+export interface MessageMeta {
+  file_id?: number
+  file_name?: string
+  file_size?: number
+  [key: string]: unknown
 }
 
 export class SendMessageReqDto {
@@ -53,6 +61,10 @@ export class SendMessageReqDto {
   @IsOptional()
   @IsBoolean({ message: ivm('validation.common.IS_BOOLEAN', { property: 'external_link' }) })
   external_link?: boolean
+
+  @IsOptional()
+  @IsObject({ message: ivm('validation.common.IS_OBJECT', { property: 'meta' }) })
+  meta?: MessageMeta
 
   @IsOptional()
   @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'comment_id' }) })

@@ -13,6 +13,7 @@ model Message {
   link_text String? @db.VarChar(255)
   link_url String? @db.VarChar(255)
   external_link Boolean @default(false)
+  meta Json?
 
   comment_id Int?
   comment Comment? @relation("comment_message", fields: [comment_id], references: [id], onDelete: Cascade)

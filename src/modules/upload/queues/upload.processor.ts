@@ -13,6 +13,8 @@ import {
   ActivityFileStatus,
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
+import { MessageService } from '../../message/services/message.service'
+import { MessageType } from '../../message/dto/req/send-message.req.dto'
 
 type S3UploadJobPayload = {
   resourceFileId: number
@@ -26,6 +28,7 @@ export class UploadProcessor {
     @Inject(GAME_STORAGE)
     private readonly s3Service: S3Service,
     private readonly activityService: ActivityService,
+    private readonly messageService: MessageService,
   ) {
     this.logger = new Logger(UploadProcessor.name)
   }
@@ -75,12 +78,19 @@ export class UploadProcessor {
         `resource file ${resourceFileId} not OK to upload (status=${file.file_check_status})`,
       )
     }
+
+    const gameId = file.game_download_resource.game_id
+    const meta = {
+      file_id: resourceFileId,
+      file_name: file.file_name,
+      file_size: Number(file.file_size),
+    }
+
     const localPath = file.file_path
     if (!localPath || !fs.existsSync(localPath)) {
       throw new Error(`local file not found for resource file ${resourceFileId}: ${localPath}`)
     }
 
-    const gameId = file.game_download_resource.game_id
     const base = path.basename(file.file_name).normalize('NFKC')
     const safeName = base.replace(/[^\p{L}\p{N}._-]+/gu, '_')
     const s3Key = `games/${gameId}/${resourceFileId}/${safeName}`
@@ -95,21 +105,38 @@ export class UploadProcessor {
       file.file_hash,
     )
 
-    await this.prismaService.gameDownloadResourceFile.update({
-      where: { id: resourceFileId },
-      data: {
-        file_status: 3,
-        s3_file_key: s3Key,
-      },
-    })
+    await this.prismaService.$transaction(async tx => {
+      await tx.gameDownloadResourceFile.update({
+        where: { id: resourceFileId },
+        data: {
+          file_status: 3,
+          s3_file_key: s3Key,
+        },
+      })
 
-    await this.activityService.create({
-      type: ActivityType.FILE_UPLOAD_TO_S3,
-      user_id: file.creator_id,
-      game_id: gameId,
-      file_id: resourceFileId,
-      file_status: ActivityFileStatus.UPLOADED_TO_S3,
-      file_check_status: ActivityFileCheckStatus.OK,
+      await this.activityService.create(
+        {
+          type: ActivityType.FILE_UPLOAD_TO_S3,
+          user_id: file.creator_id,
+          game_id: gameId,
+          file_id: resourceFileId,
+          file_status: ActivityFileStatus.UPLOADED_TO_S3,
+          file_check_status: ActivityFileCheckStatus.OK,
+        },
+        tx,
+      )
+
+      await this.messageService.send(
+        {
+          type: MessageType.SYSTEM,
+          title: 'Messages.System.File.Upload.FileUploadSuccessTitle',
+          content: 'Messages.System.File.Upload.FileUploadSuccessContent',
+          game_id: gameId,
+          meta,
+          receiver_id: file.creator_id,
+        },
+        tx,
+      )
     })
 
     try {

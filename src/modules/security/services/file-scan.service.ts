@@ -16,6 +16,9 @@ import {
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
 import { UserService } from '../../user/services/user.service'
+import { MessageService } from '../../message/services/message.service'
+import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { FILE_CHECK_STATUS_MAP } from '../../upload/constants/upload.constants'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -28,6 +31,7 @@ export class FileScanService implements OnModuleInit {
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly activityService: ActivityService,
     private readonly userService: UserService,
+    private readonly messageService: MessageService,
   ) {}
 
   async onModuleInit() {
@@ -96,6 +100,13 @@ export class FileScanService implements OnModuleInit {
     }
     this.logger.log(`scanning file ${filePath}`)
     const status = await this.inspectArchive(filePath)
+    const gameId = file.game_download_resource.game_id
+    const meta = {
+      file_id: file.id,
+      file_name: file.file_name,
+      file_size: Number(file.file_size),
+    }
+
     if (status !== ArchiveStatus.OK) {
       await this.prismaService.gameDownloadResourceFile.update({
         where: { file_path: filePath },
@@ -117,12 +128,24 @@ export class FileScanService implements OnModuleInit {
       await this.activityService.create({
         type: activityType,
         user_id: creator_id,
-        game_id: file.game_download_resource.game_id,
+        game_id: gameId,
         file_id: file.id,
         file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
         file_check_status: activityCheckStatus,
         file_size: Number(file.file_size),
         file_name: file.file_name,
+      })
+      await this.messageService.send({
+        type: MessageType.SYSTEM,
+        title: 'Messages.System.File.Upload.FileUploadFailedTitle',
+        content: 'Messages.System.File.Upload.FileCheckFailedContent',
+        game_id: gameId,
+        meta: {
+          ...meta,
+          file_check_status: status,
+          reason: FILE_CHECK_STATUS_MAP[status],
+        },
+        receiver_id: creator_id,
       })
       this.logger.warn(`file ${filePath} is not ok, reason: ${status}`)
       return
@@ -138,12 +161,27 @@ export class FileScanService implements OnModuleInit {
           {
             type: ActivityType.FILE_CHECK_HARMFUL,
             user_id: creator_id,
-            game_id: file.game_download_resource.game_id,
+            game_id: gameId,
             file_id: file.id,
             file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
             file_check_status: ActivityFileCheckStatus.HARMFUL,
             file_size: Number(file.file_size),
             file_name: file.file_name,
+          },
+          tx,
+        )
+        await this.messageService.send(
+          {
+            type: MessageType.SYSTEM,
+            title: 'Messages.System.File.Upload.FileUploadFailedTitle',
+            content: 'Messages.System.File.Upload.FileHarmfulContent',
+            game_id: gameId,
+            meta: {
+              ...meta,
+              file_check_status: ArchiveStatus.HARMFUL,
+              reason: FILE_CHECK_STATUS_MAP[ArchiveStatus.HARMFUL],
+            },
+            receiver_id: creator_id,
           },
           tx,
         )
@@ -193,7 +231,7 @@ export class FileScanService implements OnModuleInit {
     )
     await this.activityService.create({
       type: ActivityType.FILE_CHECK_OK,
-      game_id: file.game_download_resource.game_id,
+      game_id: gameId,
       user_id: creator_id,
       file_id: file.id,
       file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
