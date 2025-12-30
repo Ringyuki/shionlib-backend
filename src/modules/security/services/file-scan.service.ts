@@ -170,6 +170,11 @@ export class FileScanService implements OnModuleInit {
           },
           tx,
         )
+        const { upload_injected_file_times } = await tx.user.update({
+          where: { id: creator_id },
+          data: { upload_injected_file_times: { increment: 1 } },
+          select: { upload_injected_file_times: true },
+        })
         await this.messageService.send(
           {
             type: MessageType.SYSTEM,
@@ -179,32 +184,18 @@ export class FileScanService implements OnModuleInit {
             meta: {
               ...meta,
               file_check_status: ArchiveStatus.HARMFUL,
-              reason: FILE_CHECK_STATUS_MAP[ArchiveStatus.HARMFUL],
+              upload_injected_file_times,
             },
             receiver_id: creator_id,
           },
           tx,
         )
-        const user = await tx.user.update({
-          where: { id: creator_id },
-          data: { upload_injected_file_times: { increment: 1 } },
-          select: { upload_injected_file_times: true },
-        })
-        if (user.upload_injected_file_times === 3) {
+        if (upload_injected_file_times === 3) {
           await this.userService.ban(
             creator_id,
             {
               banned_reason: 'Uploaded harmful file (3 times)',
               banned_duration_days: 30,
-            },
-            tx,
-          )
-        } else if (user.upload_injected_file_times === 5) {
-          await this.userService.ban(
-            creator_id,
-            {
-              banned_reason: 'Uploaded harmful file (5 times)',
-              is_permanent: true,
             },
             tx,
           )

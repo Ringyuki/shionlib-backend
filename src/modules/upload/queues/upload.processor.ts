@@ -113,7 +113,6 @@ export class UploadProcessor {
           s3_file_key: s3Key,
         },
       })
-
       await this.activityService.create(
         {
           type: ActivityType.FILE_UPLOAD_TO_S3,
@@ -125,7 +124,6 @@ export class UploadProcessor {
         },
         tx,
       )
-
       await this.messageService.send(
         {
           type: MessageType.SYSTEM,
@@ -137,6 +135,10 @@ export class UploadProcessor {
         },
         tx,
       )
+      await tx.user.update({
+        where: { id: file.creator_id },
+        data: { upload_injected_file_times: 0 },
+      })
     })
 
     try {
