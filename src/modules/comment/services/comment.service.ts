@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { InjectQueue } from '@nestjs/bull'
+import { Queue } from 'bull'
 import { PrismaService } from 'src/prisma.service'
 import { CreateCommentReqDto } from '../dto/req/create-comment.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
@@ -11,25 +13,27 @@ import { CommentResDto } from '../dto/res/comment.res.dto'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { SerializedEditorState } from 'lexical'
-import { ActivityService } from '../../activity/services/activity.service'
-import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { MessageService } from '../../message/services/message.service'
 import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import {
+  MODERATION_QUEUE,
+  OMNI_MODERATION_JOB,
+} from '../../moderate/constants/moderation.constants'
 
 @Injectable()
 export class CommentServices {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly renderService: LexicalRendererService,
-    private readonly activityService: ActivityService,
     private readonly messageService: MessageService,
+    @InjectQueue(MODERATION_QUEUE) private readonly moderationQueue: Queue,
   ) {}
 
   async createGameComment(game_id: number, dto: CreateCommentReqDto, req: RequestWithUser) {
     const { content, parent_id } = dto
 
     let root_id: number | null = null
-    return await this.prismaService.$transaction(async tx => {
+    const result = await this.prismaService.$transaction(async tx => {
       if (parent_id) {
         const parent = await tx.comment.findUnique({
           where: { id: parent_id },
@@ -51,6 +55,7 @@ export class CommentServices {
           creator_id: req.user.sub,
           parent_id,
           root_id,
+          status: 2,
         },
         select: {
           id: true,
@@ -100,35 +105,15 @@ export class CommentServices {
           data: { reply_count: { increment: 1 } },
         })
       }
-      await this.activityService.create(
-        {
-          type: ActivityType.COMMENT,
-          user_id: req.user.sub,
-          game_id,
-          comment_id: comment.id,
-        },
-        tx,
-      )
-      if (parent_id && comment.parent?.creator?.id && comment.parent.creator.id !== req.user.sub)
-        await this.messageService.send(
-          {
-            type: MessageType.COMMENT_REPLY,
-            title: 'Messages.Comment.Reply.Title',
-            content: 'Messages.Comment.Reply.Content',
-            receiver_id: comment.parent.creator.id,
-            comment_id: comment.id,
-            game_id,
-            sender_id: req.user.sub,
-          },
-          tx,
-        )
-
       return {
         ...comment,
         root_id: root_id || comment.id,
         like_count: 0,
       }
     })
+
+    await this.moderationQueue.add(OMNI_MODERATION_JOB, { commentId: result.id })
+    return result
   }
 
   async editComment(id: number, dto: EditCommentReqDto, req: RequestWithUser) {
@@ -153,9 +138,9 @@ export class CommentServices {
 
     const html = await this.renderService.toHtml(content as SerializedEditorState)
 
-    return await this.prismaService.comment.update({
+    const comment = await this.prismaService.comment.update({
       where: { id },
-      data: { content, html, edited: true },
+      data: { content, html, edited: true, status: 2 },
       select: {
         id: true,
         content: true,
@@ -174,6 +159,9 @@ export class CommentServices {
         updated: true,
       },
     })
+
+    await this.moderationQueue.add(OMNI_MODERATION_JOB, { commentId: id })
+    return comment
   }
 
   async getRaw(id: number, req: RequestWithUser) {

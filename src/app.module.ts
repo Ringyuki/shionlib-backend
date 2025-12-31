@@ -34,6 +34,8 @@ import { ActivityModule } from './modules/activity/activity.module'
 import { SiteModule } from './modules/site/site.module'
 import { MessageModule } from './modules/message/message.module'
 import { DatabaseModule } from './modules/database/database.module'
+import { LLMsModule } from './modules/llms/llms.module'
+import { ModerateModule } from './modules/moderate/moderate.module'
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { DatabaseModule } from './modules/database/database.module'
     PrismaModule,
     ScheduleModule.forRoot(),
     BullModule,
+    LLMsModule,
+    ModerateModule,
     S3Module,
     B2Module,
     ThrottleModule,

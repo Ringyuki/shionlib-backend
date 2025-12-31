@@ -1,4 +1,4 @@
-// comment status: 1 -> visible, 2 -> hidden, 3 -> deleted
+// comment status: 1 -> visible, 2 -> pending moderation (hidden), 3 -> deleted
 model Comment {
   id      Int     @id @default(autoincrement())
   content Json    @db.JsonB
@@ -25,6 +25,8 @@ model Comment {
   edited Boolean @default(false)
 
   messages Message[] @relation("comment_message")
+
+  moderates moderation_events[] @relation("comment_moderate")
 
   created DateTime @default(now())
   updated DateTime @updatedAt
