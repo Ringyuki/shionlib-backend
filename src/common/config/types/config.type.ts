@@ -1,8 +1,9 @@
 import { AppConfig } from '../interfaces/app.interface'
 import { AuthConfig } from '../interfaces/auth.interface'
 import { DatabaseConfig } from '../interfaces/database.interface'
+import { LLMsConfig } from '../interfaces/llms.interface'
 
-export type ConfigType = AppConfig & AuthConfig & DatabaseConfig
+export type ConfigType = AppConfig & AuthConfig & DatabaseConfig & LLMsConfig
 
 type IsRecord<T> = T extends object
   ? T extends (...args: unknown[]) => unknown
