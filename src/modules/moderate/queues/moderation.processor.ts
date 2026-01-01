@@ -157,9 +157,17 @@ export class ModerationProcessor {
     const comment = await this.prismaService.comment.findUnique({
       where: { id: commentId },
       include: {
+        game: {
+          select: {
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+          },
+        },
         parent: {
           select: {
             creator_id: true,
+            html: true,
           },
         },
       },
@@ -191,20 +199,38 @@ export class ModerationProcessor {
        */
       categories_json: z.object({}).catchall(z.boolean()),
     })
+
+    const gameName = `${comment.game.title_zh} ${comment.game.title_en} ${comment.game.title_jp}`
+    const parentComment = comment.parent ? this.htmlToPureText(comment.parent.html) : null
+    const context = [
+      `Game: ${gameName}`,
+      parentComment ? `Replying to: "${parentComment}"` : null,
+      `Comment: "${this.htmlToPureText(comment.html)}"`,
+    ]
+      .filter(Boolean)
+      .join('\n')
+
     const input = [
       {
         role: 'system' as const,
-        content: `You are a content moderation system. Analyze the given comment and return a moderation decision. Available categories (use these exact values for top_category and as keys in categories_json): ${categories.map(c => `- ${c}`).join('\n')} For categories_json, set each category to true if the content violates that category, false otherwise. For top_category, select the most relevant violation category (or "harassment" if none apply). If the content is acceptable, set decision to "ALLOW". If it violates policies, set decision to "BLOCK".`,
+        content: `You are a content moderation system for a game review platform. Analyze the given comment in context and return a moderation decision.
+                  Context matters: Gaming slang, hyperbolic expressions (e.g., "I'm dying" meaning frustration), and game-related discussions are generally acceptable.
+                  Available categories (use these exact values for top_category and as keys in categories_json):
+                  ${categories.map(c => `- ${c}`).join('\n')}
+                  For categories_json, set each category to true if the content violates that category, false otherwise.
+                  For top_category, select the most relevant violation category (or "harassment" if none apply).
+                  If the content is acceptable, set decision to "ALLOW". If it violates policies, set decision to "BLOCK".`,
       },
       {
         role: 'user' as const,
-        content: this.htmlToPureText(comment.html),
+        content: context,
       },
     ]
     const { output_parsed } = await this.openaiService.parseResponse({
       model: LLM_MODERATION_MODEL,
       input,
       text: { format: zodTextFormat(moderationEvent, 'moderationEvent') },
+      reasoning: { effort: 'medium' },
     })
 
     if (!output_parsed) {
