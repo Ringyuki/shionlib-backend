@@ -10,10 +10,15 @@ import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { GetGameListFilterReqDto } from '../dto/req/get-game-list.req.dto'
 import { applyDate } from '../helpers/date-filters'
+import { CacheService } from '../../cache/services/cache.service'
+import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
 
 @Injectable()
 export class GameService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
   async getById(id: number, user_id?: number, content_limit?: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
       where: {
@@ -312,23 +317,63 @@ export class GameService {
     }
   }
 
-  async getAllGames() {
-    return (
-      await this.prisma.game.findMany({
-        select: {
-          id: true,
-          title_jp: true,
-          title_zh: true,
-          title_en: true,
-          aliases: true,
+  async addToRecentUpdate(game_id: number) {
+    const now = Date.now()
+    await this.cacheService.zadd(RECENT_UPDATE_KEY, now, game_id)
+    const expiredBefore = now - RECENT_UPDATE_TTL_MS
+    await this.cacheService.zremrangebyscore(RECENT_UPDATE_KEY, '-inf', expiredBefore)
+  }
+
+  async removeFromRecentUpdate(game_id: number) {
+    await this.cacheService.zrem(RECENT_UPDATE_KEY, game_id)
+  }
+
+  async getRecentUpdate(dto: PaginationReqDto): Promise<PaginatedResult<GetGameListResDto>> {
+    const { page = 1, pageSize = 100 } = dto
+    const start = (page - 1) * pageSize
+    const end = start + pageSize - 1
+    const now = Date.now()
+    const expiredBefore = now - RECENT_UPDATE_TTL_MS
+    await this.cacheService.zremrangebyscore(RECENT_UPDATE_KEY, '-inf', expiredBefore)
+
+    const items = await this.cacheService.zrangeWithScores(RECENT_UPDATE_KEY, start, end, 'DESC')
+    const gameIds = items.map(item => Number(item.member))
+    const total = gameIds.length
+    const games = await this.prisma.game.findMany({
+      skip: start,
+      take: pageSize,
+      where: {
+        id: { in: gameIds },
+      },
+      select: {
+        id: true,
+        title_jp: true,
+        title_zh: true,
+        title_en: true,
+        aliases: true,
+        type: true,
+        covers: {
+          select: {
+            language: true,
+            type: true,
+            dims: true,
+            sexual: true,
+            violence: true,
+            url: true,
+          },
         },
-      })
-    ).map(game => ({
-      game_id: game.id,
-      title_jp: game.title_jp,
-      title_zh: game.title_zh,
-      title_en: game.title_en,
-      aliases: game.aliases,
-    }))
+        views: true,
+      },
+    })
+    return {
+      items: games,
+      meta: {
+        totalItems: total,
+        itemCount: games.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
   }
 }

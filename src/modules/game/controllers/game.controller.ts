@@ -9,6 +9,7 @@ import {
   UseGuards,
   Body,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameService } from '../services/game.service'
@@ -22,6 +23,7 @@ import { GameDownloadSourceService } from '../services/game-download-resource.se
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { SkipThrottle } from '@nestjs/throttler'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 
 @Controller('game')
 export class GameController {
@@ -38,6 +40,11 @@ export class GameController {
       getGameListReqDto.developer_id,
       getGameListReqDto.filter,
     )
+  }
+
+  @Get('recent-update')
+  async getRecentUpdate(@Query() getRecentUpdateReqDto: PaginationReqDto) {
+    return await this.gameService.getRecentUpdate(getRecentUpdateReqDto)
   }
 
   @Get(':id')
@@ -88,8 +95,15 @@ export class GameController {
 
   @UseGuards(JwtAuthGuard)
   @Roles(ShionlibUserRoles.ADMIN)
-  @Get('migrate/all')
-  async getAllGames() {
-    return await this.gameService.getAllGames()
+  @Put(':id/recent-update')
+  async updateRecentUpdate(@Param('id', ParseIntPipe) id: number) {
+    return await this.gameService.addToRecentUpdate(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(ShionlibUserRoles.ADMIN)
+  @Delete(':id/recent-update')
+  async removeFromRecentUpdate(@Param('id', ParseIntPipe) id: number) {
+    return await this.gameService.removeFromRecentUpdate(id)
   }
 }

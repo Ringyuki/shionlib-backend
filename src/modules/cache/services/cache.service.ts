@@ -30,4 +30,37 @@ export class CacheService {
   async del(key: string): Promise<void> {
     await this.cache.del(key)
   }
+
+  async zadd(key: string, score: number, member: string | number): Promise<number> {
+    return this.redis.zadd(key, score, String(member))
+  }
+
+  async zrem(key: string, ...members: (string | number)[]): Promise<number> {
+    return this.redis.zrem(key, ...members.map(String))
+  }
+
+  async zrangeWithScores(
+    key: string,
+    start: number,
+    stop: number,
+    order: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<{ member: string; score: number }[]> {
+    const result =
+      order === 'DESC'
+        ? await this.redis.zrevrange(key, start, stop, 'WITHSCORES')
+        : await this.redis.zrange(key, start, stop, 'WITHSCORES')
+
+    const items: { member: string; score: number }[] = []
+    for (let i = 0; i < result.length; i += 2) {
+      items.push({
+        member: result[i],
+        score: Number(result[i + 1]),
+      })
+    }
+    return items
+  }
+
+  async zremrangebyscore(key: string, min: number | string, max: number | string): Promise<number> {
+    return this.redis.zremrangebyscore(key, min, max)
+  }
 }
