@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectQueue } from '@nestjs/bull'
 import { Queue } from 'bull'
 import { PrismaService } from 'src/prisma.service'
+import { Prisma } from '@prisma/client'
 import { CreateCommentReqDto } from '../dto/req/create-comment.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditCommentReqDto } from '../dto/req/edit-comment.req.dto'
@@ -83,6 +84,7 @@ export class CommentServices {
               avatar: true,
             },
           },
+          status: true,
           created: true,
           updated: true,
         },
@@ -155,6 +157,7 @@ export class CommentServices {
           },
         },
         edited: true,
+        status: true,
         created: true,
         updated: true,
       },
@@ -230,12 +233,16 @@ export class CommentServices {
     req: RequestWithUser,
   ): Promise<PaginatedResult<CommentResDto>> {
     const { page, pageSize } = paginationReqDto
-    const total = await this.prismaService.comment.count({
-      where: { game_id },
-    })
 
+    const where: Prisma.CommentWhereInput = {
+      OR: [
+        { game_id, status: 1 },
+        { game_id, creator_id: req.user.sub, status: { not: 3 } },
+      ],
+    }
+    const total = await this.prismaService.comment.count({ where })
     const comments = await this.prismaService.comment.findMany({
-      where: { game_id, status: 1 },
+      where,
       orderBy: [{ created: 'asc' }],
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -268,6 +275,7 @@ export class CommentServices {
           },
         },
         edited: true,
+        status: true,
         created: true,
         updated: true,
       },
@@ -289,6 +297,7 @@ export class CommentServices {
         like_count: comment._count.liked_users,
         creator: comment.creator,
         edited: comment.edited,
+        status: comment.status,
         created: comment.created,
         updated: comment.updated,
       })),

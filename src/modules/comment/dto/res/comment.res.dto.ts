@@ -18,6 +18,7 @@ export class CommentResDto {
     avatar: string | null
   }
   edited: boolean
+  status: number
   created: Date
   updated: Date
 }
