@@ -7,6 +7,7 @@ import {
   LLM_MODERATION_JOB,
   LLM_MODERATION_MODEL,
   REVIEW_THRESHOLD_SCORE,
+  BLOCK_THRESHOLD_SCORE,
 } from '../constants/moderation.constants'
 import { OpenaiService } from '../../llms/openai/services/openai.service'
 import { PrismaService } from '../../../prisma.service'
@@ -63,8 +64,16 @@ export class ModerationProcessor {
 
     const topCategory = this.getTopCategory(moderation)
     const maxScore = this.getMaxScore(moderation)
-    const isApproved = maxScore < REVIEW_THRESHOLD_SCORE && !moderation.flagged
-    const needsLlmReview = !moderation.flagged && maxScore >= REVIEW_THRESHOLD_SCORE
+
+    const shouldBlock = maxScore >= BLOCK_THRESHOLD_SCORE
+    const needsLlmReview = !shouldBlock && maxScore >= REVIEW_THRESHOLD_SCORE
+    const isApproved = maxScore < REVIEW_THRESHOLD_SCORE
+
+    const decision = shouldBlock
+      ? ModerationDecision.BLOCK
+      : needsLlmReview
+        ? ModerationDecision.REVIEW
+        : ModerationDecision.ALLOW
 
     await this.prismaService.$transaction(async tx => {
       await tx.moderation_events.create({
@@ -72,11 +81,7 @@ export class ModerationProcessor {
           comment_id: commentId,
           audit_by: 1,
           model: 'omni-moderation-latest',
-          decision: moderation.flagged
-            ? ModerationDecision.BLOCK
-            : needsLlmReview
-              ? ModerationDecision.REVIEW
-              : ModerationDecision.ALLOW,
+          decision,
           top_category: topCategory,
           categories_json: moderation.categories as unknown as Prisma.InputJsonValue,
           max_score: maxScore,
@@ -118,7 +123,7 @@ export class ModerationProcessor {
         }
       }
 
-      if (moderation.flagged) {
+      if (shouldBlock) {
         await tx.comment.update({
           where: { id: commentId },
           data: { status: 3 },
