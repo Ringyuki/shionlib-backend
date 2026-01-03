@@ -26,7 +26,7 @@ model GameDownloadResource {
 // file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
 // file check status: 0 -> pending, 1 -> ok, 2 -> broken or truncated, 3 -> broken or unsupported, 4 -> encrypted, 5 -> harmful
 model GameDownloadResourceFile {
-  id                Int     @id @default(autoincrement())
+  id                Int           @id @default(autoincrement())
   type              Int
   file_name         String
   file_path         String? // for file type 1, local file path
@@ -48,7 +48,8 @@ model GameDownloadResourceFile {
   creator_id Int
   creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
 
-  activities Activity[] @relation("game_download_resource_file_activity")
+  activities Activity[]                        @relation("game_download_resource_file_activity")
+  histories  GameDownloadResourceFileHistory[] @relation("game_download_resource_file_history")
 
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -57,4 +58,27 @@ model GameDownloadResourceFile {
   @@unique([file_path])
   @@index([file_path])
   @@map("game_download_resource_files")
+}
+
+model GameDownloadResourceFileHistory {
+  id Int @id @default(autoincrement())
+
+  file_id Int
+  file    GameDownloadResourceFile @relation("game_download_resource_file_history", fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  file_size      BigInt
+  hash_algorithm HashAlgorithm
+  file_hash      String
+  s3_file_key    String?
+
+  reason            String? @db.VarChar(500) // reason for reupload
+  upload_session_id Int? // the old upload session id
+
+  operator_id Int
+  operator    User @relation("user_reupload_game_download_resource_file", fields: [operator_id], references: [id])
+
+  created DateTime @default(now())
+
+  @@index([file_id])
+  @@map("game_download_resource_file_histories")
 }

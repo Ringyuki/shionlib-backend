@@ -75,6 +75,7 @@ export type I18nTranslations = {
         "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": string;
+        "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER": string;
         "FAVORITE_ALREADY_EXISTS": string;
         "COMMENT_NOT_FOUND": string;
         "COMMENT_NOT_OWNER": string;
@@ -92,6 +93,8 @@ export type I18nTranslations = {
         "GAME_UPLOAD_INVALID_CHUNK_INDEX": string;
         "GAME_UPLOAD_SESSION_EXPIRED": string;
         "GAME_UPLOAD_SESSION_NOT_OWNER": string;
+        "GAME_UPLOAD_SESSION_ALREADY_USED": string;
+        "GAME_UPLOAD_INVALID_FILE_STATUS": string;
         "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": string;
         "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": string;
         "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": string;

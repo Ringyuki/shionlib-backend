@@ -10,10 +10,11 @@ model User {
   avatar   String?
   cover    String?
 
-  games                        Game[]                     @relation("user_create_game")
-  game_download_resources      GameDownloadResource[]     @relation("user_create_game_download_resource")
-  game_download_resource_files GameDownloadResourceFile[] @relation("user_create_game_download_resource_file")
-  comments                     Comment[]                  @relation("user_create_comment")
+  games                                 Game[]                            @relation("user_create_game")
+  game_download_resources               GameDownloadResource[]            @relation("user_create_game_download_resource")
+  game_download_resource_files          GameDownloadResourceFile[]        @relation("user_create_game_download_resource_file")
+  game_download_resource_file_histories GameDownloadResourceFileHistory[] @relation("user_reupload_game_download_resource_file")
+  comments                              Comment[]                         @relation("user_create_comment")
 
   favorite_games GameFavoriteRelation[] @relation("user_favorite_game")
 
@@ -22,9 +23,9 @@ model User {
   role          Int      @default(1)
   status        Int      @default(1)
 
-  upload_injected_file_times Int @default(0)
-  banned_records UserBannedRecord[] @relation("user_banned")
-  banned_by_records UserBannedRecord[] @relation("user_banned_by")
+  upload_injected_file_times Int                @default(0)
+  banned_records             UserBannedRecord[] @relation("user_banned")
+  banned_by_records          UserBannedRecord[] @relation("user_banned_by")
 
   email_verified_at  DateTime?
   last_login_at      DateTime?
@@ -88,15 +89,15 @@ model UserLoginSession {
 model UserBannedRecord {
   id Int @id @default(autoincrement())
 
-  user_id Int
-  user User @relation("user_banned", fields: [user_id], references: [id])
-  banned_at DateTime @default(now())
-  banned_reason String? @db.VarChar(255)
-  banned_by Int?
-  banned_by_user User? @relation("user_banned_by", fields: [banned_by], references: [id], onDelete: SetNull)
+  user_id        Int
+  user           User     @relation("user_banned", fields: [user_id], references: [id])
+  banned_at      DateTime @default(now())
+  banned_reason  String?  @db.VarChar(255)
+  banned_by      Int?
+  banned_by_user User?    @relation("user_banned_by", fields: [banned_by], references: [id], onDelete: SetNull)
 
   banned_duration_days Int?
-  is_permanent Boolean @default(false)
+  is_permanent         Boolean @default(false)
 
   unbanned_at DateTime?
 

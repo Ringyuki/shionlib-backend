@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
+import { Prisma } from '@prisma/client'
 import {
   CreateGameDownloadSourceReqDto,
   MigrateCreateGameDownloadSourceReqDto,
@@ -24,9 +25,13 @@ import {
 } from '../../activity/dto/create-activity.dto'
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
+import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.interface'
+import { UploadQuotaService } from '../../upload/services/upload-quota.service'
+import { MessageService } from '../../message/services/message.service'
+import { MessageType } from '../../message/dto/req/send-message.req.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -37,6 +42,8 @@ export class GameDownloadSourceService {
     private readonly configService: ShionConfigService,
     private readonly activityService: ActivityService,
     private readonly httpService: HttpService,
+    private readonly uploadQuotaService: UploadQuotaService,
+    private readonly messageService: MessageService,
   ) {}
 
   async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
@@ -473,5 +480,190 @@ export class GameDownloadSourceService {
         },
       })
     })
+  }
+
+  async reuploadFile(fileId: number, dto: ReuploadFileReqDto, req: RequestWithUser) {
+    const file = await this.prismaService.gameDownloadResourceFile.findUnique({
+      where: { id: fileId },
+      include: {
+        game_download_resource: {
+          select: {
+            id: true,
+            game_id: true,
+            creator_id: true,
+            game: {
+              select: {
+                id: true,
+                title_jp: true,
+                title_zh: true,
+                title_en: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND',
+      )
+    }
+    const oldFileStatus = file.file_status
+    if (oldFileStatus !== ActivityFileStatus.UPLOADED_TO_S3) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_INVALID_FILE_STATUS,
+        'shion-biz.GAME_UPLOAD_INVALID_FILE_STATUS',
+      )
+    }
+
+    if (
+      file.creator_id !== req.user.sub &&
+      ![ShionlibUserRoles.ADMIN, ShionlibUserRoles.SUPER_ADMIN].includes(req.user.role)
+    ) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER',
+      )
+    }
+
+    const session = await this.prismaService.gameUploadSession.findUnique({
+      where: { id: dto.upload_session_id },
+    })
+
+    if (!session) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_SESSION_NOT_FOUND,
+        'shion-biz.GAME_UPLOAD_SESSION_NOT_FOUND',
+      )
+    }
+    if (session.status !== 'COMPLETED') {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_INVALID_SESSION_STATUS,
+        'shion-biz.GAME_UPLOAD_INVALID_SESSION_STATUS',
+      )
+    }
+    if (session.creator_id !== req.user.sub) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_SESSION_NOT_OWNER,
+        'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
+      )
+    }
+
+    const existingFileWithSession = await this.prismaService.gameDownloadResourceFile.findUnique({
+      where: { upload_session_id: dto.upload_session_id },
+    })
+    if (existingFileWithSession && existingFileWithSession.id !== fileId) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_UPLOAD_SESSION_ALREADY_USED,
+        'shion-biz.GAME_UPLOAD_SESSION_ALREADY_USED',
+      )
+    }
+
+    const gameId = file.game_download_resource.game_id
+    const game = file.game_download_resource.game
+    const oldUploadSessionId = file.upload_session_id
+
+    await this.prismaService.$transaction(async tx => {
+      await tx.gameDownloadResourceFileHistory.create({
+        data: {
+          file_id: fileId,
+          file_size: file.file_size,
+          hash_algorithm: file.hash_algorithm,
+          file_hash: file.file_hash,
+          s3_file_key: file.s3_file_key,
+          reason: dto.reason,
+          upload_session_id: oldUploadSessionId,
+          operator_id: req.user.sub,
+        },
+      })
+      await tx.gameDownloadResource.update({
+        where: { id: file.game_download_resource_id },
+        data: {
+          updated: new Date(),
+        },
+      })
+
+      if (file.s3_file_key) {
+        await this.s3Service.deleteFile(file.s3_file_key, true)
+      }
+
+      if (oldUploadSessionId) {
+        await this.uploadQuotaService.withdrawUploadQuotaUseAdjustment(
+          file.creator_id,
+          oldUploadSessionId,
+        )
+      }
+
+      await tx.gameDownloadResourceFile.update({
+        where: { id: fileId },
+        data: {
+          file_path: session.storage_path,
+          file_size: session.total_size,
+          file_hash: session.file_sha256,
+          hash_algorithm: session.hash_algorithm,
+          file_content_type: session.mime_type,
+          file_status: 2,
+          file_check_status: 0,
+          s3_file_key: null,
+          upload_session_id: dto.upload_session_id,
+        },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.FILE_REUPLOAD,
+          user_id: req.user.sub,
+          game_id: gameId,
+          file_id: fileId,
+          file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
+          file_check_status: ActivityFileCheckStatus.PENDING,
+          file_size: Number(session.total_size),
+          file_name: file.file_name,
+        },
+        tx,
+      )
+
+      await this.notifyFavoriteUsers(gameId, game, file.file_name, dto.reason, req.user.sub, tx)
+    })
+
+    return { ok: true }
+  }
+
+  private async notifyFavoriteUsers(
+    gameId: number,
+    game: { id: number; title_jp: string | null; title_zh: string | null; title_en: string | null },
+    fileName: string,
+    reason: string | undefined,
+    operatorId: number,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const favorites = await (tx || this.prismaService).gameFavoriteRelation.findMany({
+      where: {
+        game_id: gameId,
+        user_id: { not: operatorId },
+      },
+      select: { user_id: true },
+    })
+
+    for (const fav of favorites) {
+      await this.messageService.send(
+        {
+          type: MessageType.SYSTEM,
+          title: 'Messages.System.File.Reupload.FileReuploadedTitle',
+          content: 'Messages.System.File.Reupload.FileReuploadedContent',
+          game_id: gameId,
+          meta: {
+            file_name: fileName,
+            reason: reason || undefined,
+            game_title_jp: game.title_jp,
+            game_title_zh: game.title_zh,
+            game_title_en: game.title_en,
+          },
+          receiver_id: fav.user_id,
+        },
+        tx,
+      )
+    }
   }
 }

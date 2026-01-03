@@ -46,6 +46,7 @@
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "ダウンロードリソースファイルが見つかりません",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token が必要です",
   "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "検証に失敗しました, エラーコード: {errorCodes}",
+  "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER": "このファイルを変更する権限がありません",
 
   "FAVORITE_ALREADY_EXISTS": "すでにお気に入りに登録されています",
 
@@ -66,6 +67,8 @@
   "GAME_UPLOAD_INVALID_CHUNK_INDEX": "無効なチャンクインデックス",
   "GAME_UPLOAD_SESSION_EXPIRED": "アップロードセッションが期限切れです",
   "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません",
+  "GAME_UPLOAD_SESSION_ALREADY_USED": "アップロードセッションは別のファイルによって使用されています",
+  "GAME_UPLOAD_INVALID_FILE_STATUS": "アップロードファイル状態が無効です",
 
   "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "アップロードファイルサイズが制限を超えています",
   "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "ファイルが提供されていません",

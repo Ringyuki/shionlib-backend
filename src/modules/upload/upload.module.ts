@@ -28,6 +28,6 @@ import { HashWorkerService } from './services/hash-worker.service'
     HashWorkerService,
   ],
   imports: [S3Module, BullModule.registerQueue({ name: LARGE_FILE_UPLOAD_QUEUE })],
-  exports: [BullModule, SmallFileUploadService],
+  exports: [BullModule, SmallFileUploadService, UploadQuotaService],
 })
 export class UploadModule {}

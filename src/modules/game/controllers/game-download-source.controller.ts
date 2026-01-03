@@ -10,6 +10,7 @@ import {
   Get,
   Query,
   Delete,
+  Put,
 } from '@nestjs/common'
 import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
@@ -19,6 +20,7 @@ import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { MigrateCreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
+import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 
@@ -71,5 +73,15 @@ export class GameDownloadSourceController {
       createDownloadResourceFileReqDto,
       download_source_id,
     )
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('file/:fileId/reupload')
+  async reuploadFile(
+    @Param('fileId', ParseIntPipe) fileId: number,
+    @Body() reuploadFileReqDto: ReuploadFileReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.gameDownloadSourceService.reuploadFile(fileId, reuploadFileReqDto, req)
   }
 }
