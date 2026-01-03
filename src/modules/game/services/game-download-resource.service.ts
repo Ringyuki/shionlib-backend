@@ -26,6 +26,7 @@ import {
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
 import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
+import { GetFileHistoryResDto } from '../dto/res/get-file-history.res.dto'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.interface'
@@ -221,25 +222,35 @@ export class GameDownloadSourceService {
         'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_OWNER',
       )
     }
-    await this.prismaService.gameDownloadResource.update({
-      where: { id },
-      data: {
-        platform: dto.platform,
-        language: dto.language,
-        note: dto.note,
-        // in most situations, if we use this endpoint to edit a download resource, there should be only one file in it
-        // so we update the file name for all files in the download resource
-        files: {
-          updateMany: {
-            where: {
-              game_download_resource_id: id,
-            },
-            data: {
-              file_name: dto.file_name,
+
+    await this.prismaService.$transaction(async tx => {
+      const row = await tx.gameDownloadResource.findUnique({
+        where: { id },
+        select: {
+          updated: true,
+        },
+      })
+      await tx.gameDownloadResource.update({
+        where: { id },
+        data: {
+          platform: dto.platform,
+          language: dto.language,
+          note: dto.note,
+          // in most situations, if we use this endpoint to edit a download resource, there should be only one file in it
+          // so we update the file name for all files in the download resource
+          files: {
+            updateMany: {
+              where: {
+                game_download_resource_id: id,
+              },
+              data: {
+                file_name: dto.file_name,
+              },
             },
           },
+          updated: row?.updated,
         },
-      },
+      })
     })
   }
 
@@ -334,12 +345,19 @@ export class GameDownloadSourceService {
     }
 
     await this.prismaService.$transaction(async tx => {
+      const row = await tx.gameDownloadResource.findUnique({
+        where: { id: file.game_download_resource_id },
+        select: {
+          updated: true,
+        },
+      })
       const { game_id } = await tx.gameDownloadResource.update({
         where: { id: file.game_download_resource_id },
         data: {
           downloads: {
             increment: 1,
           },
+          updated: row?.updated,
         },
         select: {
           game_id: true,
@@ -628,6 +646,54 @@ export class GameDownloadSourceService {
     })
 
     return { ok: true }
+  }
+
+  async getFileHistory(fileId: number): Promise<GetFileHistoryResDto[]> {
+    const file = await this.prismaService.gameDownloadResourceFile.findUnique({
+      where: { id: fileId },
+      select: {
+        id: true,
+        creator_id: true,
+        game_download_resource: {
+          select: {
+            creator_id: true,
+          },
+        },
+      },
+    })
+
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND',
+      )
+    }
+
+    const histories = await this.prismaService.gameDownloadResourceFileHistory.findMany({
+      where: { file_id: fileId },
+      orderBy: { created: 'desc' },
+      select: {
+        id: true,
+        file_size: true,
+        hash_algorithm: true,
+        file_hash: true,
+        s3_file_key: true,
+        reason: true,
+        operator: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        created: true,
+      },
+    })
+
+    return histories.map(h => ({
+      ...h,
+      file_size: Number(h.file_size),
+    }))
   }
 
   private async notifyFavoriteUsers(

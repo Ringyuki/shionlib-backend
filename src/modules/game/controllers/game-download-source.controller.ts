@@ -84,4 +84,9 @@ export class GameDownloadSourceController {
   ) {
     return await this.gameDownloadSourceService.reuploadFile(fileId, reuploadFileReqDto, req)
   }
+
+  @Get('file/:fileId/history')
+  async getFileHistory(@Param('fileId', ParseIntPipe) fileId: number) {
+    return await this.gameDownloadSourceService.getFileHistory(fileId)
+  }
 }
