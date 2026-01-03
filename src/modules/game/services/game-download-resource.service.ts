@@ -587,12 +587,11 @@ export class GameDownloadSourceService {
       await tx.gameDownloadResourceFileHistory.create({
         data: {
           file_id: fileId,
-          file_size: file.file_size,
-          hash_algorithm: file.hash_algorithm,
-          file_hash: file.file_hash,
-          s3_file_key: file.s3_file_key,
+          file_size: session.total_size,
+          hash_algorithm: session.hash_algorithm,
+          file_hash: session.file_sha256,
           reason: dto.reason,
-          upload_session_id: oldUploadSessionId,
+          upload_session_id: session.id,
           operator_id: req.user.sub,
         },
       })

@@ -106,6 +106,35 @@ export class UploadProcessor {
     )
 
     await this.prismaService.$transaction(async tx => {
+      const latestHistory = await tx.gameDownloadResourceFileHistory.findFirst({
+        where: { file_id: resourceFileId },
+        orderBy: { created: 'desc' },
+        select: {
+          id: true,
+        },
+      })
+      if (latestHistory) {
+        await tx.gameDownloadResourceFileHistory.update({
+          where: { id: latestHistory.id },
+          data: {
+            s3_file_key: s3Key,
+          },
+        })
+      } else {
+        await tx.gameDownloadResourceFileHistory.create({
+          data: {
+            file_id: resourceFileId,
+            file_size: file.file_size,
+            hash_algorithm: file.hash_algorithm,
+            file_hash: file.file_hash,
+            s3_file_key: s3Key,
+            reason: null,
+            upload_session_id: file.upload_session_id,
+            operator_id: file.creator_id,
+          },
+        })
+      }
+
       await tx.gameDownloadResourceFile.update({
         where: { id: resourceFileId },
         data: {

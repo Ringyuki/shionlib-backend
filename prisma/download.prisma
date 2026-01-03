@@ -72,7 +72,7 @@ model GameDownloadResourceFileHistory {
   s3_file_key    String?
 
   reason            String? @db.VarChar(500) // reason for reupload
-  upload_session_id Int? // the old upload session id
+  upload_session_id Int?
 
   operator_id Int
   operator    User @relation("user_reupload_game_download_resource_file", fields: [operator_id], references: [id])
