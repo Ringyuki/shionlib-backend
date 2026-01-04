@@ -13,6 +13,7 @@ import mime from 'mime-types'
 import { UploadQuotaService } from './upload-quota.service'
 import { UserUploadQuotaUsedAmountRecordAction } from '../dto/req/adjust-quota.req.dto'
 import { HashWorkerService } from './hash-worker.service'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 @Injectable()
 export class LargeFileUploadService {
@@ -57,7 +58,10 @@ export class LargeFileUploadService {
           'shion-biz.GAME_UPLOAD_TOO_MANY_CHUNKS',
         )
       }
-      if (dto.total_size > this.configService.get('file_upload.upload_large_file_max_size')) {
+      if (
+        dto.total_size > this.configService.get('file_upload.upload_large_file_max_size') &&
+        req.user.role < ShionlibUserRoles.ADMIN
+      ) {
         throw new ShionBizException(
           ShionBizCode.GAME_UPLOAD_TOO_LARGE,
           'shion-biz.GAME_UPLOAD_TOO_LARGE',
