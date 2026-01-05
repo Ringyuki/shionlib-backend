@@ -4,6 +4,7 @@ import { PrismaService } from '../../../prisma.service'
 import {
   GameData,
   GameCharacter,
+  GameCharacterGender,
   GameCover,
   GameDeveloper,
   GameImage,
@@ -194,8 +195,12 @@ export class GameCreateService {
       hips: c.hips,
       cup: c.cup,
       age: c.age,
-      birthday: this.dataOrEmpty(c.birthday, []),
-      gender: this.dataOrEmpty(c.gender, []),
+      birthday: this.dataOrEmpty(c.birthday, []).filter(
+        (v): v is number => v !== null && v !== undefined,
+      ),
+      gender: this.dataOrEmpty(c.gender, []).filter(
+        (v): v is GameCharacterGender => v !== null && v !== undefined,
+      ),
     }
     return tx.gameCharacter.create({ data: chCreateData })
   }
