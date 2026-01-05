@@ -78,7 +78,9 @@ export class GameCreateService {
           nsfw: this.dataOrEmpty(finalGameData.nsfw, false),
           type: finalGameData.type,
           platform: this.dataOrEmpty(finalGameData.platform, []),
-          release_date: finalGameData.release_date,
+          release_date: this.isValidDate(finalGameData.release_date)
+            ? finalGameData.release_date
+            : null,
           creator_id: req.user.sub,
         }
         const game = await tx.game.create({ data: gameCreateData })
@@ -273,6 +275,10 @@ export class GameCreateService {
 
   private dataOrEmpty = <T>(value: T | undefined | null, fallback: T) =>
     value === undefined || value === null ? fallback : value
+
+  private isValidDate = (date: Date | undefined | null): date is Date => {
+    return date instanceof Date && !isNaN(date.getTime())
+  }
 
   async createGame(createGameReqDto: CreateGameReqDto, creator_id: number) {
     const existing = await this.prisma.game.findFirst({
