@@ -56,12 +56,42 @@ export class SmallFileUploadService {
     }
   }
 
-  async uploadGameImage(game_id: number, file: Express.Multer.File) {
+  async uploadGameImage(game_id: number, file: Express.Multer.File, req?: RequestWithUser) {
+    const game = await this.prismaService.game.findUnique({
+      where: {
+        id: game_id,
+      },
+    })
+    if (!game) {
+      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND, 'shion-biz.GAME_NOT_FOUND')
+    }
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
+      )
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
+      )
+    }
+
     const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
       format: TargetFormatEnum.WEBP,
     })
     const key = `game/${game_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
-    await this._upload(data, key)
+    await this._upload(
+      data,
+      key,
+      req
+        ? {
+            game_id: game_id.toString(),
+            uploader_id: req.user.sub.toString(),
+          }
+        : undefined,
+    )
     return {
       key,
     }
