@@ -244,6 +244,11 @@ export class GameService {
         lte: new Date(to),
       }
     } else if (years || months) where = applyDate(where, { years, months })
+    if (start_date || end_date || years || months) {
+      where.release_date_tba = {
+        not: true,
+      }
+    }
 
     const orderByArray: Prisma.GameOrderByWithRelationInput[] = []
     orderByArray.push({ release_date_tba: 'asc' })
