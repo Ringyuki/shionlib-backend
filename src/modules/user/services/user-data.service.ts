@@ -136,15 +136,15 @@ export class UserDataService {
     dto: PaginationReqDto,
   ): Promise<PaginatedResult<CommentResDto>> {
     const { page, pageSize } = dto
+    const where: Prisma.CommentWhereInput = {
+      creator_id: user_id,
+      status: 1,
+    }
     const total = await this.prismaService.comment.count({
-      where: {
-        creator_id: user_id,
-      },
+      where,
     })
     const comments = await this.prismaService.comment.findMany({
-      where: {
-        creator_id: user_id,
-      },
+      where,
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
