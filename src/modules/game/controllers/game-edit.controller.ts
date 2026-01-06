@@ -20,6 +20,10 @@ import {
   AddGameCoverReqDto,
   RemoveGameCoverReqDto,
   EditGameCoverDto,
+  EditGameImageReqDto,
+  AddGameImageReqDto,
+  RemoveGameImageReqDto,
+  EditGameImageDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -159,5 +163,73 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.removeCovers(id, dto.ids, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Patch(':id/edit/images')
+  async editImages(
+    @Body() dto: EditGameImageReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editImages(id, dto.images, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Patch(':id/edit/image')
+  async editImage(
+    @Body() dto: EditGameImageDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editImage(id, dto, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Put(':id/edit/images')
+  async addImages(
+    @Body() dto: AddGameImageReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.addImages(id, dto.images, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Delete(':id/edit/images')
+  async removeImages(
+    @Body() dto: RemoveGameImageReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.removeImages(id, dto.ids, req)
   }
 }

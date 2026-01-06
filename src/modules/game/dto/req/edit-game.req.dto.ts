@@ -275,3 +275,70 @@ export class RemoveGameCoverReqDto {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
   ids: number[]
 }
+
+export class GameImageDto {
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'url' }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'url' }) })
+  url: string
+
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'dims' }) })
+  @ArrayMaxSize(2, { message: ivm('validation.common.ARRAY_MAX_SIZE', { property: 'dims' }) })
+  @ArrayMinSize(2, { message: ivm('validation.common.ARRAY_MIN_SIZE', { property: 'dims' }) })
+  @IsNumber({}, { each: true, message: ivm('validation.common.IS_NUMBER', { property: 'dims' }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'dims' }) })
+  dims: number[]
+
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'sexual' }) },
+  )
+  @Max(2, { message: ivm('validation.common.MAX', { property: 'sexual', max: 2 }) })
+  @Min(0, { message: ivm('validation.common.MIN', { property: 'sexual', min: 0 }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'sexual' }) })
+  sexual: number
+
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'violence' }) },
+  )
+  @Max(2, { message: ivm('validation.common.MAX', { property: 'violence', max: 2 }) })
+  @Min(0, { message: ivm('validation.common.MIN', { property: 'violence', min: 0 }) })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'violence' }) })
+  violence: number
+}
+
+export class EditGameImageDto extends GameImageDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'id' }) })
+  id: number
+}
+
+export class EditGameImageReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'images' }) })
+  @ValidateNested({ each: true })
+  @Type(() => EditGameImageDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'images' }) })
+  images: EditGameImageDto[]
+}
+
+export class AddGameImageReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'images' }) })
+  @ValidateNested({ each: true })
+  @Type(() => GameImageDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'images' }) })
+  images: GameImageDto[]
+}
+
+export class RemoveGameImageReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'ids' }) })
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'ids' }), each: true },
+  )
+  @Type(() => Number)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
+  ids: number[]
+}

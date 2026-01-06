@@ -6,6 +6,8 @@ import {
   EditGameLinkDto,
   EditGameCoverDto,
   GameCoverDto,
+  EditGameImageDto,
+  GameImageDto,
 } from '../dto/req/edit-game.req.dto'
 import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
 import { EditActionType } from '../../edit/enums/edit-action-type.enum'
@@ -372,6 +374,176 @@ export class GameEditService {
 
     for (const cover of coversToRemove) {
       await this.imageStorage.deleteFile(cover.url, false)
+    }
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async editImages(id: number, images: EditGameImageDto[], req: RequestWithUser) {
+    for (const image of images) {
+      await this.editImage(id, image, req)
+    }
+
+    const game = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+
+    await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+  }
+
+  async editImage(id: number, image: EditGameImageDto, req: RequestWithUser) {
+    const imageToEdit = await this.prisma.gameImage.findUnique({
+      where: { id: image.id },
+      select: {
+        id: true,
+        url: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        game_id: true,
+      },
+    })
+    if (!imageToEdit || imageToEdit.game_id !== id) return
+    if (!imageToEdit) return
+    const { field_changes } = pickChanges(image, imageToEdit)
+    if (field_changes.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.gameImage.update({
+        where: { id: image.id },
+        data: image,
+        select: {
+          id: true,
+          url: true,
+          dims: true,
+          sexual: true,
+          violence: true,
+        },
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.UPDATE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.IMAGE,
+          field_changes: ['images'],
+          changes: {
+            relation: 'images',
+            before: [imageToEdit],
+            after: [updated],
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async addImages(id: number, images: GameImageDto[], req: RequestWithUser) {
+    const exisited = await this.prisma.gameImage.findMany({
+      where: { game_id: id },
+      select: { url: true, dims: true, sexual: true, violence: true },
+    })
+    const uniqueImages = images.filter(i => !exisited.some(e => e.url === i.url))
+    if (uniqueImages.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameImage.createMany({
+        data: uniqueImages.map(i => ({
+          game_id: id,
+          url: i.url,
+          dims: i.dims,
+          sexual: i.sexual,
+          violence: i.violence,
+        })),
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.ADD_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.IMAGE,
+          field_changes: ['images'],
+          changes: { relation: 'images', added: uniqueImages } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async removeImages(id: number, images: number[], req: RequestWithUser) {
+    const imagesToRemove = await this.prisma.gameImage.findMany({
+      where: { game_id: id, id: { in: images } },
+      select: { id: true, url: true, dims: true, sexual: true, violence: true },
+    })
+    if (imagesToRemove.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameImage.deleteMany({ where: { game_id: id, id: { in: images } } })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.REMOVE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.IMAGE,
+          field_changes: ['images'],
+          changes: { relation: 'images', removed: imagesToRemove } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    for (const image of imagesToRemove) {
+      await this.imageStorage.deleteFile(image.url, false)
     }
 
     const updated = await this.prisma.game.findUnique({
