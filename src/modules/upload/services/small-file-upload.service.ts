@@ -56,7 +56,7 @@ export class SmallFileUploadService {
     }
   }
 
-  async uploadGameImage(game_id: number, file: Express.Multer.File, req?: RequestWithUser) {
+  async uploadGameImage(game_id: number, file: Express.Multer.File, req: RequestWithUser) {
     const game = await this.prismaService.game.findUnique({
       where: {
         id: game_id,
@@ -82,16 +82,10 @@ export class SmallFileUploadService {
       format: TargetFormatEnum.WEBP,
     })
     const key = `game/${game_id}/image/${nodeRandomUUID()}${data.filenameSuffix}`
-    await this._upload(
-      data,
-      key,
-      req
-        ? {
-            game_id: game_id.toString(),
-            uploader_id: req.user.sub.toString(),
-          }
-        : undefined,
-    )
+    await this._upload(data, key, {
+      game_id: game_id.toString(),
+      uploader_id: req.user.sub.toString(),
+    })
     return {
       key,
     }
