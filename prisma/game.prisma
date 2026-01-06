@@ -15,6 +15,7 @@ model Game {
   covers       GameCover[] @relation("game_cover")
   images       GameImage[] @relation("game_image")
   release_date DateTime?
+  release_date_tba Boolean   @default(false)
   extra_info   Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
   tags       String[]                @default([])

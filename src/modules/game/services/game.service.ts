@@ -68,6 +68,7 @@ export class GameService {
         },
       },
       release_date: true,
+      release_date_tba: true,
       extra_info: true,
       tags: true,
       staffs: true,
@@ -210,9 +211,6 @@ export class GameService {
     const { tags, years, months, sort_by, sort_order, start_date, end_date } = filter ?? {}
 
     let where: Prisma.GameWhereInput = {}
-    let orderBy: Prisma.GameOrderByWithRelationInput = {
-      release_date: 'desc',
-    }
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       where.nsfw = {
         not: true,
@@ -247,10 +245,14 @@ export class GameService {
       }
     } else if (years || months) where = applyDate(where, { years, months })
 
-    if (sort_by)
-      orderBy = {
-        [sort_by]: sort_order,
-      }
+    const orderByArray: Prisma.GameOrderByWithRelationInput[] = []
+    orderByArray.push({ release_date_tba: 'asc' })
+    if (sort_by) {
+      orderByArray.push({ [sort_by]: sort_order } as Prisma.GameOrderByWithRelationInput)
+    } else {
+      orderByArray.push({ release_date: 'desc' })
+    }
+    orderByArray.push({ id: 'desc' })
 
     const total = await this.prisma.game.count({
       where,
@@ -258,7 +260,7 @@ export class GameService {
     const games = await this.prisma.game.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: [orderBy, { id: 'desc' }],
+      orderBy: orderByArray,
       where,
       select: {
         id: true,

@@ -62,6 +62,7 @@ export class GameCreateService {
     let gameId = 0
     try {
       gameId = await this.prisma.$transaction(async tx => {
+        const isValidReleaseDate = this.isValidDate(finalGameData.release_date)
         const gameCreateData: any = {
           b_id: finalGameData.b_id,
           v_id: finalGameData.v_id,
@@ -78,9 +79,8 @@ export class GameCreateService {
           nsfw: this.dataOrEmpty(finalGameData.nsfw, false),
           type: finalGameData.type,
           platform: this.dataOrEmpty(finalGameData.platform, []),
-          release_date: this.isValidDate(finalGameData.release_date)
-            ? finalGameData.release_date
-            : null,
+          release_date: isValidReleaseDate ? finalGameData.release_date : null,
+          release_date_tba: !isValidReleaseDate,
           creator_id: req.user.sub,
         }
         const game = await tx.game.create({ data: gameCreateData })

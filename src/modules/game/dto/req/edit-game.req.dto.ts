@@ -117,6 +117,10 @@ export class EditGameReqDto {
   @IsOptional()
   release_date?: string
 
+  @IsBoolean({ message: ivm('validation.common.IS_BOOLEAN', { property: 'release_date_tba' }) })
+  @IsOptional()
+  release_date_tba?: boolean
+
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
     { message: ivm('validation.common.IS_NUMBER', { property: 'views' }) },

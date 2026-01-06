@@ -25,6 +25,7 @@ export class DataService {
         intro_en: true,
         platform: true,
         release_date: true,
+        release_date_tba: true,
         extra_info: true,
         tags: true,
         staffs: true,

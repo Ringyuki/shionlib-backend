@@ -16,6 +16,7 @@ export class GetGameResDto {
   covers: GameCover[]
   images: GameImage[]
   release_date: string
+  release_date_tba: boolean
   extra_info: ExtraInfo[]
   tags: string[]
   staffs: GameStaff[]

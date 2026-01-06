@@ -5,7 +5,7 @@ export const GameFieldGroupToFields: Record<GameFieldGroupBit, string[]> = {
   [GameFieldGroupBit.TITLES]: ['title_jp', 'title_zh', 'title_en'],
   [GameFieldGroupBit.INTROS]: ['intro_jp', 'intro_zh', 'intro_en'],
   [GameFieldGroupBit.ALIASES]: ['aliases'],
-  [GameFieldGroupBit.RELEASE]: ['release_date'],
+  [GameFieldGroupBit.RELEASE]: ['release_date', 'release_date_tba'],
   [GameFieldGroupBit.TYPE]: ['type'],
   [GameFieldGroupBit.PLATFORMS]: ['platform'],
   [GameFieldGroupBit.EXTRA]: ['extra_info'],

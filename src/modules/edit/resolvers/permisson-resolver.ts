@@ -20,6 +20,7 @@ export const GamekeyToBit: Record<keyof GameScalarResDto, GameFieldGroupBit> = {
   intro_en: GameFieldGroupBit.INTROS,
   aliases: GameFieldGroupBit.ALIASES,
   release_date: GameFieldGroupBit.RELEASE,
+  release_date_tba: GameFieldGroupBit.RELEASE,
   nsfw: GameFieldGroupBit.NSFW,
   type: GameFieldGroupBit.TYPE,
   platform: GameFieldGroupBit.PLATFORMS,
