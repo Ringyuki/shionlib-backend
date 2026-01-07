@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
@@ -12,12 +12,14 @@ import { GetGameListFilterReqDto } from '../dto/req/get-game-list.req.dto'
 import { applyDate } from '../helpers/date-filters'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
+import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
 
 @Injectable()
 export class GameService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
+    @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
   ) {}
   async getById(id: number, user_id?: number, content_limit?: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
@@ -199,6 +201,7 @@ export class GameService {
         id,
       },
     })
+    await this.searchEngine.removeGame(id)
   }
 
   async getList(
