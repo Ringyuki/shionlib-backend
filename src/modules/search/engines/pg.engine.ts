@@ -12,7 +12,9 @@ export class PgSearchEngine implements SearchEngine {
 
   async bulkUpsertGames() {}
 
-  async removeGame() {}
+  async deleteGame() {}
+
+  async deleteAllGames() {}
 
   async searchGames(q: SearchQuery): Promise<PaginatedResult<GameItemResDto>> {
     const { page, pageSize, content_limit } = q

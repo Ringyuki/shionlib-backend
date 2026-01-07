@@ -76,10 +76,23 @@ export class OpenSearchEngine implements SearchEngine {
     await this.opensearchService.refresh(this.indexName)
   }
 
-  async removeGame(id: number): Promise<void> {
+  async deleteGame(id: number): Promise<void> {
     const client = this.opensearchService.getClient()
     if (!client) return
     await client.delete({ index: this.indexName, id: String(id) })
+  }
+
+  async deleteAllGames(): Promise<void> {
+    const client = this.opensearchService.getClient()
+    if (!client) return
+    await this.opensearchService.ensureIndex(this.indexName, true)
+
+    await client.deleteByQuery({
+      index: this.indexName,
+      body: { query: { match_all: {} } },
+      refresh: true,
+      conflicts: 'proceed',
+    })
   }
 
   async searchGames(

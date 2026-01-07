@@ -29,6 +29,10 @@ async function main() {
   const prisma = app.get(PrismaService)
   const searchEngine = app.get<SearchEngine>(SEARCH_ENGINE)
 
+  logger.log('Clearing all existing game documents from the search engine...')
+  await searchEngine.deleteAllGames()
+  logger.log('Existing documents cleared.')
+
   const total = await prisma.game.count()
   const batchSize = 500
   let processed = 0

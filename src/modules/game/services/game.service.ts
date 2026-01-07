@@ -201,7 +201,7 @@ export class GameService {
         id,
       },
     })
-    await this.searchEngine.removeGame(id)
+    await this.searchEngine.deleteGame(id)
   }
 
   async getList(

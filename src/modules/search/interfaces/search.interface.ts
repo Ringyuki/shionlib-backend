@@ -11,7 +11,8 @@ export interface SearchQuery extends PaginationReqDto {
 export interface SearchEngine {
   upsertGame(doc: IndexedGame): Promise<void>
   bulkUpsertGames(docs: IndexedGame[]): Promise<void>
-  removeGame(id: number): Promise<void>
+  deleteGame(id: number): Promise<void>
+  deleteAllGames(): Promise<void>
   searchGames(query: SearchQuery, content_limit?: UserContentLimit): Promise<PaginatedResult<any>>
   searchGameTags(query: string, limit?: number): Promise<string[]>
 }

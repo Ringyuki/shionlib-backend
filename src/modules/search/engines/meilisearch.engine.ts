@@ -54,10 +54,16 @@ export class MeilisearchEngine implements SearchEngine {
     await index.addDocuments(docs)
   }
 
-  async removeGame(id: number): Promise<void> {
+  async deleteGame(id: number): Promise<void> {
     const index = await this.getIndex()
     if (!index) return
     await index.deleteDocument(id)
+  }
+
+  async deleteAllGames(): Promise<void> {
+    const index = await this.getIndex()
+    if (!index) return
+    await index.deleteAllDocuments()
   }
 
   async searchGames(
