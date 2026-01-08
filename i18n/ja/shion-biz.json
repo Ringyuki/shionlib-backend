@@ -42,6 +42,7 @@
 
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "ダウンロードリソースが見つかりません",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "ダウンロードリソースが現在のユーザーに属していません",
+  "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED": "アップロードセッションは別のファイルによって使用されています",
 
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "ダウンロードリソースファイルが見つかりません",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token が必要です",

@@ -43,6 +43,7 @@
 
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "download resource not found",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "download resource not owner",
+  "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
 
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",

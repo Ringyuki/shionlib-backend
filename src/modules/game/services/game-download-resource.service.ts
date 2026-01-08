@@ -153,6 +153,21 @@ export class GameDownloadSourceService {
         'shion-biz.GAME_UPLOAD_SESSION_NOT_OWNER',
       )
     }
+    const existingDownloadResource = await this.prismaService.gameDownloadResource.findFirst({
+      where: {
+        game_id,
+        upload_session_id: dto.upload_session_id,
+      },
+      select: {
+        id: true,
+      },
+    })
+    if (existingDownloadResource) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED',
+      )
+    }
 
     await this.prismaService.$transaction(async tx => {
       const gameDownloadResource = await tx.gameDownloadResource.create({

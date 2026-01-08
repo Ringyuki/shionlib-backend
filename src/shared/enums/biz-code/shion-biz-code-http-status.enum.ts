@@ -56,6 +56,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   // 44
   [ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER]: HttpStatus.FORBIDDEN,
+  [ShionBizCode.GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED]: HttpStatus.CONFLICT,
 
   // 45
   [ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND]: HttpStatus.NOT_FOUND,
