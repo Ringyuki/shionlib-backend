@@ -8,6 +8,8 @@ import {
   GameCoverDto,
   EditGameImageDto,
   GameImageDto,
+  GameDeveloperRelationDto,
+  EditGameDeveloperDto,
 } from '../dto/req/edit-game.req.dto'
 import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
 import { EditActionType } from '../../edit/enums/edit-action-type.enum'
@@ -551,5 +553,210 @@ export class GameEditService {
       select: rawDataQuery,
     })
     await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async addDevelopers(id: number, developers: GameDeveloperRelationDto[], req: RequestWithUser) {
+    const game = await this.prisma.game.findUnique({ where: { id }, select: { id: true } })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    const existing = await this.prisma.gameDeveloperRelation.findMany({
+      where: { game_id: id },
+      select: { developer_id: true },
+    })
+    const existingIds = new Set(existing.map(e => e.developer_id))
+    const uniqueDevelopers = developers
+      .filter(d => !existingIds.has(d.developer_id))
+      .map(d => ({
+        game_id: id,
+        developer_id: d.developer_id,
+        role: d.role ?? null,
+      }))
+    if (uniqueDevelopers.length === 0) return
+
+    const uniqueDevelopersWithNames = await Promise.all(
+      uniqueDevelopers.map(async d => {
+        const developer = await this.prisma.gameDeveloper.findUnique({
+          where: { id: d.developer_id },
+          select: { name: true },
+        })
+        return {
+          ...d,
+          developer: { name: developer?.name ?? null },
+        }
+      }),
+    )
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameDeveloperRelation.createMany({
+        data: uniqueDevelopersWithNames.map(d => ({
+          game_id: id,
+          developer_id: d.developer_id,
+          role: d.role ?? null,
+        })),
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.ADD_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.DEVELOPER,
+          field_changes: ['developers'],
+          changes: {
+            relation: 'developers',
+            added: uniqueDevelopersWithNames.map(d => ({
+              role: d.role,
+              developer: { name: d.developer.name },
+            })),
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async removeDevelopers(id: number, relationIds: number[], req: RequestWithUser) {
+    const relationsToRemove = await this.prisma.gameDeveloperRelation.findMany({
+      where: { game_id: id, id: { in: relationIds } },
+      select: { id: true, developer_id: true, role: true, developer: { select: { name: true } } },
+    })
+    if (relationsToRemove.length === 0) return
+
+    const existing = await this.prisma.gameDeveloperRelation.findMany({
+      where: { game_id: id },
+      select: { developer_id: true },
+    })
+    const existingIds = new Set(existing.map(e => e.developer_id))
+    if (existingIds.size <= 1)
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_MIN_ONE_REQUIRED)
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameDeveloperRelation.deleteMany({
+        where: { game_id: id, id: { in: relationIds } },
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.REMOVE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.DEVELOPER,
+          field_changes: ['developers'],
+          changes: {
+            relation: 'developers',
+            removed: relationsToRemove.map(r => ({
+              role: r.role,
+              developer: { name: r.developer.name },
+            })),
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async editDevelopers(id: number, developers: EditGameDeveloperDto[], req: RequestWithUser) {
+    for (const developer of developers) {
+      await this.editDeveloper(id, developer, req)
+    }
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async editDeveloper(id: number, developer: EditGameDeveloperDto, req: RequestWithUser) {
+    const relationToEdit = await this.prisma.gameDeveloperRelation.findUnique({
+      where: { id: developer.id },
+      select: {
+        id: true,
+        developer_id: true,
+        role: true,
+        game_id: true,
+        developer: { select: { name: true } },
+      },
+    })
+    if (!relationToEdit || relationToEdit.game_id !== id) return
+
+    const { field_changes } = pickChanges({ role: developer.role }, relationToEdit)
+    if (field_changes.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.gameDeveloperRelation.update({
+        where: { id: developer.id },
+        data: { role: developer.role ?? null },
+        select: { id: true, developer_id: true, role: true, developer: { select: { name: true } } },
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.UPDATE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.DEVELOPER,
+          field_changes: ['developers'],
+          changes: {
+            relation: 'developers',
+            before: [
+              {
+                role: relationToEdit.role,
+                developer: { name: relationToEdit.developer.name },
+              },
+            ],
+            after: [
+              {
+                role: updated.role,
+                developer: { name: updated.developer.name },
+              },
+            ],
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
   }
 }

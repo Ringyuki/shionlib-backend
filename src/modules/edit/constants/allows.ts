@@ -84,6 +84,7 @@ export const devUserAllow = mask(
   GameDeveloperFieldGroupBit.ALIASES,
   GameDeveloperFieldGroupBit.INTROS,
   GameDeveloperFieldGroupBit.EXTRA,
+  GameDeveloperFieldGroupBit.WEBSITE,
 )
 export const devAdminAllow = mask(
   GameDeveloperFieldGroupBit.NAME,
@@ -91,6 +92,7 @@ export const devAdminAllow = mask(
   GameDeveloperFieldGroupBit.INTROS,
   GameDeveloperFieldGroupBit.EXTRA,
   GameDeveloperFieldGroupBit.LOGO,
+  GameDeveloperFieldGroupBit.WEBSITE,
 )
 export const devRootAllow = mask(
   GameDeveloperFieldGroupBit.IDS,
@@ -99,4 +101,5 @@ export const devRootAllow = mask(
   GameDeveloperFieldGroupBit.INTROS,
   GameDeveloperFieldGroupBit.EXTRA,
   GameDeveloperFieldGroupBit.LOGO,
+  GameDeveloperFieldGroupBit.WEBSITE,
 )

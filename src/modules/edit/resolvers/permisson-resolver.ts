@@ -41,6 +41,7 @@ export const DeveloperKeyToBit: Record<keyof DeveloperScalarResDto, GameDevelope
   intro_en: GameDeveloperFieldGroupBit.INTROS,
   extra_info: GameDeveloperFieldGroupBit.EXTRA,
   logo: GameDeveloperFieldGroupBit.LOGO,
+  website: GameDeveloperFieldGroupBit.WEBSITE,
 }
 
 export const CharacterKeyToBit: Record<keyof CharacterScalarResDto, GameCharacterFieldGroupBit> = {

@@ -34,6 +34,7 @@
 
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
   "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
+  "GAME_DEVELOPER_MIN_ONE_REQUIRED": "at least one developer is required",
 
   "GAME_CHARACTER_NOT_FOUND": "character not found",
   "GAME_CHARACTER_ALREADY_EXISTS": "character already exists",

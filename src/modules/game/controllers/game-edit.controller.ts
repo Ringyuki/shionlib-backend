@@ -24,6 +24,9 @@ import {
   AddGameImageReqDto,
   RemoveGameImageReqDto,
   EditGameImageDto,
+  AddGameDeveloperReqDto,
+  RemoveGameDeveloperReqDto,
+  EditGameDeveloperReqDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -231,5 +234,57 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.removeImages(id, dto.ids, req)
+  }
+
+  // Developer relation endpoints
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_DEVELOPERS],
+      undefined,
+      'developers',
+    ),
+  )
+  @Put(':id/edit/developers')
+  async addDevelopers(
+    @Body() dto: AddGameDeveloperReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.addDevelopers(id, dto.developers, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_DEVELOPERS],
+      undefined,
+      'developers',
+    ),
+  )
+  @Delete(':id/edit/developers')
+  async removeDevelopers(
+    @Body() dto: RemoveGameDeveloperReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.removeDevelopers(id, dto.ids, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_DEVELOPERS],
+      undefined,
+      'developers',
+    ),
+  )
+  @Patch(':id/edit/developers')
+  async editDevelopers(
+    @Body() dto: EditGameDeveloperReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editDevelopers(id, dto.developers, req)
   }
 }

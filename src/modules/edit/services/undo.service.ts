@@ -170,7 +170,11 @@ export class UndoService {
       await this.inverseGame(tx, rec, req)
       return
     }
-    // TODO: later extend character/developer, can distribute here
+    if (rec.entity === PermissionEntity.DEVELOPER) {
+      await this.inverseDeveloper(tx, rec, req)
+      return
+    }
+    // TODO: later extend character
     throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 
@@ -529,7 +533,170 @@ export class UndoService {
       }
     }
 
-    // TODO: later extend character/developer, can distribute here
+    if (relation === EditRelationType.DEVELOPER) {
+      if (action === EditActionType.ADD_RELATION) {
+        const added = (changes as RelationChanges)?.added ?? []
+        for (const a of added) {
+          await tx.gameDeveloperRelation.deleteMany({
+            where: { game_id: id, developer_id: a.developer_id },
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.REMOVE_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.DEVELOPER,
+            field_changes: ['developers'],
+            changes: { relation: 'developers', removed: added },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+
+      if (action === EditActionType.REMOVE_RELATION) {
+        const removed = (changes as RelationChanges)?.removed ?? []
+        if (removed.length > 0) {
+          await tx.gameDeveloperRelation.createMany({
+            data: removed.map((r: any) => ({
+              game_id: id,
+              developer_id: r.developer_id,
+              role: r.role ?? null,
+            })),
+            skipDuplicates: true,
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.ADD_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.DEVELOPER,
+            field_changes: ['developers'],
+            changes: { relation: 'developers', added: removed },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+
+      if (action === EditActionType.UPDATE_RELATION) {
+        const before = (changes as RelationChanges)?.before?.[0]
+        const after = (changes as RelationChanges)?.after?.[0]
+        if (before?.id) {
+          await tx.gameDeveloperRelation.update({
+            where: { id: before.id },
+            data: { role: before.role ?? null },
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.UPDATE_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.DEVELOPER,
+            field_changes: ['developers'],
+            changes: {
+              relation: 'developers',
+              before: [after],
+              after: [before],
+            },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+    }
+
+    // TODO: later extend character
+    throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
+  }
+
+  private async inverseDeveloper(tx: Prisma.TransactionClient, rec: any, req: RequestWithUser) {
+    const id = rec.target_id as number
+    const action: EditActionType = rec.action
+    const changes = rec.changes as ScalarChanges | null
+
+    if (action === EditActionType.UPDATE_SCALAR) {
+      const before = changes?.before ?? {}
+      const data = before as Record<string, unknown>
+
+      if (Object.keys(data).length > 0) {
+        await tx.gameDeveloper.update({ where: { id }, data })
+      }
+
+      const afterNow = Object.keys(data).length > 0 ? data : {}
+      const undoRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.DEVELOPER,
+          target_id: id,
+          action: EditActionType.UPDATE_SCALAR,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          field_changes: Object.keys(data),
+          changes: { before: changes?.after ?? {}, after: afterNow } as any,
+          note: `undo of #${rec.id}`,
+          undo: true,
+          undo_of_id: rec.id,
+        },
+        select: { id: true },
+      })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.DEVELOPER_EDIT,
+          user_id: req.user.sub,
+          developer_id: id,
+          edit_record_id: undoRecord.id,
+        },
+        tx,
+      )
+      return
+    }
+
     throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 

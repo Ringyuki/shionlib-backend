@@ -53,8 +53,7 @@ export class PermissionService {
       }
     }
 
-    const fields = createFieldPermissionMap(fieldGroups)
-
+    const fields = createFieldPermissionMap(fieldGroups, entity)
     return {
       allowMask: allowMask.toString(),
       fields,

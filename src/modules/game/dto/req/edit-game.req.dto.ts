@@ -342,3 +342,52 @@ export class RemoveGameImageReqDto {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
   ids: number[]
 }
+
+export class GameDeveloperRelationDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'developer_id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'developer_id' }) })
+  developer_id: number
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'role' }) })
+  @IsOptional()
+  role?: string
+}
+
+export class AddGameDeveloperReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'developers' }) })
+  @ValidateNested({ each: true })
+  @Type(() => GameDeveloperRelationDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'developers' }) })
+  developers: GameDeveloperRelationDto[]
+}
+
+export class EditGameDeveloperDto extends GameDeveloperRelationDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'id' }) })
+  id: number
+}
+
+export class EditGameDeveloperReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'developers' }) })
+  @ValidateNested({ each: true })
+  @Type(() => EditGameDeveloperDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'developers' }) })
+  developers: EditGameDeveloperDto[]
+}
+
+export class RemoveGameDeveloperReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'ids' }) })
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'ids' }), each: true },
+  )
+  @Type(() => Number)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
+  ids: number[]
+}

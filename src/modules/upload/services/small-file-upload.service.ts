@@ -91,6 +91,44 @@ export class SmallFileUploadService {
     }
   }
 
+  async uploadDeveloperLogo(developer_id: number, file: Express.Multer.File, req: RequestWithUser) {
+    const developer = await this.prismaService.gameDeveloper.findUnique({
+      where: {
+        id: developer_id,
+      },
+    })
+    if (!developer) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DEVELOPER_NOT_FOUND,
+        'shion-biz.GAME_DEVELOPER_NOT_FOUND',
+      )
+    }
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
+      )
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
+      )
+    }
+
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `developer/${developer_id}/logo/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      developer_id: developer_id.toString(),
+      uploader_id: req.user.sub.toString(),
+    })
+    return {
+      key,
+    }
+  }
+
   private async _upload(dto: ImageProcessResDto, key: string, metadata?: Record<string, string>) {
     try {
       const buffer = Buffer.from(dto.data)

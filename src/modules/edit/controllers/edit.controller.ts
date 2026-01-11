@@ -25,8 +25,28 @@ export class EditController {
     return this.dataService.getGameImage(id)
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/game/:id/developers')
+  async getGameDevelopers(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getGameDevelopers(id)
+  }
+
   @Get('/game/:id/history')
   async getGameEditHistory(@Param('id', ParseIntPipe) id: number, @Query() dto: PaginationReqDto) {
     return this.dataService.getGameEditHistory(id, dto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/developer/:id/scalar')
+  async getDeveloperScalar(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getDeveloperScalar(id)
+  }
+
+  @Get('/developer/:id/history')
+  async getDeveloperEditHistory(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() dto: PaginationReqDto,
+  ) {
+    return this.dataService.getDeveloperEditHistory(id, dto)
   }
 }

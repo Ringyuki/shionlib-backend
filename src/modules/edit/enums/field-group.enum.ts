@@ -38,4 +38,5 @@ export enum GameDeveloperFieldGroupBit {
   INTROS = 3, // intro_jp, intro_zh, intro_en
   EXTRA = 4,
   LOGO = 5,
+  WEBSITE = 6,
 }

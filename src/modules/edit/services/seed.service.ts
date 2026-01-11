@@ -68,6 +68,7 @@ export class SeedService implements OnModuleInit {
       ['INTROS', GameDeveloperFieldGroupBit.INTROS, false],
       ['EXTRA', GameDeveloperFieldGroupBit.EXTRA, false],
       ['LOGO', GameDeveloperFieldGroupBit.LOGO, false],
+      ['WEBSITE', GameDeveloperFieldGroupBit.WEBSITE, false],
     ] as const
 
     try {

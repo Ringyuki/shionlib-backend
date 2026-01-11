@@ -8,6 +8,7 @@ export class DeveloperScalarResDto {
   intro_en: string
   extra_info: ExtraInfo[]
   logo: string
+  website: string
 }
 
 class ExtraInfo {

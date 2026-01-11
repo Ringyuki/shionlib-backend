@@ -89,6 +89,37 @@ export class DataService {
     return images
   }
 
+  async getGameDevelopers(game_id: number) {
+    const game = await this.prismaService.game.findUnique({
+      where: { id: game_id },
+      select: {
+        id: true,
+      },
+    })
+    if (!game) {
+      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+    }
+    const developers = await this.prismaService.gameDeveloperRelation.findMany({
+      where: {
+        game_id,
+      },
+      select: {
+        id: true,
+        developer_id: true,
+        role: true,
+        developer: {
+          select: {
+            id: true,
+            name: true,
+            aliases: true,
+          },
+        },
+      },
+    })
+
+    return developers
+  }
+
   async getGameEditHistory(
     game_id: number,
     dto: PaginationReqDto,
@@ -138,6 +169,89 @@ export class DataService {
             id: true,
           },
         },
+        actor: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        note: true,
+        created: true,
+        updated: true,
+      },
+    })
+    return {
+      items: history as unknown as EditRecordItem[],
+      meta: {
+        totalItems: total,
+        itemCount: history.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
+  }
+
+  async getDeveloperScalar(developer_id: number) {
+    const developer = await this.prismaService.gameDeveloper.findUnique({
+      where: { id: developer_id },
+      select: {
+        b_id: true,
+        v_id: true,
+        name: true,
+        aliases: true,
+        intro_jp: true,
+        intro_zh: true,
+        intro_en: true,
+        extra_info: true,
+        logo: true,
+        website: true,
+      },
+    })
+    if (!developer) {
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_NOT_FOUND)
+    }
+    return developer
+  }
+
+  async getDeveloperEditHistory(
+    developer_id: number,
+    dto: PaginationReqDto,
+  ): Promise<PaginatedResult<EditRecordItem>> {
+    const developer = await this.prismaService.gameDeveloper.findUnique({
+      where: { id: developer_id },
+      select: { id: true },
+    })
+    if (!developer) {
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_NOT_FOUND)
+    }
+
+    const { page, pageSize } = dto
+    const total = await this.prismaService.editRecord.count({
+      where: {
+        target_id: developer_id,
+        entity: 'developer',
+      },
+    })
+    const history = await this.prismaService.editRecord.findMany({
+      where: {
+        target_id: developer_id,
+        entity: 'developer',
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { created: 'desc' },
+      select: {
+        id: true,
+        entity: true,
+        target_id: true,
+        action: true,
+        field_changes: true,
+        changes: true,
+        undo: true,
+        undo_of: { select: { id: true } },
+        undone_by: { select: { id: true } },
         actor: {
           select: {
             id: true,
