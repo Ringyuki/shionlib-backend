@@ -607,6 +607,7 @@ export class GameEditService {
             relation: 'developers',
             added: uniqueDevelopersWithNames.map(d => ({
               role: d.role,
+              developer_id: d.developer_id,
               developer: { name: d.developer.name },
             })),
           } as any,
@@ -663,6 +664,7 @@ export class GameEditService {
             relation: 'developers',
             removed: relationsToRemove.map(r => ({
               role: r.role,
+              developer_id: r.developer_id,
               developer: { name: r.developer.name },
             })),
           } as any,
@@ -735,12 +737,14 @@ export class GameEditService {
             before: [
               {
                 role: relationToEdit.role,
+                developer_id: relationToEdit.developer_id,
                 developer: { name: relationToEdit.developer.name },
               },
             ],
             after: [
               {
                 role: updated.role,
+                developer_id: updated.developer_id,
                 developer: { name: updated.developer.name },
               },
             ],

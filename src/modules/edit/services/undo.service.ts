@@ -614,7 +614,7 @@ export class UndoService {
         const after = (changes as RelationChanges)?.after?.[0]
         if (before?.id) {
           await tx.gameDeveloperRelation.update({
-            where: { id: before.id },
+            where: { game_id_developer_id: { game_id: id, developer_id: before.developer_id } },
             data: { role: before.role ?? null },
           })
         }
