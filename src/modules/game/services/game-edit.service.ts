@@ -10,6 +10,8 @@ import {
   GameImageDto,
   GameDeveloperRelationDto,
   EditGameDeveloperDto,
+  GameCharacterRelationDto,
+  EditGameCharacterDto,
 } from '../dto/req/edit-game.req.dto'
 import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
 import { EditActionType } from '../../edit/enums/edit-action-type.enum'
@@ -667,7 +669,7 @@ export class GameEditService {
               developer_id: r.developer_id,
               developer: { name: r.developer.name },
             })),
-          } as any,
+          },
         },
         select: { id: true },
       })
@@ -746,6 +748,244 @@ export class GameEditService {
                 role: updated.role,
                 developer_id: updated.developer_id,
                 developer: { name: updated.developer.name },
+              },
+            ],
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+  }
+
+  async addCharacters(id: number, characters: GameCharacterRelationDto[], req: RequestWithUser) {
+    const game = await this.prisma.game.findUnique({ where: { id }, select: { id: true } })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    const existing = await this.prisma.gameCharacterRelation.findMany({
+      where: { game_id: id },
+      select: { character_id: true },
+    })
+    const existingIds = new Set(existing.map(e => e.character_id))
+    const uniqueCharacters = characters
+      .filter(c => !existingIds.has(c.character_id))
+      .map(c => ({
+        game_id: id,
+        character_id: c.character_id,
+        role: c.role ?? null,
+        image: c.image ?? null,
+        actor: c.actor ?? null,
+      }))
+    if (uniqueCharacters.length === 0) return
+
+    const uniqueCharactersWithNames = await Promise.all(
+      uniqueCharacters.map(async c => {
+        const character = await this.prisma.gameCharacter.findUnique({
+          where: { id: c.character_id },
+          select: { name_jp: true },
+        })
+        return {
+          ...c,
+          character: { name: character?.name_jp ?? null },
+        }
+      }),
+    )
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameCharacterRelation.createMany({
+        data: uniqueCharactersWithNames.map(c => ({
+          game_id: id,
+          character_id: c.character_id,
+          role: c.role ?? null,
+          image: c.image ?? null,
+          actor: c.actor ?? null,
+        })),
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.ADD_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.CHARACTER,
+          field_changes: ['characters'],
+          changes: {
+            relation: 'characters',
+            added: uniqueCharactersWithNames.map(c => ({
+              role: c.role,
+              character_id: c.character_id,
+              character: { name: c.character.name },
+            })),
+          } as any,
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async removeCharacters(id: number, relationIds: number[], req: RequestWithUser) {
+    const relationsToRemove = await this.prisma.gameCharacterRelation.findMany({
+      where: { game_id: id, id: { in: relationIds } },
+      select: {
+        id: true,
+        role: true,
+        image: true,
+        actor: true,
+        character: { select: { id: true, name_jp: true, name_zh: true, name_en: true } },
+      },
+    })
+    if (relationsToRemove.length === 0) return
+
+    const existing = await this.prisma.gameCharacterRelation.findMany({
+      where: { game_id: id },
+      select: { character_id: true },
+    })
+    const existingIds = new Set(existing.map(e => e.character_id))
+    if (existingIds.size <= 1)
+      throw new ShionBizException(ShionBizCode.GAME_CHARACTER_MIN_ONE_REQUIRED)
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameCharacterRelation.deleteMany({ where: { game_id: id, id: { in: relationIds } } })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.REMOVE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.CHARACTER,
+          field_changes: ['characters'],
+          changes: relationsToRemove.map(r => ({
+            id: r.id,
+            role: r.role,
+            image: r.image,
+            actor: r.actor,
+            character: {
+              name_jp: r.character.name_jp,
+              name_zh: r.character.name_zh,
+              name_en: r.character.name_en,
+            },
+          })),
+        },
+        select: { id: true },
+      })
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  async editCharacters(id: number, characters: EditGameCharacterDto[], req: RequestWithUser) {
+    for (const character of characters) {
+      await this.editCharacter(id, character, req)
+    }
+  }
+
+  async editCharacter(id: number, character: EditGameCharacterDto, req: RequestWithUser) {
+    const relationToEdit = await this.prisma.gameCharacterRelation.findUnique({
+      where: { id: character.id },
+      select: {
+        id: true,
+        role: true,
+        image: true,
+        actor: true,
+        game_id: true,
+        character: { select: { id: true, name_jp: true, name_zh: true, name_en: true } },
+      },
+    })
+    if (!relationToEdit || relationToEdit.game_id !== id) return
+
+    const { field_changes } = pickChanges(
+      { role: character.role, image: character.image, actor: character.actor },
+      relationToEdit,
+    )
+    if (field_changes.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.gameCharacterRelation.update({
+        where: { id: character.id },
+        data: {
+          role: character.role,
+          image: character.image,
+          actor: character.actor,
+        },
+        select: {
+          id: true,
+          role: true,
+          image: true,
+          actor: true,
+          character: { select: { id: true, name_jp: true, name_zh: true, name_en: true } },
+        },
+      })
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.UPDATE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.CHARACTER,
+          field_changes: ['characters'],
+          changes: {
+            relation: 'characters',
+            before: [
+              {
+                role: relationToEdit.role,
+                image: relationToEdit.image,
+                actor: relationToEdit.actor,
+                character: {
+                  name_jp: relationToEdit.character.name_jp,
+                  name_zh: relationToEdit.character.name_zh,
+                  name_en: relationToEdit.character.name_en,
+                },
+              },
+            ],
+            after: [
+              {
+                role: updated.role,
+                image: updated.image,
+                actor: updated.actor,
+                character: {
+                  name_jp: updated.character.name_jp,
+                  name_zh: updated.character.name_zh,
+                  name_en: updated.character.name_en,
+                },
               },
             ],
           } as any,

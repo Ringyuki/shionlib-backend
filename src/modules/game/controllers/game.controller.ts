@@ -38,6 +38,7 @@ export class GameController {
       { page: getGameListReqDto.page, pageSize: getGameListReqDto.pageSize },
       req.user?.content_limit,
       getGameListReqDto.developer_id,
+      getGameListReqDto.character_id,
       getGameListReqDto.filter,
     )
   }

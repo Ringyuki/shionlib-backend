@@ -102,4 +102,31 @@ export class SmallFileUploadController {
   ) {
     return await this.smallFileUploadService.uploadDeveloperLogo(developer_id, file, req)
   }
+
+  @Put('character/:character_id/image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
+        cb(
+          ok
+            ? null
+            : new ShionBizException(
+                ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE,
+                'shion-biz.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE',
+              ),
+          ok,
+        )
+      },
+    }),
+  )
+  async uploadCharacterImage(
+    @Param('character_id', ParseIntPipe) character_id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.smallFileUploadService.uploadCharacterImage(character_id, file, req)
+  }
 }

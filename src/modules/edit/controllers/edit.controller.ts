@@ -31,6 +31,12 @@ export class EditController {
     return this.dataService.getGameDevelopers(id)
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/game/:id/characters')
+  async getGameCharacters(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getGameCharacters(id)
+  }
+
   @Get('/game/:id/history')
   async getGameEditHistory(@Param('id', ParseIntPipe) id: number, @Query() dto: PaginationReqDto) {
     return this.dataService.getGameEditHistory(id, dto)
@@ -48,5 +54,19 @@ export class EditController {
     @Query() dto: PaginationReqDto,
   ) {
     return this.dataService.getDeveloperEditHistory(id, dto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/character/:id/scalar')
+  async getCharacterScalar(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getCharacterScalar(id)
+  }
+
+  @Get('/character/:id/history')
+  async getCharacterEditHistory(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() dto: PaginationReqDto,
+  ) {
+    return this.dataService.getCharacterEditHistory(id, dto)
   }
 }

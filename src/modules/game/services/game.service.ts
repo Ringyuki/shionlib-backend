@@ -208,6 +208,7 @@ export class GameService {
     getGameListReqDto: PaginationReqDto,
     content_limit?: number,
     producer_id?: number,
+    character_id?: number,
     filter?: GetGameListFilterReqDto,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10 } = getGameListReqDto
@@ -231,6 +232,14 @@ export class GameService {
         some: {
           developer: {
             id: producer_id,
+          },
+        },
+      }
+    if (character_id)
+      where.characters = {
+        some: {
+          character: {
+            id: character_id,
           },
         },
       }

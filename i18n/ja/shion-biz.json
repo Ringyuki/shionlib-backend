@@ -37,6 +37,7 @@
 
   "GAME_CHARACTER_NOT_FOUND": "キャラクターが見つかりません",
   "GAME_CHARACTER_ALREADY_EXISTS": "キャラクターがすでに存在します",
+  "GAME_CHARACTER_MIN_ONE_REQUIRED": "少なくとも1つのキャラクターが必要です",
 
   "GAME_COVER_ALREADY_EXISTS": "カバーがすでに存在します",
   "GAME_COVER_MIN_ONE_REQUIRED": "少なくとも1つのカバーが必要です",

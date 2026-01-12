@@ -391,3 +391,69 @@ export class RemoveGameDeveloperReqDto {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
   ids: number[]
 }
+
+export enum GameCharacterRole {
+  MAIN = 'main',
+  PRIMARY = 'primary',
+  SIDE = 'side',
+  APPEARS = 'appears',
+}
+
+export class GameCharacterRelationDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'character_id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'character_id' }) })
+  character_id: number
+
+  @IsEnum(GameCharacterRole, {
+    message: ivmEnum('validation.common.IS_ENUM', { property: 'role' }),
+  })
+  @IsOptional()
+  role?: GameCharacterRole
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'image' }) })
+  @IsOptional()
+  image?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'actor' }) })
+  @IsOptional()
+  actor?: string
+}
+
+export class AddGameCharacterReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'characters' }) })
+  @ValidateNested({ each: true })
+  @Type(() => GameCharacterRelationDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'characters' }) })
+  characters: GameCharacterRelationDto[]
+}
+
+export class EditGameCharacterDto extends GameCharacterRelationDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'id' }) })
+  id: number
+}
+
+export class EditGameCharacterReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'characters' }) })
+  @ValidateNested({ each: true })
+  @Type(() => EditGameCharacterDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'characters' }) })
+  characters: EditGameCharacterDto[]
+}
+
+export class RemoveGameCharacterReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'ids' }) })
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'ids' }), each: true },
+  )
+  @Type(() => Number)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
+  ids: number[]
+}

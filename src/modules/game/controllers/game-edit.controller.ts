@@ -27,6 +27,9 @@ import {
   AddGameDeveloperReqDto,
   RemoveGameDeveloperReqDto,
   EditGameDeveloperReqDto,
+  AddGameCharacterReqDto,
+  RemoveGameCharacterReqDto,
+  EditGameCharacterReqDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -286,5 +289,57 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.editDevelopers(id, dto.developers, req)
+  }
+
+  // Character relation endpoints
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_CHARACTERS],
+      undefined,
+      'characters',
+    ),
+  )
+  @Put(':id/edit/characters')
+  async addCharacters(
+    @Body() dto: AddGameCharacterReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.addCharacters(id, dto.characters, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_CHARACTERS],
+      undefined,
+      'characters',
+    ),
+  )
+  @Delete(':id/edit/characters')
+  async removeCharacters(
+    @Body() dto: RemoveGameCharacterReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.removeCharacters(id, dto.ids, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_CHARACTERS],
+      undefined,
+      'characters',
+    ),
+  )
+  @Patch(':id/edit/characters')
+  async editCharacters(
+    @Body() dto: EditGameCharacterReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editCharacters(id, dto.characters, req)
   }
 }

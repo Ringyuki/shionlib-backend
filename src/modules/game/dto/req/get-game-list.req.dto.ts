@@ -83,6 +83,14 @@ export class GetGameListReqDto extends PaginationReqDto {
   @Type(() => Number)
   developer_id?: number
 
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'character_id' }) },
+  )
+  @IsOptional()
+  @Type(() => Number)
+  character_id?: number
+
   @IsOptional()
   @ValidateNested()
   @Type(() => GetGameListFilterReqDto)

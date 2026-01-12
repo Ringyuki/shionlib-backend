@@ -29,6 +29,7 @@ import { EditModule } from './modules/edit/edit.module'
 import { CommentModule } from './modules/comment/comment.module'
 import { RenderModule } from './modules/render/render.module'
 import { DeveloperModule } from './modules/developer/developer.module'
+import { CharacterModule } from './modules/character/character.module'
 import { SearchModule } from './modules/search/search.module'
 import { ActivityModule } from './modules/activity/activity.module'
 import { SiteModule } from './modules/site/site.module'
@@ -99,6 +100,7 @@ import { ModerateModule } from './modules/moderate/moderate.module'
     CommentModule,
     RenderModule,
     DeveloperModule,
+    CharacterModule,
     SearchModule,
     ActivityModule,
     SiteModule,

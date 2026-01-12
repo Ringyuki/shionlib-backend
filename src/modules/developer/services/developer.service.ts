@@ -4,7 +4,7 @@ import type { Prisma } from '@prisma/client'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { GetListReqDto } from '../dto/req/get-list.req.dto'
-import { PaginatedResult } from 'src/shared/interfaces/response/response.interface'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { DeveloperResDto } from '../dto/res/developer.res.dto'
 
 @Injectable()

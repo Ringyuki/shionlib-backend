@@ -174,7 +174,10 @@ export class UndoService {
       await this.inverseDeveloper(tx, rec, req)
       return
     }
-    // TODO: later extend character
+    if (rec.entity === PermissionEntity.CHARACTER) {
+      await this.inverseCharacter(tx, rec, req)
+      return
+    }
     throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 
@@ -690,6 +693,51 @@ export class UndoService {
           type: ActivityType.DEVELOPER_EDIT,
           user_id: req.user.sub,
           developer_id: id,
+          edit_record_id: undoRecord.id,
+        },
+        tx,
+      )
+      return
+    }
+
+    throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
+  }
+
+  private async inverseCharacter(tx: Prisma.TransactionClient, rec: any, req: RequestWithUser) {
+    const id = rec.target_id as number
+    const action: EditActionType = rec.action
+    const changes = rec.changes as ScalarChanges | null
+
+    if (action === EditActionType.UPDATE_SCALAR) {
+      const before = changes?.before ?? {}
+      const data = before as Record<string, unknown>
+
+      if (Object.keys(data).length > 0) {
+        await tx.gameCharacter.update({ where: { id }, data })
+      }
+
+      const afterNow = Object.keys(data).length > 0 ? data : {}
+      const undoRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.CHARACTER,
+          target_id: id,
+          action: EditActionType.UPDATE_SCALAR,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          field_changes: Object.keys(data),
+          changes: { before: changes?.after ?? {}, after: afterNow } as any,
+          note: `undo of #${rec.id}`,
+          undo: true,
+          undo_of_id: rec.id,
+        },
+        select: { id: true },
+      })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.CHARACTER_EDIT,
+          user_id: req.user.sub,
+          character_id: id,
           edit_record_id: undoRecord.id,
         },
         tx,
