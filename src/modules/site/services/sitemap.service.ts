@@ -50,6 +50,16 @@ export class SitemapService {
         url: buildUrl(type, developer.id),
         lastmod: developer.updated.toISOString(),
       }))
+    } else if (type === SitemapType.CHARACTER) {
+      const characters = await this.prisma.gameCharacter.findMany({
+        skip,
+        take: pageSize,
+        select: { id: true, created: true, updated: true },
+      })
+      items = characters.map(character => ({
+        url: buildUrl(type, character.id),
+        lastmod: character.updated.toISOString(),
+      }))
     }
     return items
   }
@@ -57,13 +67,15 @@ export class SitemapService {
   async generateIndex(): Promise<string> {
     const pageSize = 50000
 
-    const [gameCount, developerCount] = await Promise.all([
+    const [gameCount, developerCount, characterCount] = await Promise.all([
       this.prisma.game.count({ where: { status: 1, nsfw: false } }),
       this.prisma.gameDeveloper.count(),
+      this.prisma.gameCharacter.count(),
     ])
     const sections: IndexItem[] = [
       { type: SitemapType.GAME, count: gameCount },
       { type: SitemapType.DEVELOPER, count: developerCount },
+      { type: SitemapType.CHARACTER, count: characterCount },
     ]
 
     const now = new Date().toISOString()
@@ -90,7 +102,7 @@ export class SitemapService {
     const items = await this.getBaseInfos(type, options)
     const urls = items
       .map(i => {
-        const url = this.buildUrl(i.url, this.defaultLang)
+        const url = i.url
         const alternates = this.supportedLangs
           .map(l => {
             return `<xhtml:link rel="alternate" hreflang="${l}" href="${this.buildUrl(url, l)}"/>`

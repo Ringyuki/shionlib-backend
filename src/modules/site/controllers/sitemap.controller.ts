@@ -36,7 +36,7 @@ export class SitemapController {
     @Param('page', ParseIntPipe) page: number,
     @Res() res: Response,
   ): Promise<void> {
-    if (![SitemapType.GAME, SitemapType.DEVELOPER].includes(type)) {
+    if (![SitemapType.GAME, SitemapType.DEVELOPER, SitemapType.CHARACTER].includes(type)) {
       res
         .type('application/xml; charset=utf-8')
         .send(
