@@ -1,0 +1,194 @@
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from '../../../prisma.service'
+import { AdminGameListReqDto } from '../dto/req/game-list.req.dto'
+import { AdminCharacterListReqDto, AdminDeveloperListReqDto } from '../dto/req/content-list.req.dto'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { AdminGameItemResDto } from '../dto/res/admin-game-item.res.dto'
+import { AdminCharacterItemResDto } from '../dto/res/admin-character-item.res.dto'
+import { AdminDeveloperItemResDto } from '../dto/res/admin-developer-item.res.dto'
+
+@Injectable()
+export class AdminContentService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getGameList(query: AdminGameListReqDto): Promise<PaginatedResult<AdminGameItemResDto>> {
+    const { page, pageSize, search, sortBy = 'id', sortOrder = 'desc', status } = query
+
+    const where: any = {}
+
+    if (status !== undefined) {
+      where.status = status
+    }
+
+    if (search) {
+      where.OR = [
+        { title_jp: { contains: search, mode: 'insensitive' } },
+        { title_zh: { contains: search, mode: 'insensitive' } },
+        { title_en: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.game.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          title_jp: true,
+          title_zh: true,
+          title_en: true,
+          status: true,
+          views: true,
+          downloads: true,
+          nsfw: true,
+          created: true,
+          updated: true,
+          covers: {
+            take: 1,
+            select: { url: true },
+          },
+          creator: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      }),
+      this.prisma.game.count({ where }),
+    ])
+
+    return {
+      items: items.map(item => ({
+        ...item,
+        cover: item.covers[0]?.url,
+      })),
+      meta: {
+        totalItems: total,
+        itemCount: items.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
+  }
+
+  async updateGameStatus(gameId: number, status: number): Promise<void> {
+    await this.prisma.game.update({
+      where: { id: gameId },
+      data: { status },
+    })
+  }
+
+  async getCharacterList(
+    query: AdminCharacterListReqDto,
+  ): Promise<PaginatedResult<AdminCharacterItemResDto>> {
+    const { page, pageSize, search, sortBy = 'id', sortOrder = 'desc' } = query
+
+    const where: any = {}
+
+    if (search) {
+      where.OR = [
+        { name_jp: { contains: search, mode: 'insensitive' } },
+        { name_zh: { contains: search, mode: 'insensitive' } },
+        { name_en: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.gameCharacter.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          name_jp: true,
+          name_zh: true,
+          name_en: true,
+          image: true,
+          gender: true,
+          created: true,
+          updated: true,
+          _count: {
+            select: { games: true },
+          },
+        },
+      }),
+      this.prisma.gameCharacter.count({ where }),
+    ])
+
+    return {
+      items: items.map(item => ({
+        id: item.id,
+        name_jp: item.name_jp,
+        name_zh: item.name_zh,
+        name_en: item.name_en,
+        image: item.image ?? undefined,
+        gender: item.gender,
+        gamesCount: item._count.games,
+        created: item.created,
+        updated: item.updated,
+      })),
+      meta: {
+        totalItems: total,
+        itemCount: items.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
+  }
+
+  async getDeveloperList(
+    query: AdminDeveloperListReqDto,
+  ): Promise<PaginatedResult<AdminDeveloperItemResDto>> {
+    const { page, pageSize, search, sortBy = 'id', sortOrder = 'desc' } = query
+
+    const where: any = {}
+
+    if (search) {
+      where.name = { contains: search, mode: 'insensitive' }
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.gameDeveloper.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          created: true,
+          updated: true,
+          _count: {
+            select: { games: true },
+          },
+        },
+      }),
+      this.prisma.gameDeveloper.count({ where }),
+    ])
+
+    return {
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        logo: item.logo ?? undefined,
+        gamesCount: item._count.games,
+        created: item.created,
+        updated: item.updated,
+      })),
+      meta: {
+        totalItems: total,
+        itemCount: items.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+      },
+    }
+  }
+}

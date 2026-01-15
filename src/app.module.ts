@@ -37,6 +37,7 @@ import { MessageModule } from './modules/message/message.module'
 import { DatabaseModule } from './modules/database/database.module'
 import { LLMsModule } from './modules/llms/llms.module'
 import { ModerateModule } from './modules/moderate/moderate.module'
+import { AdminModule } from './modules/admin/admin.module'
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { ModerateModule } from './modules/moderate/moderate.module'
     SiteModule,
     MessageModule,
     DatabaseModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [
