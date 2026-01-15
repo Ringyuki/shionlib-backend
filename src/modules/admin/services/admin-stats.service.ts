@@ -8,6 +8,19 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 const CACHE_KEY_OVERVIEW = 'admin:stats:overview'
 const CACHE_KEY_TRENDS = 'admin:stats:trends'
 const CACHE_KEY_TOP_GAMES = 'admin:stats:top-games'
+const UTC8_OFFSET_MS = 8 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+
+const getUtc8StartOfDay = (date: Date): Date => {
+  const utc8 = new Date(date.getTime() + UTC8_OFFSET_MS)
+  utc8.setUTCHours(0, 0, 0, 0)
+  return new Date(utc8.getTime() - UTC8_OFFSET_MS)
+}
+
+const formatUtc8Date = (date: Date): string => {
+  const utc8 = new Date(date.getTime() + UTC8_OFFSET_MS)
+  return utc8.toISOString().split('T')[0]
+}
 
 @Injectable()
 export class AdminStatsService {
@@ -22,8 +35,7 @@ export class AdminStatsService {
       return cached
     }
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = getUtc8StartOfDay(new Date())
 
     const [
       totalGames,
@@ -81,38 +93,32 @@ export class AdminStatsService {
       return cached
     }
 
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - days)
-    startDate.setHours(0, 0, 0, 0)
+    const startDate = getUtc8StartOfDay(new Date())
+    startDate.setTime(startDate.getTime() - (days - 1) * DAY_MS)
 
-    const gamesPerDay = await this.prisma.$queryRaw<{ date: Date; count: bigint }[]>`
-      SELECT DATE(created) as date, COUNT(*) as count
+    const gamesPerDay = await this.prisma.$queryRaw<{ date: string; count: bigint }[]>`
+      SELECT TO_CHAR(created AT TIME ZONE 'Asia/Shanghai', 'YYYY-MM-DD') as date, COUNT(*) as count
       FROM games
       WHERE created >= ${startDate} AND status = 1
-      GROUP BY DATE(created)
+      GROUP BY TO_CHAR(created AT TIME ZONE 'Asia/Shanghai', 'YYYY-MM-DD')
       ORDER BY date ASC
     `
 
-    const usersPerDay = await this.prisma.$queryRaw<{ date: Date; count: bigint }[]>`
-      SELECT DATE(created) as date, COUNT(*) as count
+    const usersPerDay = await this.prisma.$queryRaw<{ date: string; count: bigint }[]>`
+      SELECT TO_CHAR(created AT TIME ZONE 'Asia/Shanghai', 'YYYY-MM-DD') as date, COUNT(*) as count
       FROM users
       WHERE created >= ${startDate} AND status = 1
-      GROUP BY DATE(created)
+      GROUP BY TO_CHAR(created AT TIME ZONE 'Asia/Shanghai', 'YYYY-MM-DD')
       ORDER BY date ASC
     `
 
     const result: StatsTrend[] = []
-    const gamesMap = new Map(
-      gamesPerDay.map(g => [g.date.toISOString().split('T')[0], Number(g.count)]),
-    )
-    const usersMap = new Map(
-      usersPerDay.map(u => [u.date.toISOString().split('T')[0], Number(u.count)]),
-    )
+    const gamesMap = new Map(gamesPerDay.map(g => [g.date, Number(g.count)]))
+    const usersMap = new Map(usersPerDay.map(u => [u.date, Number(u.count)]))
 
     for (let i = 0; i < days; i++) {
-      const date = new Date(startDate)
-      date.setDate(date.getDate() + i)
-      const dateStr = date.toISOString().split('T')[0]
+      const date = new Date(startDate.getTime() + i * DAY_MS)
+      const dateStr = formatUtc8Date(date)
 
       result.push({
         date: dateStr,
