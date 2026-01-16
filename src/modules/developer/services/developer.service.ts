@@ -100,4 +100,14 @@ export class DeveloperService {
       },
     })
   }
+
+  async deleteById(id: number) {
+    const exist = await this.prisma.gameDeveloper.findUnique({
+      where: { id },
+    })
+    if (!exist) {
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_NOT_FOUND)
+    }
+    await this.prisma.gameDeveloper.delete({ where: { id } })
+  }
 }
