@@ -120,7 +120,7 @@ export class BackupService {
       const toDelete = sorted.slice(retention)
       for (const item of toDelete) {
         if (!item.Key || item.Key === latestKey) continue
-        await this.backupStorage.deleteFile(item.Key)
+        await this.backupStorage.deleteFile(item.Key, false)
         this.logger.log(`Deleted old backup ${item.Key}`)
       }
     } catch (error) {
