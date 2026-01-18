@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import * as fs from 'fs'
+import * as path from 'path'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { SiteItem } from '../types/sitemap/SiteItem'
@@ -19,6 +21,15 @@ export class SitemapService {
   }
   private readonly supportedLangs: Lang[] = ['zh', 'ja', 'en']
   private readonly defaultLang: Lang = 'en'
+  private stylesheetCache?: string
+  private get stylesheetUrl(): string {
+    const isDev = this.configService.get('environment') === 'development'
+    const port = this.configService.get('port')
+    return isDev ? `http://localhost:${port}/sitemap.xsl` : `${this.siteUrl}/sitemap.xsl`
+  }
+  private get stylesheetPath(): string {
+    return path.join(__dirname, '../assets/sitemap.xsl')
+  }
 
   async getBaseInfos(type: SitemapType, options: SiteMapReqDto): Promise<SiteItem[]> {
     const { page, pageSize } = options
@@ -90,7 +101,7 @@ export class SitemapService {
       }
     }
 
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join(
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="${this.stylesheetUrl}"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join(
       '\n',
     )}\n</sitemapindex>`
   }
@@ -110,11 +121,11 @@ export class SitemapService {
           .join('')
         const xDefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${this.buildUrl(url, this.defaultLang)}"/>`
         const lastmod = `<lastmod>${i.lastmod}</lastmod>`
-        return `<url><loc>${url}</loc>${alternates}${xDefault}${lastmod}<changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
+        return `<url><loc>${this.buildUrl(url, this.defaultLang)}</loc>${alternates}${xDefault}${lastmod}<changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
       })
       .join('\n')
 
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>`
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="${this.stylesheetUrl}"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>`
   }
 
   private buildUrl(originalUrl: string, lang: Lang): string {
@@ -122,5 +133,15 @@ export class SitemapService {
     if (!originalUrl.startsWith(base + '/')) return originalUrl
     const path = originalUrl.slice((base + '/').length)
     return `${base}/${lang}/${path}`
+  }
+
+  getStylesheet(): string {
+    if (process.env.NODE_ENV === 'development') {
+      return fs.readFileSync(this.stylesheetPath, 'utf8')
+    }
+    if (!this.stylesheetCache) {
+      this.stylesheetCache = fs.readFileSync(this.stylesheetPath, 'utf8')
+    }
+    return this.stylesheetCache
   }
 }

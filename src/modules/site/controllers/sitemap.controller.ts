@@ -28,6 +28,14 @@ export class SitemapController {
     return
   }
 
+  @Get('sitemap.xsl')
+  @Header('Content-Type', 'text/xsl; charset=utf-8')
+  @Header('Cache-Control', 'public, max-age=86400')
+  async getSitemapStylesheet(@Res() res: Response): Promise<void> {
+    res.type('text/xsl; charset=utf-8').send(this.sitemapService.getStylesheet())
+    return
+  }
+
   @Get('sitemap-:type-:page.xml')
   @Header('Content-Type', 'application/xml; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=3600')
