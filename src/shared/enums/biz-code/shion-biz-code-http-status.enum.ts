@@ -45,11 +45,14 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_DEVELOPER_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.GAME_DEVELOPER_ALREADY_EXISTS]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_DEVELOPER_MIN_ONE_REQUIRED]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_DEVELOPER_HAS_RELATIONS]: HttpStatus.CONFLICT,
+  [ShionBizCode.GAME_DEVELOPER_HAS_CHILDREN]: HttpStatus.CONFLICT,
 
   // 42
   [ShionBizCode.GAME_CHARACTER_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.GAME_CHARACTER_ALREADY_EXISTS]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_CHARACTER_MIN_ONE_REQUIRED]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_CHARACTER_HAS_RELATIONS]: HttpStatus.CONFLICT,
 
   // 43
   [ShionBizCode.GAME_COVER_ALREADY_EXISTS]: HttpStatus.CONFLICT,

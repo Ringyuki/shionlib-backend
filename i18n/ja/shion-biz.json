@@ -34,10 +34,13 @@
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
   "GAME_DEVELOPER_ALREADY_EXISTS": "開発者がすでに存在します",
   "GAME_DEVELOPER_MIN_ONE_REQUIRED": "少なくとも1つの開発者が必須です",
+  "GAME_DEVELOPER_HAS_RELATIONS": "この開発者は既存のゲームと関連しているゲームがあります",
+  "GAME_DEVELOPER_HAS_CHILDREN": "この開発者は既存の子開発者があります",
 
   "GAME_CHARACTER_NOT_FOUND": "キャラクターが見つかりません",
   "GAME_CHARACTER_ALREADY_EXISTS": "キャラクターがすでに存在します",
   "GAME_CHARACTER_MIN_ONE_REQUIRED": "少なくとも1つのキャラクターが必要です",
+  "GAME_CHARACTER_HAS_RELATIONS": "このキャラクターは既存のゲームと関連しているゲームがあります",
 
   "GAME_COVER_ALREADY_EXISTS": "カバーがすでに存在します",
   "GAME_COVER_MIN_ONE_REQUIRED": "少なくとも1つのカバーが必要です",

@@ -140,4 +140,21 @@ export class CharacterService {
       },
     }
   }
+
+  async deleteById(id: number) {
+    const character = await this.prisma.gameCharacter.findUnique({
+      where: { id },
+    })
+    if (!character) {
+      throw new ShionBizException(ShionBizCode.GAME_CHARACTER_NOT_FOUND)
+    }
+    const existRelations = await this.prisma.gameCharacterRelation.findMany({
+      where: { character_id: id },
+    })
+    if (existRelations.length > 0) {
+      throw new ShionBizException(ShionBizCode.GAME_CHARACTER_HAS_RELATIONS)
+    }
+    await this.prisma.gameCharacter.delete({ where: { id } })
+    return character
+  }
 }

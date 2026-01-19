@@ -108,6 +108,18 @@ export class DeveloperService {
     if (!exist) {
       throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_NOT_FOUND)
     }
+    const existRelations = await this.prisma.gameDeveloperRelation.findMany({
+      where: { developer_id: id },
+    })
+    if (existRelations.length > 0) {
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_HAS_RELATIONS)
+    }
+    const existChilds = await this.prisma.gameDeveloper.findMany({
+      where: { parent_developer_id: id },
+    })
+    if (existChilds.length > 0) {
+      throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_HAS_CHILDREN)
+    }
     await this.prisma.gameDeveloper.delete({ where: { id } })
   }
 }
