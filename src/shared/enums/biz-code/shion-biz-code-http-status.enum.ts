@@ -71,6 +71,13 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 46
   [ShionBizCode.FAVORITE_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ShionBizCode.FAVORITE_ITEM_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ShionBizCode.FAVORITE_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.FAVORITE_ITEM_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.FAVORITE_ITEM_NOT_OWNER]: HttpStatus.FORBIDDEN,
+  [ShionBizCode.FAVORITE_NOT_OWNER]: HttpStatus.FORBIDDEN,
+  [ShionBizCode.FAVORITE_NAME_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ShionBizCode.FAVORITE_NOT_ALLOW_VIEW]: HttpStatus.FORBIDDEN,
 
   // 47
   [ShionBizCode.COMMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,

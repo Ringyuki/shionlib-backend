@@ -55,7 +55,14 @@
   "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "validation failed, error codes: {errorCodes}",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER": "you don't have permission to modify this file",
 
-  "FAVORITE_ALREADY_EXISTS": "already in favorites",
+  "FAVORITE_ALREADY_EXISTS": "favorite already exists",
+  "FAVORITE_ITEM_ALREADY_EXISTS": "favorite already contains this game",
+  "FAVORITE_NOT_FOUND": "favorite not found",
+  "FAVORITE_ITEM_NOT_FOUND": "this game is not in the favorite",
+  "FAVORITE_ITEM_NOT_OWNER": "you don't have permission to modify this game in the favorite",
+  "FAVORITE_NOT_OWNER": "you don't have permission to modify this favorite",
+  "FAVORITE_NAME_ALREADY_EXISTS": "favorite name already exists",
+  "FAVORITE_NOT_ALLOW_VIEW": "you don't have permission to view this favorite",
 
   "COMMENT_NOT_FOUND": "comment not found",
   "COMMENT_NOT_OWNER": "comment not owner",

@@ -7,7 +7,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { getPreferredLang } from '../helpers/user-language-preference-getter.helper'
 import { CreateUserDto } from '../dto/req/CreateUser.req.dto'
-import { CreateUserResDto } from '../dto/res/CreateUser.res.dto'
+import { CreateUserResDto } from '../dto/res/create-user.res.dto'
 import { LoginDto } from '../dto/req/Login.req.dto'
 import { LoginResDto } from '../dto/res/Login.res.dto'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
@@ -77,6 +77,12 @@ export class UserService {
           create: {
             size: 0n,
             used: 0n,
+          },
+        },
+        favorites: {
+          create: {
+            name: 'default',
+            default: true,
           },
         },
       },

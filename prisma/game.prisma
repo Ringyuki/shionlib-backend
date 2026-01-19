@@ -38,6 +38,7 @@ model Game {
   creator    User @relation("user_create_game", fields: [creator_id], references: [id])
 
   favorite_users GameFavoriteRelation[] @relation("game_favorite")
+  favorite_items FavoriteItem[] @relation("favorite_game_item")
   activities     Activity[]             @relation("game_activity")
 
   comments Comment[] @relation("game_comment")
