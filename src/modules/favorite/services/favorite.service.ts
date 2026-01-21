@@ -6,8 +6,9 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { CreateFavoriteItemReqDto } from '../dto/req/create-favorite-item.req.dto'
 import { UpdateFavoriteItemReqDto } from '../dto/req/update-favorite-item.req.dto'
 import { UpdateFavoriteReqDto } from '../dto/req/update-favorite.req.dto'
-import { GetFavoriteItemsReqDto } from '../dto/req/get-favorite.req.dto'
+import { GetFavoriteItemsReqDto } from '../dto/req/get-favorite-items.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { GetFavoritesReqDto } from '../dto/req/get-favorites.req.dto'
 
 @Injectable()
 export class FavoriteService {
@@ -146,6 +147,22 @@ export class FavoriteService {
     })
   }
 
+  async deleteFavoriteItemByGameId(favorite_id: number, game_id: number, user_id: number) {
+    const exist = await this.prisma.favoriteItem.findFirst({
+      where: {
+        favorite_id,
+        game_id,
+      },
+    })
+    if (!exist) {
+      throw new ShionBizException(
+        ShionBizCode.FAVORITE_ITEM_NOT_FOUND,
+        'shion-biz.FAVORITE_ITEM_NOT_FOUND',
+      )
+    }
+    await this.deleteFavoriteItem(exist.id, user_id)
+  }
+
   async deleteFavoriteItem(favorite_item_id: number, user_id: number) {
     const exist = await this.prisma.favoriteItem.findFirst({
       where: {
@@ -219,7 +236,8 @@ export class FavoriteService {
     })
   }
 
-  async getFavorites(user_id: number) {
+  async getFavorites(user_id: number, dto: GetFavoritesReqDto) {
+    const { game_id } = dto
     const favorites = await this.prisma.favorite.findMany({
       where: {
         user_id,
@@ -232,7 +250,43 @@ export class FavoriteService {
         default: true,
       },
     })
-    return favorites
+    const favoriteIds = favorites.map(favorite => favorite.id)
+    if (favoriteIds.length === 0) return []
+
+    const counts = await this.prisma.favoriteItem.groupBy({
+      by: ['favorite_id'],
+      where: {
+        favorite_id: { in: favoriteIds },
+      },
+      _count: {
+        favorite_id: true,
+      },
+    })
+    const countMap = new Map(counts.map(item => [item.favorite_id, item._count.favorite_id]))
+
+    if (!game_id) {
+      return favorites.map(favorite => ({
+        ...favorite,
+        game_count: countMap.get(favorite.id) ?? 0,
+      }))
+    }
+
+    const favoriteItems = await this.prisma.favoriteItem.findMany({
+      where: {
+        favorite_id: { in: favoriteIds },
+        game_id,
+      },
+      select: {
+        favorite_id: true,
+      },
+    })
+    const favoriteIdSet = new Set(favoriteItems.map(item => item.favorite_id))
+
+    return favorites.map(favorite => ({
+      ...favorite,
+      game_count: countMap.get(favorite.id) ?? 0,
+      is_favorite: favoriteIdSet.has(favorite.id),
+    }))
   }
 
   async getFavoriteItems(

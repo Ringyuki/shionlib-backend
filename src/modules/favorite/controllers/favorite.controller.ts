@@ -13,13 +13,14 @@ import {
   Delete,
 } from '@nestjs/common'
 import { FavoriteService } from '../services/favorite.service'
-import { GetFavoriteItemsReqDto } from '../dto/req/get-favorite.req.dto'
+import { GetFavoriteItemsReqDto } from '../dto/req/get-favorite-items.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { CreateFavoriteReqDto } from '../dto/req/create-favorite.req.dto'
 import { UpdateFavoriteReqDto } from '../dto/req/update-favorite.req.dto'
 import { UpdateFavoriteItemReqDto } from '../dto/req/update-favorite-item.req.dto'
 import { CreateFavoriteItemReqDto } from '../dto/req/create-favorite-item.req.dto'
+import { GetFavoritesReqDto } from '../dto/req/get-favorites.req.dto'
 
 @UseGuards(JwtAuthGuard)
 @Controller('favorites')
@@ -66,9 +67,18 @@ export class FavoriteController {
     return this.favoriteService.deleteFavoriteItem(item_id, req.user?.sub)
   }
 
+  @Delete(':id/games/:game_id')
+  async deleteFavoriteItemByGameId(
+    @Param('id', ParseIntPipe) favorite_id: number,
+    @Param('game_id', ParseIntPipe) game_id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.favoriteService.deleteFavoriteItemByGameId(favorite_id, game_id, req.user?.sub)
+  }
+
   @Get('')
-  async getFavorites(@Req() req: RequestWithUser) {
-    return this.favoriteService.getFavorites(req.user?.sub)
+  async getFavorites(@Req() req: RequestWithUser, @Query() dto: GetFavoritesReqDto) {
+    return this.favoriteService.getFavorites(req.user?.sub, dto)
   }
 
   @Get(':id/items')
