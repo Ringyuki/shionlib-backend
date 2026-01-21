@@ -28,7 +28,7 @@ export class FavoriteService {
         'shion-biz.FAVORITE_ALREADY_EXISTS',
       )
     }
-    await this.prisma.favorite.create({
+    return await this.prisma.favorite.create({
       data: {
         user_id,
         name,
@@ -39,6 +39,7 @@ export class FavoriteService {
         id: true,
         name: true,
         description: true,
+        is_private: true,
       },
     })
   }

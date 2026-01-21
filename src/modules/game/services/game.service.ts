@@ -168,10 +168,12 @@ export class GameService {
       select,
     })
 
-    const isFavorite = await this.prisma.gameFavoriteRelation.findFirst({
+    const isFavorite = await this.prisma.favoriteItem.findFirst({
       where: {
         game_id: id,
-        user_id,
+        favorite: {
+          user_id,
+        },
       },
     })
 
@@ -310,29 +312,6 @@ export class GameService {
         currentPage: page,
         content_limit,
       },
-    }
-  }
-
-  async favoriteGame(game_id: number, user_id: number) {
-    const exist = await this.prisma.gameFavoriteRelation.findFirst({
-      where: {
-        game_id,
-        user_id,
-      },
-    })
-    if (exist) {
-      await this.prisma.gameFavoriteRelation.delete({
-        where: {
-          id: exist.id,
-        },
-      })
-    } else {
-      await this.prisma.gameFavoriteRelation.create({
-        data: {
-          game_id,
-          user_id,
-        },
-      })
     }
   }
 

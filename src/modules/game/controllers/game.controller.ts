@@ -75,12 +75,6 @@ export class GameController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':id/favorite')
-  async favoriteGame(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    return await this.gameService.favoriteGame(id, req.user?.sub)
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Post(':id/download-source')
   async createDownloadSource(
     @Param('id', ParseIntPipe) id: number,
