@@ -1,4 +1,5 @@
 import { Injectable, ExecutionContext, HttpStatus } from '@nestjs/common'
+import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
 import { JwtService } from '@nestjs/jwt'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
@@ -6,6 +7,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { CacheService } from '../../cache/services/cache.service'
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -13,10 +15,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     private readonly jwtService: JwtService,
     private readonly configService: ShionConfigService,
     private readonly cacheService: CacheService,
+    private readonly reflector: Reflector,
   ) {
     super()
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ])
+    if (isPublic) return true
     const request = context.switchToHttp().getRequest<RequestWithUser>()
     const headerToken = this.extractTokenFromHeader(request)
     const cookieToken = this.extractTokenFromCookie(request)

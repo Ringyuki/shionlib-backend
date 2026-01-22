@@ -21,6 +21,7 @@ import { UpdateFavoriteReqDto } from '../dto/req/update-favorite.req.dto'
 import { UpdateFavoriteItemReqDto } from '../dto/req/update-favorite-item.req.dto'
 import { CreateFavoriteItemReqDto } from '../dto/req/create-favorite-item.req.dto'
 import { GetFavoritesReqDto } from '../dto/req/get-favorites.req.dto'
+import { Public } from '../../auth/decorators/public.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('favorites')
@@ -81,6 +82,7 @@ export class FavoriteController {
     return this.favoriteService.getFavorites(req.user?.sub, dto)
   }
 
+  @Public()
   @Get(':id/items')
   async getFavoriteItems(
     @Param('id', ParseIntPipe) favorite_id: number,
