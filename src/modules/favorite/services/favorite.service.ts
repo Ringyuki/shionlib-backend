@@ -9,6 +9,8 @@ import { UpdateFavoriteReqDto } from '../dto/req/update-favorite.req.dto'
 import { GetFavoriteItemsReqDto } from '../dto/req/get-favorite-items.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GetFavoritesReqDto } from '../dto/req/get-favorites.req.dto'
+import { Prisma } from '@prisma/client'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
 export class FavoriteService {
@@ -40,6 +42,32 @@ export class FavoriteService {
         name: true,
         description: true,
         is_private: true,
+      },
+    })
+  }
+
+  async deleteFavorite(favorite_id: number, user_id: number) {
+    const exist = await this.prisma.favorite.findUnique({
+      where: {
+        id: favorite_id,
+      },
+    })
+    if (!exist) {
+      throw new ShionBizException(ShionBizCode.FAVORITE_NOT_FOUND, 'shion-biz.FAVORITE_NOT_FOUND')
+    }
+    if (exist.user_id !== user_id) {
+      throw new ShionBizException(ShionBizCode.FAVORITE_NOT_OWNER, 'shion-biz.FAVORITE_NOT_OWNER')
+    }
+    if (exist.default) {
+      throw new ShionBizException(
+        ShionBizCode.FAVORITE_DEFAULT_NOT_ALLOW_DELETE,
+        'shion-biz.FAVORITE_DEFAULT_NOT_ALLOW_DELETE',
+      )
+    }
+
+    await this.prisma.favorite.delete({
+      where: {
+        id: favorite_id,
       },
     })
   }
@@ -238,11 +266,21 @@ export class FavoriteService {
   }
 
   async getFavorites(user_id: number, dto: GetFavoritesReqDto) {
-    const { game_id } = dto
+    const { game_id, user_id: user_id_param } = dto
+
+    const where: Prisma.FavoriteWhereInput = {}
+    if (user_id_param) {
+      where.user_id = user_id_param
+      if (user_id_param !== user_id) {
+        where.is_private = false
+      }
+    } else if (user_id) {
+      where.user_id = user_id
+    } else {
+      return []
+    }
     const favorites = await this.prisma.favorite.findMany({
-      where: {
-        user_id,
-      },
+      where,
       select: {
         id: true,
         name: true,
@@ -293,7 +331,7 @@ export class FavoriteService {
   async getFavoriteItems(
     favorite_id: number,
     dto: GetFavoriteItemsReqDto,
-    user_id: number,
+    req: RequestWithUser,
   ): Promise<PaginatedResult<any>> {
     const { page, pageSize } = dto
 
@@ -309,7 +347,7 @@ export class FavoriteService {
     if (!exist) {
       throw new ShionBizException(ShionBizCode.FAVORITE_NOT_FOUND, 'shion-biz.FAVORITE_NOT_FOUND')
     }
-    if (exist.user_id !== user_id && exist.is_private) {
+    if (exist.user_id !== req.user?.sub && exist.is_private) {
       throw new ShionBizException(
         ShionBizCode.FAVORITE_NOT_ALLOW_VIEW,
         'shion-biz.FAVORITE_NOT_ALLOW_VIEW',
@@ -328,9 +366,7 @@ export class FavoriteService {
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: {
-        game: {
-          created: 'desc',
-        },
+        created: 'desc',
       },
       select: {
         id: true,
@@ -379,6 +415,7 @@ export class FavoriteService {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit: req.user.content_limit,
       },
     }
   }

@@ -51,6 +51,14 @@ export class FavoriteController {
     return this.favoriteService.updateFavorite(favorite_id, req.user?.sub, dto)
   }
 
+  @Delete(':id')
+  async deleteFavorite(
+    @Param('id', ParseIntPipe) favorite_id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.favoriteService.deleteFavorite(favorite_id, req.user?.sub)
+  }
+
   @Patch('items/:item_id')
   async updateFavoriteItem(
     @Param('item_id', ParseIntPipe) item_id: number,
@@ -77,6 +85,7 @@ export class FavoriteController {
     return this.favoriteService.deleteFavoriteItemByGameId(favorite_id, game_id, req.user?.sub)
   }
 
+  @Public()
   @Get('')
   async getFavorites(@Req() req: RequestWithUser, @Query() dto: GetFavoritesReqDto) {
     return this.favoriteService.getFavorites(req.user?.sub, dto)
@@ -89,6 +98,6 @@ export class FavoriteController {
     @Query() dto: GetFavoriteItemsReqDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.favoriteService.getFavoriteItems(favorite_id, dto, req.user?.sub)
+    return this.favoriteService.getFavoriteItems(favorite_id, dto, req)
   }
 }

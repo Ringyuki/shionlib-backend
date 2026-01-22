@@ -90,6 +90,7 @@ export type I18nTranslations = {
         "FAVORITE_NOT_OWNER": string;
         "FAVORITE_NAME_ALREADY_EXISTS": string;
         "FAVORITE_NOT_ALLOW_VIEW": string;
+        "FAVORITE_DEFAULT_NOT_ALLOW_DELETE": string;
         "COMMENT_NOT_FOUND": string;
         "COMMENT_NOT_OWNER": string;
         "COMMENT_TOO_DEEP": string;

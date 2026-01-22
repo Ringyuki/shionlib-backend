@@ -6,4 +6,9 @@ export class GetFavoritesReqDto {
   @IsNumber()
   @Type(() => Number)
   game_id?: number
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  user_id?: number
 }

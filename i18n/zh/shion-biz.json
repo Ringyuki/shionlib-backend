@@ -63,6 +63,7 @@
   "FAVORITE_NOT_OWNER": "你没有权限修改该收藏夹",
   "FAVORITE_NAME_ALREADY_EXISTS": "收藏夹名称已存在",
   "FAVORITE_NOT_ALLOW_VIEW": "你没有权限查看该收藏夹",
+  "FAVORITE_DEFAULT_NOT_ALLOW_DELETE": "不能删除默认收藏夹",
 
   "COMMENT_NOT_FOUND": "评论不存在",
   "COMMENT_NOT_OWNER": "评论不属于当前用户",
