@@ -718,12 +718,14 @@ export class GameDownloadSourceService {
     operatorId: number,
     tx?: Prisma.TransactionClient,
   ) {
-    const favorites = await (tx || this.prismaService).gameFavoriteRelation.findMany({
+    const favorites = await (tx || this.prismaService).favoriteItem.findMany({
       where: {
         game_id: gameId,
-        user_id: { not: operatorId },
+        favorite: {
+          user_id: { not: operatorId },
+        },
       },
-      select: { user_id: true },
+      select: { favorite: { select: { user_id: true } } },
     })
 
     for (const fav of favorites) {
@@ -740,7 +742,7 @@ export class GameDownloadSourceService {
             game_title_zh: game.title_zh,
             game_title_en: game.title_en,
           },
-          receiver_id: fav.user_id,
+          receiver_id: fav.favorite.user_id,
         },
         tx,
       )
