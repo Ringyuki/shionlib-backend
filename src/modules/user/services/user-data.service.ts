@@ -7,7 +7,6 @@ import { GameResourcesResDto } from '../dto/res/game-resources.res.dto'
 import { Prisma } from '@prisma/client'
 import { UserContentLimit } from '../interfaces/user.interface'
 import { CommentResDto } from '../../comment/dto/res/comment.res.dto'
-import { FavoritesResDto } from '../dto/res/favorites.res.dto'
 import { EditRecordItem } from '../dto/res/edit-records.res.dto'
 
 @Injectable()
@@ -198,94 +197,6 @@ export class UserDataService {
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
         is_current_user: isCurrentUser,
-      },
-    }
-  }
-
-  async getFavorites(
-    user_id: number,
-    req: RequestWithUser,
-    dto: PaginationReqDto,
-  ): Promise<PaginatedResult<FavoritesResDto>> {
-    const { page, pageSize } = dto
-
-    const where: Prisma.GameFavoriteRelationWhereInput = {
-      user_id: user_id,
-    }
-    if (
-      req.user?.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
-      !req.user?.content_limit
-    ) {
-      where.game = {
-        nsfw: { not: true },
-      }
-    }
-
-    const total = await this.prismaService.gameFavoriteRelation.count({
-      where: {
-        user_id: user_id,
-        ...where,
-      },
-    })
-    const favorites = await this.prismaService.gameFavoriteRelation.findMany({
-      where: {
-        user_id: user_id,
-        ...where,
-      },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: {
-        game: {
-          created: 'desc',
-        },
-      },
-      select: {
-        id: true,
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            platform: true,
-            type: true,
-            tags: true,
-            developers: {
-              select: {
-                role: true,
-                developer: {
-                  select: {
-                    id: true,
-                    name: true,
-                    aliases: true,
-                  },
-                },
-              },
-            },
-            covers: {
-              select: {
-                url: true,
-                language: true,
-                dims: true,
-                sexual: true,
-                violence: true,
-              },
-            },
-            release_date: true,
-          },
-        },
-      },
-    })
-
-    return {
-      items: favorites as unknown as FavoritesResDto[],
-      meta: {
-        totalItems: total,
-        itemCount: favorites.length,
-        itemsPerPage: pageSize,
-        totalPages: Math.ceil(total / pageSize),
-        currentPage: page,
-        content_limit: req.user?.content_limit,
       },
     }
   }

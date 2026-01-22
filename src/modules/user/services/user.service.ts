@@ -235,9 +235,11 @@ export class UserService {
         creator_id: id,
       },
     })
-    const favorite = await this.prisma.gameFavoriteRelation.count({
+    const favorite = await this.prisma.favoriteItem.count({
       where: {
-        user_id: id,
+        favorite: {
+          user_id: id,
+        },
       },
     })
     const edit = await this.prisma.editRecord.count({

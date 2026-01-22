@@ -17,7 +17,6 @@ model User {
   comments                              Comment[]                         @relation("user_create_comment")
 
   favorites Favorite[] @relation("user_favorite")
-  favorite_games GameFavoriteRelation[] @relation("user_favorite_game")
 
   lang          UserLang @default(en)
   content_limit Int      @default(2)

@@ -25,15 +25,6 @@ export class UserDataController {
     return await this.userDataService.getComments(id, req, dto)
   }
 
-  @Get(':id/favorites')
-  async getFavorites(
-    @Req() req: RequestWithUser,
-    @Query() dto: PaginationReqDto,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return await this.userDataService.getFavorites(id, req, dto)
-  }
-
   @Get(':id/edit-records')
   async getEditRecords(@Query() dto: PaginationReqDto, @Param('id', ParseIntPipe) id: number) {
     return await this.userDataService.getEditRecords(id, dto)
