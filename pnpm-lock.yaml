@@ -173,6 +173,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      prisma:
+        specifier: ^7.0.0
+        version: 7.0.0(@types/react@19.2.6)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.2)
       redis:
         specifier: ^5.10.0
         version: 5.10.0
@@ -273,9 +276,6 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.6.2
-      prisma:
-        specifier: ^7.0.0
-        version: 7.0.0(@types/react@19.2.6)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.2)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21

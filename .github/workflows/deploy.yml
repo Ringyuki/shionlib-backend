@@ -188,7 +188,7 @@ jobs:
 
           cd "$RELEASE_DIR"
           pnpm install --prod --frozen-lockfile
-          pnpm dlx prisma generate
+          pnpm prisma generate
 
           set -a
           [ -f "$RELEASE_DIR/.env" ] && . "$RELEASE_DIR/.env"
@@ -205,7 +205,7 @@ jobs:
             if [ "$HAS_TABLES" -gt 0 ] && { [ "$HAS_PRISMA_TABLE" = "f" ] || [ "$MIG_CNT" -eq 0 ]; }; then
               echo "Detected existing DB without Prisma migration history."
               echo "Run once in this release dir:"
-              echo "pnpm dlx prisma migrate resolve --applied 0000_initial_baseline && pnpm dlx prisma migrate deploy"
+              echo "pnpm prisma migrate resolve --applied 0000_initial_baseline && pnpm prisma migrate deploy"
               exit 1
             fi
           else
@@ -214,7 +214,7 @@ jobs:
 
           if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
             echo "Applying Prisma migrations..."
-            pnpm dlx prisma migrate deploy
+            pnpm prisma migrate deploy
           else
             echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
           fi
