@@ -268,6 +268,10 @@ export class FavoriteService {
   async getFavorites(user_id: number, dto: GetFavoritesReqDto) {
     const { game_id, user_id: user_id_param } = dto
 
+    if (!user_id && game_id) {
+      throw new ShionBizException(ShionBizCode.AUTH_UNAUTHORIZED, 'shion-biz.AUTH_UNAUTHORIZED')
+    }
+
     const where: Prisma.FavoriteWhereInput = {}
     if (user_id_param) {
       where.user_id = user_id_param
@@ -276,9 +280,8 @@ export class FavoriteService {
       }
     } else if (user_id) {
       where.user_id = user_id
-    } else {
-      return []
     }
+
     const favorites = await this.prisma.favorite.findMany({
       where,
       select: {
