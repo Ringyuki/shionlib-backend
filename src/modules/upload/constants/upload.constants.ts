@@ -11,3 +11,5 @@ export const FILE_CHECK_STATUS_MAP: Record<ArchiveStatus, keyof typeof ActivityF
   [ArchiveStatus.ENCRYPTED]: 'ENCRYPTED',
   [ArchiveStatus.HARMFUL]: 'HARMFUL',
 }
+
+export const SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT = 10 * 1024 * 1024 // 10MB

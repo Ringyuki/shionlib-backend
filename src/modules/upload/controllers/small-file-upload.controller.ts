@@ -16,6 +16,7 @@ import { memoryStorage } from 'multer'
 import type { Express } from 'express'
 import { SmallFileUploadService } from '../services/small-file-upload.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT } from '../constants/upload.constants'
 
 @UseGuards(JwtAuthGuard)
 @Controller('uploads/small')
@@ -26,7 +27,7 @@ export class SmallFileUploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT },
       fileFilter: (_req, file, cb) => {
         const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
         cb(
@@ -53,7 +54,7 @@ export class SmallFileUploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT },
       fileFilter: (_req, file, cb) => {
         const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
         cb(
@@ -80,7 +81,7 @@ export class SmallFileUploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT },
       fileFilter: (_req, file, cb) => {
         const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
         cb(
@@ -107,7 +108,7 @@ export class SmallFileUploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT },
       fileFilter: (_req, file, cb) => {
         const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
         cb(
