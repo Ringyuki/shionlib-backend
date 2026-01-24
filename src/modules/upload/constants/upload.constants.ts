@@ -12,4 +12,5 @@ export const FILE_CHECK_STATUS_MAP: Record<ArchiveStatus, keyof typeof ActivityF
   [ArchiveStatus.HARMFUL]: 'HARMFUL',
 }
 
-export const SMALL_FILE_UPLOAD_FILE_SIZE_LIMIT = 10 * 1024 * 1024 // 10MB
+export const SMALL_FILE_UPLOAD_FILE_SIZE_HARD_LIMIT = 15 * 1024 * 1024 // 15MB
+export const SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT = 5 * 1024 * 1024 // 5MB

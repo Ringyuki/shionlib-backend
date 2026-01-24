@@ -9,6 +9,8 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PrismaService } from '../../../prisma.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT } from '../constants/upload.constants'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 
 @Injectable()
 export class SmallFileUploadService {
@@ -36,7 +38,10 @@ export class SmallFileUploadService {
         'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
       )
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (
+      file.size > SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT &&
+      req.user.role < ShionlibUserRoles.ADMIN
+    ) {
       throw new ShionBizException(
         ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
         'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
@@ -71,7 +76,10 @@ export class SmallFileUploadService {
         'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
       )
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (
+      file.size > SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT &&
+      req.user.role < ShionlibUserRoles.ADMIN
+    ) {
       throw new ShionBizException(
         ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
         'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
@@ -109,7 +117,10 @@ export class SmallFileUploadService {
         'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
       )
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (
+      file.size > SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT &&
+      req.user.role < ShionlibUserRoles.ADMIN
+    ) {
       throw new ShionBizException(
         ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
         'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
@@ -151,7 +162,10 @@ export class SmallFileUploadService {
         'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
       )
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (
+      file.size > SMALL_FILE_UPLOAD_FILE_SIZE_SOFT_LIMIT &&
+      req.user.role < ShionlibUserRoles.ADMIN
+    ) {
       throw new ShionBizException(
         ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
         'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
