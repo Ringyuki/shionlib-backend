@@ -39,6 +39,7 @@ import { LLMsModule } from './modules/llms/llms.module'
 import { ModerateModule } from './modules/moderate/moderate.module'
 import { AdminModule } from './modules/admin/admin.module'
 import { FavoriteModule } from './modules/favorite/favorite.module'
+import { AnalysisModule } from './modules/analysis/analysis.module'
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { FavoriteModule } from './modules/favorite/favorite.module'
     DatabaseModule,
     AdminModule,
     FavoriteModule,
+    AnalysisModule,
   ],
   controllers: [],
   providers: [
