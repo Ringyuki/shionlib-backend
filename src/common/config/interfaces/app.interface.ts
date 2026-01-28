@@ -117,4 +117,14 @@ export interface AppConfig {
       weight_recent_downloads: number
     }
   }
+
+  cloudflare: {
+    analytics: {
+      secret: string
+      zone_id: string
+    }
+    turnstile: {
+      secret: string
+    }
+  }
 }

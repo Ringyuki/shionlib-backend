@@ -13,10 +13,4 @@ export default (): AuthConfig => ({
     rotationGraceSec: withDefault('REFRESH_TOKEN_ROTATION_GRACE_SEC', 100),
     algorithmVersion: withDefault('REFRESH_TOKEN_ALOGRITHM_VERSION', 'slrt1'),
   },
-
-  cloudflare: {
-    turnstile: {
-      secret: withDefault('CLOUDFLARE_TURNSTILE_SECRET', ''),
-    },
-  },
 })

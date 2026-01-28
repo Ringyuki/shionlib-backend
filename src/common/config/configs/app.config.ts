@@ -147,4 +147,14 @@ export default (): AppConfig => ({
       weight_recent_downloads: withDefault('GAME_HOT_SCORE_WEIGHT_RECENT_DOWNLOADS', 0.9),
     },
   },
+
+  cloudflare: {
+    analytics: {
+      secret: withDefault('CLOUDFLARE_ANALYTICS_SECRET', ''),
+      zone_id: withDefault('CLOUDFLARE_ANALYTICS_ZONE_ID', ''),
+    },
+    turnstile: {
+      secret: withDefault('CLOUDFLARE_TURNSTILE_SECRET', ''),
+    },
+  },
 })
