@@ -334,12 +334,13 @@ export class GameService {
     const expiredBefore = now - RECENT_UPDATE_TTL_MS
     await this.cacheService.zremrangebyscore(RECENT_UPDATE_KEY, '-inf', expiredBefore)
 
-    const items = await this.cacheService.zrangeWithScores(RECENT_UPDATE_KEY, start, end, 'DESC')
+    const [items, total] = await Promise.all([
+      this.cacheService.zrangeWithScores(RECENT_UPDATE_KEY, start, end, 'DESC'),
+      this.cacheService.zcard(RECENT_UPDATE_KEY),
+    ])
     const gameIds = items.map(item => Number(item.member))
-    const total = gameIds.length
+
     const games = await this.prisma.game.findMany({
-      skip: start,
-      take: pageSize,
       where: {
         id: { in: gameIds },
       },
@@ -363,11 +364,14 @@ export class GameService {
         views: true,
       },
     })
+    const gameMap = new Map(games.map(game => [game.id, game]))
+    const sortedGames = gameIds.map(id => gameMap.get(id)).filter(Boolean) as typeof games
+
     return {
-      items: games,
+      items: sortedGames,
       meta: {
         totalItems: total,
-        itemCount: games.length,
+        itemCount: sortedGames.length,
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,

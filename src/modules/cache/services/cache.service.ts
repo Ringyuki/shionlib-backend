@@ -39,6 +39,10 @@ export class CacheService {
     return this.redis.zrem(key, ...members.map(String))
   }
 
+  async zcard(key: string): Promise<number> {
+    return this.redis.zcard(key)
+  }
+
   async zrangeWithScores(
     key: string,
     start: number,
