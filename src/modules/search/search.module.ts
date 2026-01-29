@@ -15,6 +15,7 @@ import { SearchAnalyticsProcessor } from './queues/analytics.processor'
 import { RedisService } from './services/redis.service'
 import { BullModule } from '@nestjs/bull'
 import { SEARCH_ANALYTICS_QUEUE } from './constants/analytics'
+import { CacheService } from '../cache/services/cache.service'
 
 @Global()
 @Module({
@@ -23,21 +24,28 @@ import { SEARCH_ANALYTICS_QUEUE } from './constants/analytics'
   providers: [
     {
       provide: SEARCH_ENGINE,
-      inject: [ShionConfigService, PrismaService, MeilisearchService, OpenSearchService],
+      inject: [
+        ShionConfigService,
+        PrismaService,
+        MeilisearchService,
+        OpenSearchService,
+        CacheService,
+      ],
       useFactory: (
         config: ShionConfigService,
         prisma: PrismaService,
         meili: MeilisearchService,
         opensearch: OpenSearchService,
+        cache: CacheService,
       ): SearchEngine => {
         const engine = config.get('search.engine')
         switch (engine) {
           case 'pg':
-            return new PgSearchEngine(prisma)
+            return new PgSearchEngine(prisma, cache)
           case 'meilisearch':
-            return new MeilisearchEngine(meili, config)
+            return new MeilisearchEngine(meili, config, cache)
           case 'opensearch':
-            return new OpenSearchEngine(opensearch, config)
+            return new OpenSearchEngine(opensearch, config, cache)
           default:
             throw new Error(`Unsupported search engine: ${engine}`)
         }

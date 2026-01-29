@@ -7,6 +7,7 @@ import { SearchQuery } from '../interfaces/search.interface'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GameItemResDto } from '../dto/res/game-item.res.dto'
+import { CacheService } from '../../cache/services/cache.service'
 
 @Injectable()
 export class OpenSearchEngine implements SearchEngine {
@@ -14,6 +15,7 @@ export class OpenSearchEngine implements SearchEngine {
   constructor(
     private readonly opensearchService: OpenSearchService,
     private readonly configService: ShionConfigService,
+    private readonly cacheService: CacheService,
   ) {
     this.opensearchService.onModuleInit()
   }
@@ -32,6 +34,7 @@ export class OpenSearchEngine implements SearchEngine {
       body: doc,
       refresh: false,
     })
+    await this.cacheService.del(`game:${doc.id}`)
   }
 
   // async bulkUpsertGames(docs: IndexedGame[]): Promise<void> {

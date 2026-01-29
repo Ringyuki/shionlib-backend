@@ -4,11 +4,18 @@ import type { SearchEngine, SearchQuery } from '../interfaces/search.interface'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GameItemResDto } from '../dto/res/game-item.res.dto'
+import { CacheService } from '../../cache/services/cache.service'
+import { IndexedGame } from '../interfaces/index.interface'
 
 export class PgSearchEngine implements SearchEngine {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
 
-  async upsertGame() {}
+  async upsertGame(doc: IndexedGame) {
+    await this.cacheService.del(`game:${doc.id}`)
+  }
 
   async bulkUpsertGames() {}
 

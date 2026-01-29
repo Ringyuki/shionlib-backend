@@ -8,12 +8,14 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import type { Index as MeiliIndex } from 'meilisearch'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { GameItemResDto } from '../dto/res/game-item.res.dto'
+import { CacheService } from '../../cache/services/cache.service'
 
 @Injectable()
 export class MeilisearchEngine implements SearchEngine {
   constructor(
     private readonly meilisearchService: MeilisearchService,
     private readonly configService: ShionConfigService,
+    private readonly cacheService: CacheService,
   ) {
     this.meilisearchService.onModuleInit()
   }
@@ -45,6 +47,7 @@ export class MeilisearchEngine implements SearchEngine {
     const index = await this.getIndex(true)
     if (!index) return
     await index.addDocuments([doc])
+    await this.cacheService.del(`game:${doc.id}`)
   }
 
   async bulkUpsertGames(docs: IndexedGame[]): Promise<void> {

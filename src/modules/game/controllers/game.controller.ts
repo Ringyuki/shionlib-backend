@@ -24,12 +24,15 @@ import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { SkipThrottle } from '@nestjs/throttler'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { CacheService } from '../../cache/services/cache.service'
+import { GetGameResDto } from '../dto/res/get-game.res.dto'
 
 @Controller('game')
 export class GameController {
   constructor(
     private readonly gameService: GameService,
     private readonly gameDownloadSourceService: GameDownloadSourceService,
+    private readonly cacheService: CacheService,
   ) {}
 
   @Get('list')
@@ -50,7 +53,18 @@ export class GameController {
 
   @Get(':id')
   async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
-    return await this.gameService.getById(getGameReqDto.id, req.user?.sub, req.user?.content_limit)
+    const cacheKey = `game:${getGameReqDto.id}`
+    const cached = await this.cacheService.get<GetGameResDto>(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getById(
+      getGameReqDto.id,
+      req.user?.sub,
+      req.user?.content_limit,
+    )
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
   }
 
   @Get(':id/download-source')
