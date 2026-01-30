@@ -38,6 +38,6 @@ import { PasswordService } from './services/password.service'
     PasswordService,
   ],
   controllers: [AuthController, VerificationCodeController],
-  exports: [JwtModule, PassportModule],
+  exports: [JwtModule, PassportModule, LoginSessionService, UserService],
 })
 export class AuthModule {}

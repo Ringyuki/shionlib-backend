@@ -111,3 +111,23 @@ export const createFieldPermissionMap = (
 
   return fieldMap
 }
+
+export const getFieldsByGroup = (entity: PermissionEntity, groupKey: string): string[] => {
+  let mapping: Record<number, string[]> = GameFieldGroupToFields
+  let groupBit:
+    | typeof GameFieldGroupBit
+    | typeof GameDeveloperFieldGroupBit
+    | typeof GameCharacterFieldGroupBit = GameFieldGroupBit
+
+  if (entity === PermissionEntity.DEVELOPER) {
+    mapping = DeveloperFieldGroupToFields
+    groupBit = GameDeveloperFieldGroupBit
+  } else if (entity === PermissionEntity.CHARACTER) {
+    mapping = CharacterFieldGroupToFields
+    groupBit = GameCharacterFieldGroupBit
+  }
+
+  const bitValue = groupBit[groupKey as keyof typeof groupBit]
+  if (bitValue === undefined) return []
+  return mapping[bitValue] ?? []
+}

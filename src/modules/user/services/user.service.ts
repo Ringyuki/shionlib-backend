@@ -153,6 +153,11 @@ export class UserService {
       foundUser.content_limit,
     )
 
+    await this.prisma.user.update({
+      where: { id: foundUser.id },
+      data: { last_login_at: new Date() },
+    })
+
     return {
       token,
       refresh_token,
