@@ -26,6 +26,8 @@ import { SkipThrottle } from '@nestjs/throttler'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { CacheService } from '../../cache/services/cache.service'
 import { GetGameResDto } from '../dto/res/get-game.res.dto'
+import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
+import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
 
 @Controller('game')
 export class GameController {
@@ -37,18 +39,32 @@ export class GameController {
 
   @Get('list')
   async getList(@Query() getGameListReqDto: GetGameListReqDto, @Req() req: RequestWithUser) {
-    return await this.gameService.getList(
+    const cacheKey = `game:list:auth:${req.user?.sub}:cl:${req.user?.content_limit}:query:${JSON.stringify(getGameListReqDto)}`
+    const cached = await this.cacheService.get<PaginatedResult<GetGameListResDto>>(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getList(
       { page: getGameListReqDto.page, pageSize: getGameListReqDto.pageSize },
       req.user?.content_limit,
       getGameListReqDto.developer_id,
       getGameListReqDto.character_id,
       getGameListReqDto.filter,
     )
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
   }
 
   @Get('recent-update')
   async getRecentUpdate(@Query() getRecentUpdateReqDto: PaginationReqDto) {
-    return await this.gameService.getRecentUpdate(getRecentUpdateReqDto)
+    const cacheKey = `game:recent-update:query:${JSON.stringify(getRecentUpdateReqDto)}`
+    const cached = await this.cacheService.get<PaginatedResult<GetGameListResDto>>(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getRecentUpdate(getRecentUpdateReqDto)
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
   }
 
   @Get(':id')
