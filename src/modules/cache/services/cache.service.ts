@@ -72,12 +72,17 @@ export class CacheService {
     const pattern = `*${partial}*`
     let cursor = '0'
     let deleted = 0
+    const keyPrefix = this.redis.options.keyPrefix ?? ''
 
     do {
       const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', batchSize)
       cursor = nextCursor
       if (keys.length > 0) {
-        deleted += await this.redis.unlink(...keys)
+        const normalizedKeys =
+          keyPrefix.length > 0
+            ? keys.map(key => (key.startsWith(keyPrefix) ? key.slice(keyPrefix.length) : key))
+            : keys
+        deleted += await this.redis.unlink(...normalizedKeys)
       }
     } while (cursor !== '0')
 
