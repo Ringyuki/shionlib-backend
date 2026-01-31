@@ -422,4 +422,18 @@ export class FavoriteService {
       },
     }
   }
+
+  async getFavoriteStats(user_id: number, game_id: number) {
+    const favorite = await this.prisma.favoriteItem.findFirst({
+      where: {
+        game_id,
+        favorite: {
+          user_id,
+        },
+      },
+    })
+    return {
+      is_favorite: !!favorite,
+    }
+  }
 }

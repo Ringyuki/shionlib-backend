@@ -100,4 +100,9 @@ export class FavoriteController {
   ) {
     return this.favoriteService.getFavoriteItems(favorite_id, dto, req)
   }
+
+  @Get('/game/:id/stats')
+  async getFavoriteStats(@Param('id', ParseIntPipe) game_id: number, @Req() req: RequestWithUser) {
+    return this.favoriteService.getFavoriteStats(req.user?.sub, game_id)
+  }
 }

@@ -53,7 +53,7 @@ export class GameController {
 
   @Get(':id')
   async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
-    const cacheKey = `game:${getGameReqDto.id}`
+    const cacheKey = `game:${getGameReqDto.id}:auth:${req.user.sub}:cl:${req.user.content_limit}`
     const cached = await this.cacheService.get<GetGameResDto>(cacheKey)
     if (cached) {
       return cached
