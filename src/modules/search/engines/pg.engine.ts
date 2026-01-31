@@ -14,7 +14,7 @@ export class PgSearchEngine implements SearchEngine {
   ) {}
 
   async upsertGame(doc: IndexedGame) {
-    await this.cacheService.del(`game:${doc.id}`)
+    await this.cacheService.delByContains(`game:${doc.id}`)
   }
 
   async bulkUpsertGames() {}

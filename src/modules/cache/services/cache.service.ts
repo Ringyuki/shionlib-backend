@@ -67,4 +67,20 @@ export class CacheService {
   async zremrangebyscore(key: string, min: number | string, max: number | string): Promise<number> {
     return this.redis.zremrangebyscore(key, min, max)
   }
+
+  async delByContains(partial: string, batchSize = 100): Promise<number> {
+    const pattern = `*${partial}*`
+    let cursor = '0'
+    let deleted = 0
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', batchSize)
+      cursor = nextCursor
+      if (keys.length > 0) {
+        deleted += await this.redis.unlink(...keys)
+      }
+    } while (cursor !== '0')
+
+    return deleted
+  }
 }

@@ -47,7 +47,7 @@ export class MeilisearchEngine implements SearchEngine {
     const index = await this.getIndex(true)
     if (!index) return
     await index.addDocuments([doc])
-    await this.cacheService.del(`game:${doc.id}`)
+    await this.cacheService.delByContains(`game:${doc.id}`)
   }
 
   async bulkUpsertGames(docs: IndexedGame[]): Promise<void> {

@@ -34,7 +34,7 @@ export class OpenSearchEngine implements SearchEngine {
       body: doc,
       refresh: false,
     })
-    await this.cacheService.del(`game:${doc.id}`)
+    await this.cacheService.delByContains(`game:${doc.id}`)
   }
 
   // async bulkUpsertGames(docs: IndexedGame[]): Promise<void> {
