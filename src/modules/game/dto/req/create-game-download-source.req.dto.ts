@@ -25,6 +25,7 @@ export enum GameDownloadSourcePlatform {
 export enum GameDownloadSourceLanguage {
   EN = 'en',
   ZH = 'zh',
+  ZH_HANT = 'zh-hant',
   JP = 'jp',
 }
 
