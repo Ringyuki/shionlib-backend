@@ -23,10 +23,15 @@ import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-sour
 import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { CreateGameDownloadSourceReportReqDto } from '../dto/req/create-game-download-source-report.req.dto'
+import { GameDownloadResourceReportService } from '../services/game-download-resource-report.service'
 
 @Controller('game/download-source')
 export class GameDownloadSourceController {
-  constructor(private readonly gameDownloadSourceService: GameDownloadSourceService) {}
+  constructor(
+    private readonly gameDownloadSourceService: GameDownloadSourceService,
+    private readonly gameDownloadSourceReportService: GameDownloadResourceReportService,
+  ) {}
 
   @Get('list')
   async getDownloadSourceList(@Query() getDownloadSourceListReqDto: PaginationReqDto) {
@@ -88,5 +93,15 @@ export class GameDownloadSourceController {
   @Get('file/:fileId/history')
   async getFileHistory(@Param('fileId', ParseIntPipe) fileId: number) {
     return await this.gameDownloadSourceService.getFileHistory(fileId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/report')
+  async reportDownloadResource(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateGameDownloadSourceReportReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.gameDownloadSourceReportService.create(id, dto, req.user.sub)
   }
 }

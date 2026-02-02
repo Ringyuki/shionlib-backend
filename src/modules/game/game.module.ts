@@ -14,6 +14,7 @@ import { GameDownloadSourceController } from './controllers/game-download-source
 import { HttpModule } from '@nestjs/axios'
 import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
+import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
 
 @Module({
   controllers: [
@@ -34,6 +35,8 @@ import { GameScoreController } from './controllers/game-score.controller'
     GameHotScoreService,
     GameHotScoreCalcTask,
     GameScoreService,
+    GameDownloadResourceReportService,
   ],
+  exports: [GameDownloadResourceReportService],
 })
 export class GameModule {}

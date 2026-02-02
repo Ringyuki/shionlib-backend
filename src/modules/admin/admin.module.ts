@@ -9,9 +9,10 @@ import { AdminStatsService } from './services/admin-stats.service'
 import { AdminContentService } from './services/admin-content.service'
 import { AdminUserService } from './services/admin-user.service'
 import { AdminCommentService } from './services/admin-comment.service'
+import { GameModule } from '../game/game.module'
 
 @Module({
-  imports: [AuthModule, ModerateModule],
+  imports: [AuthModule, ModerateModule, GameModule],
   controllers: [
     AdminStatsController,
     AdminContentController,

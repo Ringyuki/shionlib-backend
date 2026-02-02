@@ -85,7 +85,10 @@ export class UploadQuotaService {
     })
   }
 
-  async adjustUploadQuotaSizeAmount(user_id: number, dto: AdjustQuotaSizeAmountReqDto) {
+  async adjustUploadQuotaSizeAmount(
+    user_id: number,
+    dto: AdjustQuotaSizeAmountReqDto,
+  ): Promise<number> {
     await this.prisma.$transaction(async tx => {
       const quota = await tx.userUploadQuota.findUnique({
         where: { user_id },
@@ -123,6 +126,7 @@ export class UploadQuotaService {
         })
       }
     })
+    return Number(dto.amount)
   }
 
   async withdrawUploadQuotaUseAdjustment(user_id: number, session_id: number) {

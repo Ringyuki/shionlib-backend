@@ -55,6 +55,9 @@ export class GameDownloadSourceService {
       select: {
         id: true,
         download_resources: {
+          where: {
+            status: 1,
+          },
           select: {
             id: true,
             platform: true,
@@ -220,6 +223,7 @@ export class GameDownloadSourceService {
     const resource = await this.prismaService.gameDownloadResource.findUnique({
       where: {
         id,
+        status: 1,
       },
     })
     if (!resource) {
@@ -269,7 +273,7 @@ export class GameDownloadSourceService {
     })
   }
 
-  async delete(id: number, req: RequestWithUser) {
+  async delete(id: number, req: RequestWithUser, soft?: boolean) {
     const resource = await this.prismaService.gameDownloadResource.findUnique({
       where: {
         id,
@@ -300,11 +304,21 @@ export class GameDownloadSourceService {
         await this.s3Service.deleteFile(file.s3_file_key)
       }
     }
-    await this.prismaService.gameDownloadResource.delete({
-      where: {
-        id,
-      },
-    })
+    if (soft) {
+      await this.prismaService.gameDownloadResource.update({
+        where: { id },
+        data: {
+          status: 2,
+          updated: new Date(),
+        },
+      })
+    } else {
+      await this.prismaService.gameDownloadResource.delete({
+        where: {
+          id,
+        },
+      })
+    }
   }
 
   private async validateToken(token: string) {
@@ -345,6 +359,9 @@ export class GameDownloadSourceService {
     const file = await this.prismaService.gameDownloadResourceFile.findUnique({
       where: {
         id,
+        game_download_resource: {
+          status: 1,
+        },
       },
       select: {
         game_download_resource_id: true,
@@ -401,8 +418,10 @@ export class GameDownloadSourceService {
   async getList(dto: PaginationReqDto): Promise<PaginatedResult<GetDownloadResourcesListResDto>> {
     const { page, pageSize } = dto
 
-    const total = await this.prismaService.gameDownloadResource.count()
+    const where = { status: 1 }
+    const total = await this.prismaService.gameDownloadResource.count({ where })
     const resources = await this.prismaService.gameDownloadResource.findMany({
+      where,
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: {
@@ -517,13 +536,14 @@ export class GameDownloadSourceService {
 
   async reuploadFile(fileId: number, dto: ReuploadFileReqDto, req: RequestWithUser) {
     const file = await this.prismaService.gameDownloadResourceFile.findUnique({
-      where: { id: fileId },
+      where: { id: fileId, game_download_resource: { status: 1 } },
       include: {
         game_download_resource: {
           select: {
             id: true,
             game_id: true,
             creator_id: true,
+            status: true,
             game: {
               select: {
                 id: true,

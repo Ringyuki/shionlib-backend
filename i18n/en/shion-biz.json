@@ -49,6 +49,11 @@
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "download resource not found",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "download resource not owner",
   "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
+  "GAME_DOWNLOAD_RESOURCE_REPORT_DUPLICATED": "you have already reported this resource and it is pending review",
+  "GAME_DOWNLOAD_RESOURCE_REPORT_SELF_NOT_ALLOWED": "you cannot report your own upload",
+  "GAME_DOWNLOAD_RESOURCE_REPORT_NOT_FOUND": "report not found",
+  "GAME_DOWNLOAD_RESOURCE_REPORT_ALREADY_PROCESSED": "this report has already been processed",
+  "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED": "your report capability is temporarily suspended",
 
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",

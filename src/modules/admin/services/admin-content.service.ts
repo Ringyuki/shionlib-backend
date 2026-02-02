@@ -6,10 +6,17 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { AdminGameItemResDto } from '../dto/res/admin-game-item.res.dto'
 import { AdminCharacterItemResDto } from '../dto/res/admin-character-item.res.dto'
 import { AdminDeveloperItemResDto } from '../dto/res/admin-developer-item.res.dto'
+import { GameDownloadResourceReportService } from '../../game/services/game-download-resource-report.service'
+import { GetDownloadResourceReportListReqDto } from '../dto/req/download-resource-report-list.req.dto'
+import { ReviewGameDownloadSourceReportReqDto } from '../dto/req/review-game-download-source-report.req.dto'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
 export class AdminContentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gameDownloadResourceReportService: GameDownloadResourceReportService,
+  ) {}
 
   async getGameList(query: AdminGameListReqDto): Promise<PaginatedResult<AdminGameItemResDto>> {
     const { page, pageSize, search, sortBy = 'id', sortOrder = 'desc', status } = query
@@ -190,5 +197,21 @@ export class AdminContentService {
         currentPage: page,
       },
     }
+  }
+
+  async getDownloadResourceReportList(query: GetDownloadResourceReportListReqDto) {
+    return this.gameDownloadResourceReportService.getList(query)
+  }
+
+  async getDownloadResourceReportDetail(id: number) {
+    return this.gameDownloadResourceReportService.getById(id)
+  }
+
+  async reviewDownloadResourceReport(
+    id: number,
+    dto: ReviewGameDownloadSourceReportReqDto,
+    actor: RequestWithUser['user'],
+  ) {
+    return this.gameDownloadResourceReportService.review(id, dto, actor)
   }
 }
