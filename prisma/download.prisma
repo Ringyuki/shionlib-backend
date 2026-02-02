@@ -1,8 +1,11 @@
 model GameDownloadResource {
+  status    Int @default(1) // 1 -> active, 2 -> soft deleted
+
   id      Int                        @id @default(autoincrement())
   game_id Int
   game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   files   GameDownloadResourceFile[] @relation("game_download_resource_files")
+  reports GameDownloadResourceReport[] @relation("game_download_resource_reports")
 
   platform String[] @default([])
   language String[] @default([])
@@ -19,7 +22,43 @@ model GameDownloadResource {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
+  @@index([game_id, status])
   @@map("game_download_resources")
+}
+
+model GameDownloadResourceReport {
+  id Int @id @default(autoincrement())
+
+  resource_id Int
+  resource    GameDownloadResource @relation("game_download_resource_reports", fields: [resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reporter_id Int
+  reporter    User @relation("user_report_download_resource", fields: [reporter_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reported_user_id Int
+  reported_user    User @relation("user_reported_download_resource", fields: [reported_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reason          GameDownloadResourceReportReason
+  detail          String?                       @db.VarChar(500)
+  status          GameDownloadResourceReportStatus @default(PENDING)
+  malicious_level ReportMaliciousLevel
+
+  processed_by Int?
+  processor    User? @relation("user_process_download_resource_report", fields: [processed_by], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  processed_at DateTime?
+  process_note String? @db.VarChar(500)
+
+  reporter_penalty_applied Boolean @default(false)
+  reported_penalty_applied Boolean @default(false)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([resource_id, status])
+  @@index([reporter_id, status, created])
+  @@index([reported_user_id, status, created])
+  @@index([status, created])
+  @@map("game_download_resource_reports")
 }
 
 // file type: 1 -> s3 native, 2 -> direct link, 3 -> third party link

@@ -14,6 +14,9 @@ model User {
   game_download_resources               GameDownloadResource[]            @relation("user_create_game_download_resource")
   game_download_resource_files          GameDownloadResourceFile[]        @relation("user_create_game_download_resource_file")
   game_download_resource_file_histories GameDownloadResourceFileHistory[] @relation("user_reupload_game_download_resource_file")
+  game_download_resource_reports        GameDownloadResourceReport[]      @relation("user_report_download_resource")
+  game_download_resource_reported       GameDownloadResourceReport[]      @relation("user_reported_download_resource")
+  game_download_resource_report_process GameDownloadResourceReport[]      @relation("user_process_download_resource_report")
   comments                              Comment[]                         @relation("user_create_comment")
 
   favorites Favorite[] @relation("user_favorite")

@@ -80,3 +80,24 @@ enum HashAlgorithm {
   sha256
   blake3
 }
+
+enum GameDownloadResourceReportReason {
+  MALWARE
+  IRRELEVANT
+  BROKEN_LINK
+  MISLEADING_CONTENT
+  OTHER
+}
+
+enum GameDownloadResourceReportStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
+enum ReportMaliciousLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
