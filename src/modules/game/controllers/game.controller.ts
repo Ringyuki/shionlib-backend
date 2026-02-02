@@ -72,6 +72,7 @@ export class GameController {
     const cacheKey = `game:${getGameReqDto.id}:auth:${req.user.sub}:cl:${req.user.content_limit}`
     const cached = await this.cacheService.get<GetGameResDto>(cacheKey)
     if (cached) {
+      void this.gameService.increaseViews(getGameReqDto.id).catch(() => null)
       return cached
     }
     const result = await this.gameService.getById(

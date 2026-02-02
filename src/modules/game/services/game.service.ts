@@ -378,4 +378,14 @@ export class GameService {
       },
     }
   }
+
+  async increaseViews(game_id: number) {
+    await this.prisma.game.update({
+      where: { id: game_id },
+      data: { views: { increment: 1 } },
+      select: {
+        views: true,
+      },
+    })
+  }
 }
