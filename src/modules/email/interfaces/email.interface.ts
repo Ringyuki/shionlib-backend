@@ -1,3 +1,5 @@
+import { GameDownloadResourceReportReason, ReportMaliciousLevel } from '@prisma/client'
+
 export interface EmailConfig {
   provider: 'elastic' | 'postal'
   apiKey: string
@@ -11,4 +13,15 @@ export interface VerificationCodeData {
   code: string
   type: string
   createdAt: number
+}
+
+export interface ReportNotificationData {
+  reportId: number
+  reporterName: string
+  reportedUserName: string
+  reason: GameDownloadResourceReportReason
+  maliciousLevel: ReportMaliciousLevel
+  gameTitle: string
+  detail?: string
+  adminReviewUrl: string
 }

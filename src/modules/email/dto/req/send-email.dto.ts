@@ -4,8 +4,8 @@ export class SendEmailDto {
   @IsString()
   subject: string
 
-  @IsEmail()
-  to: string
+  @IsEmail({}, { each: true })
+  to: string | string[]
 
   @IsString()
   bodyHtml: string

@@ -32,6 +32,32 @@ export type I18nTranslations = {
             "PASSWORD_RESET_LINK_EXPIRES": string;
             "PASSWORD_RESET_COPY_LINK": string;
             "PASSWORD_RESET_IGNORE": string;
+            "REPORT_NOTIFICATION_SUBJECT": string;
+            "REPORT_NOTIFICATION_INTRO": string;
+            "REPORT_ID": string;
+            "REPORTER": string;
+            "REPORTED_USER": string;
+            "GAME": string;
+            "REASON": string;
+            "MALICIOUS_LEVEL": string;
+            "DETAIL": string;
+            "REVIEW_REPORT": string;
+            "REPORT_NOTIFICATION_FOOTER": string;
+        };
+        "report": {
+            "reason": {
+                "MALWARE": string;
+                "IRRELEVANT": string;
+                "BROKEN_LINK": string;
+                "MISLEADING_CONTENT": string;
+                "OTHER": string;
+            };
+            "level": {
+                "LOW": string;
+                "MEDIUM": string;
+                "HIGH": string;
+                "CRITICAL": string;
+            };
         };
     };
     "shion-biz": {

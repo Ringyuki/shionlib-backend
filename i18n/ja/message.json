@@ -10,6 +10,32 @@
     "PASSWORD_RESET_BUTTON": "パスワードを再設定",
     "PASSWORD_RESET_LINK_EXPIRES": "このリンクは {exp} 分で期限切れになります。",
     "PASSWORD_RESET_COPY_LINK": "ボタンが動作しない場合は、次のリンクをブラウザにコピーしてください。",
-    "PASSWORD_RESET_IGNORE": "心当たりがない場合は、このメールを無視してください。"
+    "PASSWORD_RESET_IGNORE": "心当たりがない場合は、このメールを無視してください。",
+    "REPORT_NOTIFICATION_SUBJECT": "Shionlib ダウンロードリソース通報通知",
+    "REPORT_NOTIFICATION_INTRO": "確認が必要な新しいダウンロードリソースの通報があります：",
+    "REPORT_ID": "通報 ID",
+    "REPORTER": "通報者",
+    "REPORTED_USER": "被通報者",
+    "GAME": "ゲーム",
+    "REASON": "通報理由",
+    "MALICIOUS_LEVEL": "悪意レベル",
+    "DETAIL": "詳細",
+    "REVIEW_REPORT": "通報を確認",
+    "REPORT_NOTIFICATION_FOOTER": "このメールはシステムから自動送信されました。直接返信しないでください。"
+  },
+  "report": {
+    "reason": {
+      "MALWARE": "マルウェア",
+      "IRRELEVANT": "無関係なコンテンツ",
+      "BROKEN_LINK": "リンク切れ",
+      "MISLEADING_CONTENT": "誤解を招くコンテンツ",
+      "OTHER": "その他"
+    },
+    "level": {
+      "LOW": "低",
+      "MEDIUM": "中",
+      "HIGH": "高",
+      "CRITICAL": "危険"
+    }
   }
 }

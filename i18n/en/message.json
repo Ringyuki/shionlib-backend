@@ -10,6 +10,32 @@
     "PASSWORD_RESET_BUTTON": "Reset password",
     "PASSWORD_RESET_LINK_EXPIRES": "This link expires in {exp} minutes.",
     "PASSWORD_RESET_COPY_LINK": "If the button doesn't work, copy and paste this link into your browser:",
-    "PASSWORD_RESET_IGNORE": "If you didn't request a password reset, you can safely ignore this email."
+    "PASSWORD_RESET_IGNORE": "If you didn't request a password reset, you can safely ignore this email.",
+    "REPORT_NOTIFICATION_SUBJECT": "Shionlib Download Resource Report Notification",
+    "REPORT_NOTIFICATION_INTRO": "A new download resource report needs your review:",
+    "REPORT_ID": "Report ID",
+    "REPORTER": "Reporter",
+    "REPORTED_USER": "Reported User",
+    "GAME": "Game",
+    "REASON": "Reason",
+    "MALICIOUS_LEVEL": "Malicious Level",
+    "DETAIL": "Detail",
+    "REVIEW_REPORT": "Review Report",
+    "REPORT_NOTIFICATION_FOOTER": "This email was sent automatically by the system. Please do not reply directly."
+  },
+  "report": {
+    "reason": {
+      "MALWARE": "Malware",
+      "IRRELEVANT": "Irrelevant Content",
+      "BROKEN_LINK": "Broken Link",
+      "MISLEADING_CONTENT": "Misleading Content",
+      "OTHER": "Other"
+    },
+    "level": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    }
   }
 }

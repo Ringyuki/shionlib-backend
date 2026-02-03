@@ -2,11 +2,15 @@ import { Injectable, Logger } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { SendEmailDto } from '../dto/req/send-email.dto'
-import { EmailConfig } from '../interfaces/email.interface'
+import { EmailConfig, ReportNotificationData } from '../interfaces/email.interface'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { isArray } from 'class-validator'
 import { I18nService } from 'nestjs-i18n'
-import { generatePasswordResetTemplate, generateVerificationCodeTemplate } from '../templates'
+import {
+  generatePasswordResetTemplate,
+  generateVerificationCodeTemplate,
+  generateReportNotificationTemplate,
+} from '../templates'
 
 @Injectable()
 export class EmailService {
@@ -110,5 +114,18 @@ export class EmailService {
     }
 
     return this.sendEmail(emailData)
+  }
+
+  async sendReportNotification(
+    emails: string | string[],
+    data: ReportNotificationData,
+  ): Promise<boolean> {
+    const emailData: SendEmailDto = {
+      subject: this.i18nService.t('message.email.REPORT_NOTIFICATION_SUBJECT'),
+      to: emails,
+      bodyHtml: generateReportNotificationTemplate(this.i18nService, data),
+    }
+
+    return await this.sendEmail(emailData)
   }
 }

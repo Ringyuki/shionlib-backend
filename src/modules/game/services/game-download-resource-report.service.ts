@@ -23,6 +23,8 @@ import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 import { UserUploadQuotaSizeRecordAction } from '../../upload/dto/req/adjust-quota.req.dto'
 import { GameDownloadSourceService } from './game-download-resource.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { EmailService } from '../../email/services/email.service'
+import { ShionConfigService } from '../../../common/config/services/config.service'
 import {
   DEFAULT_LEVEL_BY_REASON,
   ONE_GB_BYTES,
@@ -43,6 +45,8 @@ export class GameDownloadResourceReportService {
     private readonly messageService: MessageService,
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly gameDownloadSourceService: GameDownloadSourceService,
+    private readonly emailService: EmailService,
+    private readonly configService: ShionConfigService,
   ) {}
 
   async create(resourceId: number, dto: CreateGameDownloadSourceReportReqDto, reporterId: number) {
@@ -52,6 +56,15 @@ export class GameDownloadResourceReportService {
         id: true,
         creator_id: true,
         status: true,
+        game_id: true,
+        game: {
+          select: {
+            id: true,
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+          },
+        },
       },
     })
 
@@ -106,6 +119,19 @@ export class GameDownloadResourceReportService {
         malicious_level: true,
         created: true,
       },
+    })
+
+    this.notifyAdminsNewReport(report.id, {
+      resourceId,
+      reporterId,
+      reportedUserId: resource.creator_id,
+      reason: dto.reason,
+      maliciousLevel: report.malicious_level,
+      detail: dto.detail,
+      gameId: resource.game_id,
+      gameTitle: resource.game.title_zh || resource.game.title_jp || resource.game.title_en || '',
+    }).catch(err => {
+      this.logger.error('Failed to notify admins about new report:', err)
     })
 
     return report
@@ -627,5 +653,88 @@ export class GameDownloadResourceReportService {
       }
       throw error
     }
+  }
+
+  private async notifyAdminsNewReport(
+    reportId: number,
+    data: {
+      resourceId: number
+      reporterId: number
+      reportedUserId: number
+      reason: GameDownloadResourceReportReason
+      maliciousLevel: ReportMaliciousLevel
+      detail?: string
+      gameId: number
+      gameTitle: string
+    },
+  ) {
+    const [admins, reporter, reportedUser] = await Promise.all([
+      this.getAdmins(),
+      this.prisma.user.findUnique({
+        where: { id: data.reporterId },
+        select: { id: true, name: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: data.reportedUserId },
+        select: { id: true, name: true },
+      }),
+    ])
+    if (admins.length === 0) return
+
+    const reporterName = reporter?.name ?? `User#${data.reporterId}`
+    const reportedUserName = reportedUser?.name ?? `User#${data.reportedUserId}`
+    const siteUrl = this.configService.get('siteUrl')
+    const adminReviewUrl = `${siteUrl}/admin/reports?id=${reportId}`
+
+    const messagePromises: Promise<unknown>[] = admins.map(admin =>
+      this.messageService.send({
+        type: MessageType.SYSTEM,
+        title: 'Messages.System.Report.NewReport.Title',
+        content: 'Messages.System.Report.NewReport.Content',
+        receiver_id: admin.id,
+        game_id: data.gameId,
+        link_text: 'Messages.System.Report.NewReport.LinkText',
+        link_url: `/admin/reports?id=${reportId}`,
+        meta: {
+          report_id: reportId,
+          reporter_name: reporterName,
+          reported_user_name: reportedUserName,
+          reason: data.reason,
+          malicious_level: data.maliciousLevel,
+        },
+      }),
+    )
+    const adminEmails = admins.map(admin => admin.email).filter((email): email is string => !!email)
+    if (adminEmails.length > 0) {
+      messagePromises.push(
+        this.emailService.sendReportNotification(adminEmails, {
+          reportId,
+          reporterName,
+          reportedUserName,
+          reason: data.reason,
+          maliciousLevel: data.maliciousLevel,
+          gameTitle: data.gameTitle,
+          detail: data.detail,
+          adminReviewUrl,
+        }),
+      )
+    }
+    await Promise.allSettled(messagePromises)
+  }
+
+  private async getAdmins() {
+    return this.prisma.user.findMany({
+      where: {
+        role: {
+          gte: ShionlibUserRoles.ADMIN,
+        },
+        status: UserStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    })
   }
 }
