@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common'
+import { Controller, Delete, Get, Param, ParseIntPipe, Query } from '@nestjs/common'
 import { CharacterService } from '../services/character.service'
 import { GetListReqDto } from '../dto/req/get-list.req.dto'
 
@@ -14,5 +14,10 @@ export class CharacterController {
   @Get(':id')
   async getCharacter(@Param('id', ParseIntPipe) id: number) {
     return this.characterDataService.getCharacter(id)
+  }
+
+  @Delete(':id')
+  async deleteCharacter(@Param('id', ParseIntPipe) id: number) {
+    return this.characterDataService.deleteById(id)
   }
 }
