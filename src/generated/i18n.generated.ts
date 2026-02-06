@@ -35,13 +35,21 @@ export type I18nTranslations = {
             "REPORT_NOTIFICATION_SUBJECT": string;
             "REPORT_NOTIFICATION_INTRO": string;
             "REPORT_ID": string;
+            "MALWARE_CASE_ID": string;
             "REPORTER": string;
             "REPORTED_USER": string;
+            "UPLOADER": string;
+            "FILE_NAME": string;
             "GAME": string;
             "REASON": string;
             "MALICIOUS_LEVEL": string;
             "DETAIL": string;
+            "DETECTED_VIRUSES": string;
+            "REVIEW_DEADLINE": string;
             "REVIEW_REPORT": string;
+            "REVIEW_MALWARE_CASE": string;
+            "MALWARE_SCAN_NOTIFICATION_SUBJECT": string;
+            "MALWARE_SCAN_NOTIFICATION_INTRO": string;
             "REPORT_NOTIFICATION_FOOTER": string;
         };
         "report": {
@@ -109,6 +117,8 @@ export type I18nTranslations = {
         "GAME_DOWNLOAD_RESOURCE_REPORT_NOT_FOUND": string;
         "GAME_DOWNLOAD_RESOURCE_REPORT_ALREADY_PROCESSED": string;
         "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED": string;
+        "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_NOT_FOUND": string;
+        "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": string;
         "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": string;

@@ -19,6 +19,8 @@ import { AdminCharacterListReqDto, AdminDeveloperListReqDto } from '../dto/req/c
 import { GetDownloadResourceReportListReqDto } from '../dto/req/download-resource-report-list.req.dto'
 import { ReviewGameDownloadSourceReportReqDto } from '../dto/req/review-game-download-source-report.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { GetMalwareScanCaseListReqDto } from '../../security/dto/req/get-malware-scan-case-list.req.dto'
+import { ReviewMalwareScanCaseReqDto } from '../../security/dto/req/review-malware-scan-case.req.dto'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(ShionlibUserRoles.ADMIN)
@@ -66,5 +68,24 @@ export class AdminContentController {
     @Req() req: RequestWithUser,
   ) {
     return this.adminContentService.reviewDownloadResourceReport(id, dto, req.user)
+  }
+
+  @Get('malware-scan-cases')
+  async getMalwareScanCaseList(@Query() query: GetMalwareScanCaseListReqDto) {
+    return this.adminContentService.getMalwareScanCaseList(query)
+  }
+
+  @Get('malware-scan-cases/:id')
+  async getMalwareScanCaseDetail(@Param('id', ParseIntPipe) id: number) {
+    return this.adminContentService.getMalwareScanCaseDetail(id)
+  }
+
+  @Patch('malware-scan-cases/:id/review')
+  async reviewMalwareScanCase(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ReviewMalwareScanCaseReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.adminContentService.reviewMalwareScanCase(id, dto, req.user)
   }
 }

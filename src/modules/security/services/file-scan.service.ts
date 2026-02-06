@@ -15,10 +15,13 @@ import {
   ActivityFileStatus,
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
-import { UserService } from '../../user/services/user.service'
 import { MessageService } from '../../message/services/message.service'
 import { MessageType } from '../../message/dto/req/send-message.req.dto'
 import { FILE_CHECK_STATUS_MAP } from '../../upload/constants/upload.constants'
+import path from 'node:path'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import { MalwareScanCaseService } from './malware-scan-case.service'
 
 @Injectable()
 export class FileScanService implements OnModuleInit {
@@ -30,8 +33,8 @@ export class FileScanService implements OnModuleInit {
     @InjectQueue(LARGE_FILE_UPLOAD_QUEUE) private readonly uploadQueue: Queue,
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly activityService: ActivityService,
-    private readonly userService: UserService,
     private readonly messageService: MessageService,
+    private readonly malwareScanCaseService: MalwareScanCaseService,
   ) {}
 
   async onModuleInit() {
@@ -43,7 +46,11 @@ export class FileScanService implements OnModuleInit {
     }
 
     try {
+      const scanLog = await this.ensureDir(
+        this.configService.get('file_scan.clamscan_scan_log_path'),
+      )
       this.clam = await new NodeClam().init({
+        scanLog,
         clamdscan: { active: false },
         clamscan: {
           path: this.configService.get('file_scan.clamscan_binary_path'),
@@ -80,6 +87,10 @@ export class FileScanService implements OnModuleInit {
     return allFiles.length
   }
 
+  async processExpiredMalwareCases() {
+    return this.malwareScanCaseService.processExpiredCases()
+  }
+
   private async scanFile(filePath: string, creator_id: number, upload_session_id: number) {
     const file = await this.prismaService.gameDownloadResourceFile.findUnique({
       where: { file_path: filePath },
@@ -87,8 +98,11 @@ export class FileScanService implements OnModuleInit {
         id: true,
         file_size: true,
         file_name: true,
+        file_hash: true,
+        hash_algorithm: true,
         game_download_resource: {
           select: {
+            id: true,
             game_id: true,
           },
         },
@@ -152,54 +166,17 @@ export class FileScanService implements OnModuleInit {
     }
     const result = await this.clam.scanFile(filePath)
     if (result.isInfected) {
-      await this.prismaService.$transaction(async tx => {
-        await tx.gameDownloadResourceFile.update({
-          where: { file_path: filePath },
-          data: { file_check_status: ArchiveStatus.HARMFUL },
-        })
-        await this.activityService.create(
-          {
-            type: ActivityType.FILE_CHECK_HARMFUL,
-            user_id: creator_id,
-            game_id: gameId,
-            file_id: file.id,
-            file_status: ActivityFileStatus.UPLOADED_TO_SERVER,
-            file_check_status: ActivityFileCheckStatus.HARMFUL,
-            file_size: Number(file.file_size),
-            file_name: file.file_name,
-          },
-          tx,
-        )
-        const { upload_injected_file_times } = await tx.user.update({
-          where: { id: creator_id },
-          data: { upload_injected_file_times: { increment: 1 } },
-          select: { upload_injected_file_times: true },
-        })
-        await this.messageService.send(
-          {
-            type: MessageType.SYSTEM,
-            title: 'Messages.System.File.Upload.FileUploadFailedTitle',
-            content: 'Messages.System.File.Upload.FileHarmfulContent',
-            game_id: gameId,
-            meta: {
-              ...meta,
-              file_check_status: ArchiveStatus.HARMFUL,
-              upload_injected_file_times,
-            },
-            receiver_id: creator_id,
-          },
-          tx,
-        )
-        if (upload_injected_file_times === 3) {
-          await this.userService.ban(
-            creator_id,
-            {
-              banned_reason: 'Uploaded harmful file (3 times)',
-              banned_duration_days: 30,
-            },
-            tx,
-          )
-        }
+      await this.malwareScanCaseService.registerInfectedFile({
+        fileId: file.id,
+        filePath,
+        resourceId: file.game_download_resource.id,
+        gameId,
+        uploaderId: creator_id,
+        fileName: file.file_name,
+        fileSize: Number(file.file_size),
+        fileHash: file.file_hash,
+        hashAlgorithm: file.hash_algorithm,
+        scanResult: result,
       })
       this.logger.warn(`file ${filePath} is not ok, reason: ${result}`)
       return
@@ -343,5 +320,34 @@ export class FileScanService implements OnModuleInit {
     }
 
     return status
+  }
+
+  private async ensureDir(_dir: string) {
+    const dir = path.dirname(_dir)
+    try {
+      await fs.mkdir(dir, { recursive: true })
+      const fh = await fs.open(_dir, 'a')
+      await fh.close()
+      this.logger.log(`use log file ${_dir}`)
+      return _dir
+    } catch {
+      const fallbackDir = path.join(process.cwd(), 'logs')
+      const fallbackFile = path.join(fallbackDir, path.basename(_dir))
+      this.logger.warn(`failed to create directory ${_dir}`)
+      try {
+        await fs.mkdir(fallbackDir, { recursive: true })
+        const fh = await fs.open(fallbackFile, 'a')
+        await fh.close()
+        this.logger.log(`use fallback log file ${fallbackFile}`)
+        return fallbackFile
+      } catch {
+        const tmpFile = path.join(os.tmpdir(), path.basename(_dir))
+        const fh = await fs.open(tmpFile, 'a')
+        await fh.close()
+        this.logger.warn(`failed to create directory ${_dir}`)
+        this.logger.log(`use tmp log file ${tmpFile}`)
+        return tmpFile
+      }
+    }
   }
 }

@@ -84,6 +84,13 @@ export class GameDownloadSourceService {
                 hash_algorithm: true,
                 file_hash: true,
                 file_status: true,
+                is_virus_false_positive: true,
+                malware_scan_cases: {
+                  select: {
+                    id: true,
+                    detected_viruses: true,
+                  },
+                },
                 creator: {
                   select: {
                     id: true,
@@ -658,6 +665,7 @@ export class GameDownloadSourceService {
           file_content_type: session.mime_type,
           file_status: 2,
           file_check_status: 0,
+          is_virus_false_positive: false,
           s3_file_key: null,
           upload_session_id: dto.upload_session_id,
         },

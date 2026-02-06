@@ -261,13 +261,19 @@ export class UserService {
     }
   }
 
-  async ban(id: number, dto: BanUserReqDto, _tx?: Prisma.TransactionClient) {
+  async ban(
+    id: number,
+    dto: BanUserReqDto,
+    _tx?: Prisma.TransactionClient,
+    notThrowNotFound?: boolean,
+  ) {
     const execute = async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.findUnique({
         where: { id, role: { not: ShionlibUserRoles.SUPER_ADMIN } },
         select: { id: true, status: true },
       })
       if (!user) {
+        if (notThrowNotFound) return
         throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
       }
       if (user.status === UserStatus.BANNED) {

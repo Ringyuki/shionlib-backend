@@ -10,12 +10,16 @@ import { GameDownloadResourceReportService } from '../../game/services/game-down
 import { GetDownloadResourceReportListReqDto } from '../dto/req/download-resource-report-list.req.dto'
 import { ReviewGameDownloadSourceReportReqDto } from '../dto/req/review-game-download-source-report.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { MalwareScanCaseService } from '../../security/services/malware-scan-case.service'
+import { GetMalwareScanCaseListReqDto } from '../../security/dto/req/get-malware-scan-case-list.req.dto'
+import { ReviewMalwareScanCaseReqDto } from '../../security/dto/req/review-malware-scan-case.req.dto'
 
 @Injectable()
 export class AdminContentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly gameDownloadResourceReportService: GameDownloadResourceReportService,
+    private readonly malwareScanCaseService: MalwareScanCaseService,
   ) {}
 
   async getGameList(query: AdminGameListReqDto): Promise<PaginatedResult<AdminGameItemResDto>> {
@@ -213,5 +217,21 @@ export class AdminContentService {
     actor: RequestWithUser['user'],
   ) {
     return this.gameDownloadResourceReportService.review(id, dto, actor)
+  }
+
+  async getMalwareScanCaseList(query: GetMalwareScanCaseListReqDto) {
+    return this.malwareScanCaseService.getList(query)
+  }
+
+  async getMalwareScanCaseDetail(id: number) {
+    return this.malwareScanCaseService.getById(id)
+  }
+
+  async reviewMalwareScanCase(
+    id: number,
+    dto: ReviewMalwareScanCaseReqDto,
+    actor: RequestWithUser['user'],
+  ) {
+    return this.malwareScanCaseService.review(id, dto, actor)
   }
 }

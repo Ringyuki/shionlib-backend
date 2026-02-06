@@ -77,6 +77,11 @@ export interface AppConfig {
   file_scan: {
     clamscan_binary_path: string
     clamscan_db_path: string
+    clamscan_scan_log_path: string
+    malware_review_timeout_hours: number
+    malware_auto_ban_threshold: number
+    malware_auto_ban_duration_days: number
+    malware_auto_delete_review_note: string
   }
   file_download: {
     download_cdn_host: string

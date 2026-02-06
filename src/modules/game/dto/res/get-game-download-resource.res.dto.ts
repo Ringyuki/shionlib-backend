@@ -20,6 +20,8 @@ export class GameDownloadResourceFile {
   file_url: string
   s3_file_key: string
   file_hash: string
+  is_virus_false_positive: boolean
+  malware_scan_cases: MalwareScanCase[]
   creator: Creator
 }
 
@@ -27,4 +29,9 @@ class Creator {
   id: number
   name: string
   avatar: string
+}
+
+class MalwareScanCase {
+  id: number
+  detected_viruses: string[]
 }

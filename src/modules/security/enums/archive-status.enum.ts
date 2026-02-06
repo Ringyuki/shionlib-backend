@@ -4,4 +4,5 @@ export enum ArchiveStatus {
   BROKEN_OR_UNSUPPORTED = 3,
   ENCRYPTED = 4,
   HARMFUL = 5,
+  HARMFUL_PENDING_REVIEW = 6,
 }

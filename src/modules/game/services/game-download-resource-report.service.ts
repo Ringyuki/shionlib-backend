@@ -33,8 +33,6 @@ import {
   FALSE_REPORT_SUSPEND_THRESHOLD,
 } from '../constants/download-resource-report.constant'
 
-const GAME_DOWNLOAD_RESOURCE_STATUS_ACTIVE = 1
-
 @Injectable()
 export class GameDownloadResourceReportService {
   private readonly logger = new Logger(GameDownloadResourceReportService.name)
@@ -74,7 +72,7 @@ export class GameDownloadResourceReportService {
         'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_FOUND',
       )
     }
-    if (resource.status !== GAME_DOWNLOAD_RESOURCE_STATUS_ACTIVE) {
+    if (resource.status !== 1) {
       throw new ShionBizException(
         ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_FOUND,
         'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_FOUND',

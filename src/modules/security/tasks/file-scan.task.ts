@@ -10,9 +10,15 @@ export class FileScanTask {
   @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     try {
-      const count = await this.fileScanService.scanFiles()
+      const [count, expiredProcessed] = await Promise.all([
+        this.fileScanService.scanFiles(),
+        this.fileScanService.processExpiredMalwareCases(),
+      ])
       if (count > 0) {
         this.logger.log(`${count} files scanned successfully`)
+      }
+      if (expiredProcessed > 0) {
+        this.logger.log(`${expiredProcessed} expired malware cases auto-processed`)
       }
     } catch (error) {
       this.logger.error('Error scanning files', error)

@@ -10,6 +10,7 @@ export const FILE_CHECK_STATUS_MAP: Record<ArchiveStatus, keyof typeof ActivityF
   [ArchiveStatus.BROKEN_OR_UNSUPPORTED]: 'BROKEN_OR_UNSUPPORTED',
   [ArchiveStatus.ENCRYPTED]: 'ENCRYPTED',
   [ArchiveStatus.HARMFUL]: 'HARMFUL',
+  [ArchiveStatus.HARMFUL_PENDING_REVIEW]: 'HARMFUL',
 }
 
 export const SMALL_FILE_UPLOAD_FILE_SIZE_HARD_LIMIT = 15 * 1024 * 1024 // 15MB

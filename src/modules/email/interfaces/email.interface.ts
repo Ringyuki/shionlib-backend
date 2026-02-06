@@ -25,3 +25,13 @@ export interface ReportNotificationData {
   detail?: string
   adminReviewUrl: string
 }
+
+export interface MalwareScanNotificationData {
+  caseId: number
+  fileName: string
+  uploaderName: string
+  gameTitle: string
+  detectedViruses: string[]
+  reviewDeadline: Date
+  adminReviewUrl: string
+}

@@ -104,6 +104,17 @@ export default (): AppConfig => ({
       '/opt/homebrew/opt/clamav/bin/clamscan',
     ),
     clamscan_db_path: withDefault('CLAMSCAN_DB_PATH', '/opt/homebrew/var/lib/clamav'),
+    clamscan_scan_log_path: withDefault(
+      'CLAMSCAN_SCAN_LOG_PATH',
+      '/var/log/shionlib/clamav-scan.log',
+    ),
+    malware_review_timeout_hours: withDefault('FILE_SCAN_MALWARE_REVIEW_TIMEOUT_HOURS', 24),
+    malware_auto_ban_threshold: withDefault('FILE_SCAN_MALWARE_AUTO_BAN_THRESHOLD', 3),
+    malware_auto_ban_duration_days: withDefault('FILE_SCAN_MALWARE_AUTO_BAN_DURATION_DAYS', 30),
+    malware_auto_delete_review_note: withDefault(
+      'FILE_SCAN_MALWARE_AUTO_DELETE_REVIEW_NOTE',
+      'Auto delete due to review timeout',
+    ),
   },
 
   file_download: {
