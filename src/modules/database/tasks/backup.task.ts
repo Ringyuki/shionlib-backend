@@ -7,7 +7,7 @@ export class BackupTask {
   private readonly logger = new Logger(BackupTask.name)
   constructor(private readonly backupService: BackupService) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
     try {
       this.logger.log('Starting database backup')
