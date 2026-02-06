@@ -101,3 +101,15 @@ enum ReportMaliciousLevel {
   HIGH
   CRITICAL
 }
+
+enum MalwareScanCaseStatus {
+  PENDING
+  RELEASED_FALSE_POSITIVE
+  DELETED
+}
+
+enum MalwareScanDecisionSource {
+  ADMIN_ALLOW
+  ADMIN_DELETE
+  TIMEOUT_AUTO_DELETE
+}

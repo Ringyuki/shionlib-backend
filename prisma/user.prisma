@@ -17,6 +17,8 @@ model User {
   game_download_resource_reports        GameDownloadResourceReport[]      @relation("user_report_download_resource")
   game_download_resource_reported       GameDownloadResourceReport[]      @relation("user_reported_download_resource")
   game_download_resource_report_process GameDownloadResourceReport[]      @relation("user_process_download_resource_report")
+  malware_scan_cases                    MalwareScanCase[]                 @relation("user_malware_scan_case_uploader")
+  malware_scan_case_reviews             MalwareScanCase[]                 @relation("user_malware_scan_case_reviewer")
   comments                              Comment[]                         @relation("user_create_comment")
 
   favorites Favorite[] @relation("user_favorite")

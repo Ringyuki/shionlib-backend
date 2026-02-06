@@ -29,6 +29,7 @@ model Game {
   platform String[] @default([])
 
   download_resources GameDownloadResource[] @relation("game_download_resource")
+  malware_scan_cases MalwareScanCase[]      @relation("game_malware_scan_case")
   downloads          Int                    @default(0)
 
   views Int @default(0)
