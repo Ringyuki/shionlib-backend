@@ -55,6 +55,11 @@ export class GameController {
     return result
   }
 
+  @Get('random')
+  async getRandomGame(@Req() req: RequestWithUser) {
+    return await this.gameService.getRandomGameId(req)
+  }
+
   @Get('recent-update')
   async getRecentUpdate(@Query() getRecentUpdateReqDto: PaginationReqDto) {
     const cacheKey = `game:recent-update:query:${JSON.stringify(getRecentUpdateReqDto)}`

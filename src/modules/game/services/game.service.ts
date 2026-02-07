@@ -13,6 +13,7 @@ import { applyDate } from '../helpers/date-filters'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
 export class GameService {
@@ -387,5 +388,29 @@ export class GameService {
         views: true,
       },
     })
+  }
+
+  async getRandomGameId(req: RequestWithUser): Promise<number | null> {
+    const n = await this.prisma.game.count({
+      where: { status: 1 },
+    })
+    if (n === 0) return null
+    const k = Math.floor(Math.random() * n)
+
+    const item = await this.prisma.game.findFirst({
+      where: { status: 1 },
+      select: { id: true, nsfw: true, covers: { select: { sexual: true } } },
+      orderBy: { id: 'asc' },
+      skip: k,
+    })
+    if (!item) return null
+    if (
+      (item.nsfw || item.covers.some(c => c.sexual > 0)) &&
+      (req.user.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
+        !req.user.content_limit)
+    ) {
+      return null
+    }
+    return item.id
   }
 }
