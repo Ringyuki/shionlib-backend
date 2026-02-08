@@ -12,9 +12,9 @@ export default (): AppConfig => ({
     limit: withDefault('THROTTLE_LIMIT', 600),
     blockDuration: withDefault('THROTTLE_BLOCK_DURATION_MS', 10000),
     download: {
-      ttl: withDefault('THROTTLE_DOWNLOAD_TTL_MS', 60000),
+      ttl: withDefault('THROTTLE_DOWNLOAD_TTL_MS', 60000 * 60),
       limit: withDefault('THROTTLE_DOWNLOAD_LIMIT', 60),
-      blockDuration: withDefault('THROTTLE_DOWNLOAD_BLOCK_DURATION_MS', 360000 * 12),
+      blockDuration: withDefault('THROTTLE_DOWNLOAD_BLOCK_DURATION_MS', 3600000 * 12),
     },
   },
 
