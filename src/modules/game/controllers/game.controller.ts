@@ -1,6 +1,5 @@
 import {
   Controller,
-  Delete,
   Get,
   Param,
   Post,
@@ -9,16 +8,11 @@ import {
   UseGuards,
   Body,
   ParseIntPipe,
-  Put,
 } from '@nestjs/common'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameService } from '../services/game.service'
 import { GetGameReqDto } from '../dto/req/get-game.req.dto'
-import { DeleteGameReqDto } from '../dto/req/delete-game.req.dto'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../../auth/guards/roles.guard'
-import { Roles } from '../../auth/decorators/roles.decorator'
-import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
 import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
@@ -103,13 +97,6 @@ export class GameController {
     return await this.gameDownloadSourceService.getDownloadLink(id, token)
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ShionlibUserRoles.ADMIN)
-  @Delete(':id')
-  async deleteGame(@Param() deleteGameReqDto: DeleteGameReqDto) {
-    return await this.gameService.deleteById(deleteGameReqDto.id)
-  }
-
   @UseGuards(JwtAuthGuard)
   @Post(':id/download-source')
   async createDownloadSource(
@@ -122,19 +109,5 @@ export class GameController {
       id,
       req.user?.sub,
     )
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Roles(ShionlibUserRoles.ADMIN)
-  @Put(':id/recent-update')
-  async updateRecentUpdate(@Param('id', ParseIntPipe) id: number) {
-    return await this.gameService.addToRecentUpdate(id)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Roles(ShionlibUserRoles.ADMIN)
-  @Delete(':id/recent-update')
-  async removeFromRecentUpdate(@Param('id', ParseIntPipe) id: number) {
-    return await this.gameService.removeFromRecentUpdate(id)
   }
 }

@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Patch,
+  Delete,
+  Put,
   Param,
   Query,
   Body,
@@ -21,12 +23,16 @@ import { ReviewGameDownloadSourceReportReqDto } from '../dto/req/review-game-dow
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GetMalwareScanCaseListReqDto } from '../../security/dto/req/get-malware-scan-case-list.req.dto'
 import { ReviewMalwareScanCaseReqDto } from '../../security/dto/req/review-malware-scan-case.req.dto'
+import { AdminGameService } from '../services/admin-game.service'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(ShionlibUserRoles.ADMIN)
 @Controller('admin/content')
 export class AdminContentController {
-  constructor(private readonly adminContentService: AdminContentService) {}
+  constructor(
+    private readonly adminContentService: AdminContentService,
+    private readonly adminGameService: AdminGameService,
+  ) {}
 
   @Get('games')
   async getGameList(@Query() query: AdminGameListReqDto) {
@@ -39,6 +45,31 @@ export class AdminContentController {
     @Body('status', ParseIntPipe) status: number,
   ) {
     return await this.adminContentService.updateGameStatus(id, status)
+  }
+
+  @Get('games/:id/edit/scalar')
+  async getGameScalar(@Param('id', ParseIntPipe) id: number) {
+    return await this.adminGameService.getScalar(id)
+  }
+
+  @Patch('games/:id/edit/scalar')
+  async editGameScalar(@Param('id', ParseIntPipe) id: number, @Body() body: Record<string, any>) {
+    return await this.adminContentService.editGameScalar(id, body)
+  }
+
+  @Delete('games/:id')
+  async deleteGame(@Param('id', ParseIntPipe) id: number) {
+    return await this.adminContentService.deleteGame(id)
+  }
+
+  @Put('games/:id/recent-update')
+  async addGameToRecentUpdate(@Param('id', ParseIntPipe) id: number) {
+    return await this.adminContentService.addGameToRecentUpdate(id)
+  }
+
+  @Delete('games/:id/recent-update')
+  async removeGameFromRecentUpdate(@Param('id', ParseIntPipe) id: number) {
+    return await this.adminContentService.removeGameFromRecentUpdate(id)
   }
 
   @Get('characters')

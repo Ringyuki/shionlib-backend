@@ -13,11 +13,13 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { MalwareScanCaseService } from '../../security/services/malware-scan-case.service'
 import { GetMalwareScanCaseListReqDto } from '../../security/dto/req/get-malware-scan-case-list.req.dto'
 import { ReviewMalwareScanCaseReqDto } from '../../security/dto/req/review-malware-scan-case.req.dto'
+import { AdminGameService } from './admin-game.service'
 
 @Injectable()
 export class AdminContentService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly adminGameService: AdminGameService,
     private readonly gameDownloadResourceReportService: GameDownloadResourceReportService,
     private readonly malwareScanCaseService: MalwareScanCaseService,
   ) {}
@@ -87,10 +89,23 @@ export class AdminContentService {
   }
 
   async updateGameStatus(gameId: number, status: number): Promise<void> {
-    await this.prisma.game.update({
-      where: { id: gameId },
-      data: { status },
-    })
+    await this.adminGameService.updateStatus(gameId, status)
+  }
+
+  async editGameScalar(gameId: number, payload: Record<string, any>): Promise<void> {
+    await this.adminGameService.editScalar(gameId, payload)
+  }
+
+  async deleteGame(gameId: number): Promise<void> {
+    await this.adminGameService.deleteById(gameId)
+  }
+
+  async addGameToRecentUpdate(gameId: number): Promise<void> {
+    await this.adminGameService.addToRecentUpdate(gameId)
+  }
+
+  async removeGameFromRecentUpdate(gameId: number): Promise<void> {
+    await this.adminGameService.removeFromRecentUpdate(gameId)
   }
 
   async getCharacterList(

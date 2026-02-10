@@ -9,6 +9,7 @@ import { AdminStatsService } from './services/admin-stats.service'
 import { AdminContentService } from './services/admin-content.service'
 import { AdminUserService } from './services/admin-user.service'
 import { AdminCommentService } from './services/admin-comment.service'
+import { AdminGameService } from './services/admin-game.service'
 import { GameModule } from '../game/game.module'
 import { SecurityModule } from '../security/security.module'
 
@@ -20,7 +21,19 @@ import { SecurityModule } from '../security/security.module'
     AdminUserController,
     AdminCommentController,
   ],
-  providers: [AdminStatsService, AdminContentService, AdminUserService, AdminCommentService],
-  exports: [AdminStatsService, AdminContentService, AdminUserService, AdminCommentService],
+  providers: [
+    AdminStatsService,
+    AdminContentService,
+    AdminUserService,
+    AdminCommentService,
+    AdminGameService,
+  ],
+  exports: [
+    AdminStatsService,
+    AdminContentService,
+    AdminUserService,
+    AdminCommentService,
+    AdminGameService,
+  ],
 })
 export class AdminModule {}

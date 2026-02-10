@@ -37,6 +37,6 @@ import { GameDownloadResourceReportService } from './services/game-download-reso
     GameScoreService,
     GameDownloadResourceReportService,
   ],
-  exports: [GameDownloadResourceReportService],
+  exports: [GameService, GameDownloadResourceReportService],
 })
 export class GameModule {}

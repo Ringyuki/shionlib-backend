@@ -1,6 +1,5 @@
 import { IsOptional, IsDateString, IsInt, Min, Max } from 'class-validator'
 import { Type } from 'class-transformer'
-import { PaginationReqDto } from '../../../../shared/dto/req/pagination.req.dto'
 
 export class StatsTrendReqDto {
   @IsOptional()
@@ -18,5 +17,3 @@ export class StatsTrendReqDto {
   @Max(90)
   days?: number = 30
 }
-
-export class TopGamesReqDto extends PaginationReqDto {}

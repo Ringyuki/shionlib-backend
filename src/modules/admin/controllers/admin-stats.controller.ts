@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../../auth/guards/roles.guard'
 import { Roles } from '../../auth/decorators/roles.decorator'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
-import { StatsTrendReqDto, TopGamesReqDto } from '../dto/req/stats.req.dto'
+import { StatsTrendReqDto } from '../dto/req/stats.req.dto'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(ShionlibUserRoles.ADMIN)
@@ -20,10 +20,5 @@ export class AdminStatsController {
   @Get('trends')
   async getTrends(@Query() query: StatsTrendReqDto) {
     return this.adminStatsService.getTrends(query.days)
-  }
-
-  @Get('top-games')
-  async getTopGames(@Query() query: TopGamesReqDto) {
-    return this.adminStatsService.getTopGames(query.pageSize)
   }
 }

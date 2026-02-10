@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
@@ -12,7 +12,6 @@ import { GetGameListFilterReqDto } from '../dto/req/get-game-list.req.dto'
 import { applyDate } from '../helpers/date-filters'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
-import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
@@ -20,12 +19,12 @@ export class GameService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
-    @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
   ) {}
   async getById(id: number, user_id?: number, content_limit?: number): Promise<GetGameResDto> {
     const exist = await this.prisma.game.findUnique({
       where: {
         id,
+        status: 1,
       },
       select: {
         views: true,
@@ -190,23 +189,6 @@ export class GameService {
     return data
   }
 
-  async deleteById(id: number) {
-    const exist = await this.prisma.game.findUnique({
-      where: {
-        id,
-      },
-    })
-    if (!exist) {
-      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
-    }
-    await this.prisma.game.delete({
-      where: {
-        id,
-      },
-    })
-    await this.searchEngine.deleteGame(id)
-  }
-
   async getList(
     getGameListReqDto: PaginationReqDto,
     content_limit?: number,
@@ -217,7 +199,9 @@ export class GameService {
     const { page = 1, pageSize = 10 } = getGameListReqDto
     const { tags, years, months, sort_by, sort_order, start_date, end_date } = filter ?? {}
 
-    let where: Prisma.GameWhereInput = {}
+    let where: Prisma.GameWhereInput = {
+      status: 1,
+    }
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       where.nsfw = {
         not: true,
@@ -316,17 +300,6 @@ export class GameService {
     }
   }
 
-  async addToRecentUpdate(game_id: number) {
-    const now = Date.now()
-    await this.cacheService.zadd(RECENT_UPDATE_KEY, now, game_id)
-    const expiredBefore = now - RECENT_UPDATE_TTL_MS
-    await this.cacheService.zremrangebyscore(RECENT_UPDATE_KEY, '-inf', expiredBefore)
-  }
-
-  async removeFromRecentUpdate(game_id: number) {
-    await this.cacheService.zrem(RECENT_UPDATE_KEY, game_id)
-  }
-
   async getRecentUpdate(dto: PaginationReqDto): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 100 } = dto
     const start = (page - 1) * pageSize
@@ -344,6 +317,7 @@ export class GameService {
     const games = await this.prisma.game.findMany({
       where: {
         id: { in: gameIds },
+        status: 1,
       },
       select: {
         id: true,
