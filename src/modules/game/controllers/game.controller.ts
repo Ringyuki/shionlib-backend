@@ -71,7 +71,6 @@ export class GameController {
     const cacheKey = `game:${getGameReqDto.id}:auth:${req.user.sub}:cl:${req.user.content_limit}`
     const cached = await this.cacheService.get<GetGameResDto>(cacheKey)
     if (cached) {
-      void this.gameService.increaseViews(getGameReqDto.id).catch(() => null)
       return cached
     }
     const result = await this.gameService.getById(
@@ -81,6 +80,11 @@ export class GameController {
     )
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
+  }
+
+  @Post(':id/view')
+  async increaseViews(@Param('id', ParseIntPipe) id: number) {
+    return await this.gameService.increaseViews(id)
   }
 
   @Get(':id/download-source')

@@ -158,12 +158,9 @@ export class GameService {
         }
       }
     }
-    const game = await this.prisma.game.update({
+    const game = await this.prisma.game.findUnique({
       where: {
         id,
-      },
-      data: {
-        views: { increment: 1 },
       },
       select,
     })
