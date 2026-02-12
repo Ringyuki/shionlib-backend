@@ -17,7 +17,7 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import {
   MODERATION_QUEUE,
   OMNI_MODERATION_JOB,
@@ -362,6 +362,7 @@ export class AdminCommentService {
             await this.messageService.send(
               {
                 type: MessageType.COMMENT_REPLY,
+                tone: MessageTone.INFO,
                 title: 'Messages.Comment.Reply.Title',
                 content: 'Messages.Comment.Reply.Content',
                 receiver_id: comment.parent.creator_id,
@@ -383,6 +384,7 @@ export class AdminCommentService {
         await this.messageService.send(
           {
             type: MessageType.SYSTEM,
+            tone: MessageTone.DESTRUCTIVE,
             title: 'Messages.System.Moderation.Comment.Block.Title',
             content: contentKey,
             receiver_id: comment.creator_id,

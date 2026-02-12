@@ -4,10 +4,21 @@ enum MessageType {
   SYSTEM
 }
 
+enum MessageTone {
+  PRIMARY
+  SECONDARY
+  SUCCESS
+  WARNING
+  INFO
+  DESTRUCTIVE
+  NEUTRAL
+}
+
 model Message {
   id Int @id @default(autoincrement())
 
   type MessageType
+  tone MessageTone @default(INFO)
   title String @db.VarChar(255)
   content String @db.VarChar(10240)
   link_text String? @db.VarChar(255)

@@ -8,7 +8,7 @@ export class MessageNotifier {
 
   notifyNewMessage(
     receiverId: number,
-    message: Pick<MessageListItemResDto, 'id' | 'title' | 'type' | 'created'>,
+    message: Pick<MessageListItemResDto, 'id' | 'title' | 'type' | 'tone' | 'created'>,
   ) {
     const room = this.roomOf(receiverId)
     this.gateway.server.to(room).emit('message:new', message)

@@ -32,7 +32,7 @@ import { firstValueFrom } from 'rxjs'
 import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.interface'
 import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -760,6 +760,7 @@ export class GameDownloadSourceService {
       await this.messageService.send(
         {
           type: MessageType.SYSTEM,
+          tone: MessageTone.SUCCESS,
           title: 'Messages.System.File.Reupload.FileReuploadedTitle',
           content: 'Messages.System.File.Reupload.FileReuploadedContent',
           game_id: gameId,

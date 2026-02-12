@@ -20,7 +20,7 @@ import { ModerateCategory } from '../enums/categories.enum'
 import type { Moderation } from 'openai/resources/moderations'
 import { zodTextFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 
 interface ModerationJobPayload {
   commentId: number
@@ -111,6 +111,7 @@ export class ModerationProcessor {
           await this.messageService.send(
             {
               type: MessageType.COMMENT_REPLY,
+              tone: MessageTone.INFO,
               title: 'Messages.Comment.Reply.Title',
               content: 'Messages.Comment.Reply.Content',
               receiver_id: comment.parent.creator_id,
@@ -131,6 +132,7 @@ export class ModerationProcessor {
         await this.messageService.send(
           {
             type: MessageType.SYSTEM,
+            tone: MessageTone.DESTRUCTIVE,
             title: 'Messages.System.Moderation.Comment.Block.Title',
             content: 'Messages.System.Moderation.Comment.Block.Content',
             receiver_id: comment.creator_id,
@@ -276,6 +278,7 @@ export class ModerationProcessor {
           await this.messageService.send(
             {
               type: MessageType.COMMENT_REPLY,
+              tone: MessageTone.INFO,
               title: 'Messages.Comment.Reply.Title',
               content: 'Messages.Comment.Reply.Content',
               receiver_id: comment.parent.creator_id,
@@ -294,6 +297,7 @@ export class ModerationProcessor {
         await this.messageService.send(
           {
             type: MessageType.SYSTEM,
+            tone: MessageTone.DESTRUCTIVE,
             title: 'Messages.System.Moderation.Comment.Block.Title',
             content: 'Messages.System.Moderation.Comment.Block.ReviewContent',
             receiver_id: comment.creator_id,

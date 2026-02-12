@@ -15,7 +15,7 @@ import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { SerializedEditorState } from 'lexical'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import {
   MODERATION_QUEUE,
   OMNI_MODERATION_JOB,
@@ -339,6 +339,7 @@ export class CommentServices {
         await this.messageService.send(
           {
             type: MessageType.COMMENT_LIKE,
+            tone: MessageTone.INFO,
             title: 'Messages.Comment.Like.Title',
             content: 'Messages.Comment.Like.Content',
             receiver_id: comment.creator_id,

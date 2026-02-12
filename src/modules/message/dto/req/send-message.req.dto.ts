@@ -16,6 +16,16 @@ export enum MessageType {
   SYSTEM = 'SYSTEM',
 }
 
+export enum MessageTone {
+  PRIMARY = 'PRIMARY',
+  SECONDARY = 'SECONDARY',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  INFO = 'INFO',
+  DESTRUCTIVE = 'DESTRUCTIVE',
+  NEUTRAL = 'NEUTRAL',
+}
+
 export interface MessageMeta {
   file_id?: number
   file_name?: string
@@ -31,6 +41,14 @@ export class SendMessageReqDto {
     }),
   })
   type: MessageType
+
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'tone' }) })
+  @IsEnum(MessageTone, {
+    message: ivmEnum('validation.common.IS_ENUM', MessageTone, {
+      property: 'tone',
+    }),
+  })
+  tone: MessageTone
 
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'title' }) })
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'title' }) })

@@ -70,7 +70,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayInit {
 
   notifyMessageCreated(
     receiverId: number,
-    message: Pick<MessageListItemResDto, 'id' | 'title' | 'type' | 'created'>,
+    message: Pick<MessageListItemResDto, 'id' | 'title' | 'type' | 'tone' | 'created'>,
   ) {
     const room = this.roomOf(receiverId)
     this.server.to(room).emit('message:new', message)

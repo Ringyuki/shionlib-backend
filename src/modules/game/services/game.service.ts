@@ -297,7 +297,10 @@ export class GameService {
     }
   }
 
-  async getRecentUpdate(dto: PaginationReqDto): Promise<PaginatedResult<GetGameListResDto>> {
+  async getRecentUpdate(
+    dto: PaginationReqDto,
+    content_limit?: number,
+  ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 100 } = dto
     const start = (page - 1) * pageSize
     const end = start + pageSize - 1
@@ -311,11 +314,24 @@ export class GameService {
     ])
     const gameIds = items.map(item => Number(item.member))
 
+    const where: Prisma.GameWhereInput = {
+      id: { in: gameIds },
+      status: 1,
+    }
+    if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
+      where.nsfw = {
+        not: true,
+      }
+      where.covers = {
+        every: {
+          sexual: {
+            in: [0],
+          },
+        },
+      }
+    }
     const games = await this.prisma.game.findMany({
-      where: {
-        id: { in: gameIds },
-        status: 1,
-      },
+      where,
       select: {
         id: true,
         title_jp: true,

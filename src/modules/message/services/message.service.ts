@@ -9,7 +9,7 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { Prisma } from '@prisma/client'
 import { MessageNotifier } from './message-notifier.service'
-import { MessageType } from '../dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../dto/req/send-message.req.dto'
 
 @Injectable()
 export class MessageService {
@@ -21,6 +21,7 @@ export class MessageService {
   async send(sendMessageReqDto: SendMessageReqDto, tx?: Prisma.TransactionClient) {
     const {
       type,
+      tone,
       title,
       content,
       link_text,
@@ -42,6 +43,7 @@ export class MessageService {
     const message = await (tx || this.prisma).message.create({
       data: {
         type,
+        tone,
         title,
         content,
         link_text,
@@ -57,6 +59,7 @@ export class MessageService {
         id: true,
         title: true,
         type: true,
+        tone: true,
         created: true,
       },
     })
@@ -64,6 +67,7 @@ export class MessageService {
       id: message.id,
       title: message.title,
       type: message.type as MessageType,
+      tone: message.tone as MessageTone,
       created: message.created,
     })
   }
@@ -90,6 +94,7 @@ export class MessageService {
       select: {
         id: true,
         type: true,
+        tone: true,
         title: true,
         receiver: {
           select: {
@@ -140,6 +145,7 @@ export class MessageService {
         select: {
           id: true,
           type: true,
+          tone: true,
           title: true,
           content: true,
           link_text: true,

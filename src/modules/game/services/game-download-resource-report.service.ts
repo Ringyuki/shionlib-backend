@@ -16,7 +16,7 @@ import {
 } from '../../admin/dto/req/review-game-download-source-report.req.dto'
 import { UserService } from '../../user/services/user.service'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { UserStatus } from '../../user/interfaces/user.interface'
 import { UploadQuotaService } from '../../upload/services/upload-quota.service'
@@ -404,6 +404,7 @@ export class GameDownloadResourceReportService {
           await this.messageService.send(
             {
               type: MessageType.SYSTEM,
+              tone: MessageTone.SUCCESS,
               title: 'Messages.System.Report.Valid.Title',
               content: 'Messages.System.Report.Valid.Content',
               receiver_id: report.reporter_id,
@@ -420,6 +421,7 @@ export class GameDownloadResourceReportService {
           await this.messageService.send(
             {
               type: MessageType.SYSTEM,
+              tone: MessageTone.DESTRUCTIVE,
               title: 'Messages.System.Report.Penalty.Title',
               content: 'Messages.System.Report.Penalty.Content',
               receiver_id: report.reported_user_id,
@@ -453,6 +455,7 @@ export class GameDownloadResourceReportService {
           await this.messageService.send(
             {
               type: MessageType.SYSTEM,
+              tone: MessageTone.WARNING,
               title: 'Messages.System.Report.Invalid.Title',
               content: 'Messages.System.Report.Invalid.Content',
               receiver_id: report.reporter_id,
@@ -687,6 +690,7 @@ export class GameDownloadResourceReportService {
     const messagePromises: Promise<unknown>[] = admins.map(admin =>
       this.messageService.send({
         type: MessageType.SYSTEM,
+        tone: MessageTone.WARNING,
         title: 'Messages.System.Report.NewReport.Title',
         content: 'Messages.System.Report.NewReport.Content',
         receiver_id: admin.id,

@@ -55,13 +55,19 @@ export class GameController {
   }
 
   @Get('recent-update')
-  async getRecentUpdate(@Query() getRecentUpdateReqDto: PaginationReqDto) {
-    const cacheKey = `game:recent-update:query:${JSON.stringify(getRecentUpdateReqDto)}`
+  async getRecentUpdate(
+    @Query() getRecentUpdateReqDto: PaginationReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const cacheKey = `game:recent-update:auth:${req.user?.sub}:cl:${req.user?.content_limit}:query:${JSON.stringify(getRecentUpdateReqDto)}`
     const cached = await this.cacheService.get<PaginatedResult<GetGameListResDto>>(cacheKey)
     if (cached) {
       return cached
     }
-    const result = await this.gameService.getRecentUpdate(getRecentUpdateReqDto)
+    const result = await this.gameService.getRecentUpdate(
+      getRecentUpdateReqDto,
+      req.user?.content_limit,
+    )
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
   }

@@ -16,7 +16,7 @@ import {
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import { FILE_CHECK_STATUS_MAP } from '../../upload/constants/upload.constants'
 import path from 'node:path'
 import fs from 'node:fs/promises'
@@ -151,6 +151,7 @@ export class FileScanService implements OnModuleInit {
       })
       await this.messageService.send({
         type: MessageType.SYSTEM,
+        tone: MessageTone.DESTRUCTIVE,
         title: 'Messages.System.File.Upload.FileUploadFailedTitle',
         content: 'Messages.System.File.Upload.FileCheckFailedContent',
         game_id: gameId,

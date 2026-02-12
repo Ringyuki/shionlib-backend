@@ -1,8 +1,9 @@
-import { MessageType, MessageMeta } from '../req/send-message.req.dto'
+import { MessageType, MessageMeta, MessageTone } from '../req/send-message.req.dto'
 
 export class MessageResDto {
   id: number
   type: MessageType
+  tone: MessageTone
   title: string
   content: string
   link_text: string | null

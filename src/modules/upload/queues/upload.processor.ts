@@ -14,7 +14,7 @@ import {
   ActivityFileCheckStatus,
 } from '../../activity/dto/create-activity.dto'
 import { MessageService } from '../../message/services/message.service'
-import { MessageType } from '../../message/dto/req/send-message.req.dto'
+import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 
 type S3UploadJobPayload = {
   resourceFileId: number
@@ -156,6 +156,7 @@ export class UploadProcessor {
       await this.messageService.send(
         {
           type: MessageType.SYSTEM,
+          tone: MessageTone.SUCCESS,
           title: 'Messages.System.File.Upload.FileUploadSuccessTitle',
           content: 'Messages.System.File.Upload.FileUploadSuccessContent',
           game_id: gameId,
