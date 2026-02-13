@@ -25,7 +25,7 @@ export class SitemapService {
   }
 
   private readonly supportedLangs: Lang[] = ['zh', 'ja', 'en']
-  private readonly defaultLang: Lang = 'en'
+  private readonly defaultLang: Lang = 'zh'
   private stylesheetCache?: string
   private get stylesheetUrl(): string {
     return '/sitemap.xsl'
