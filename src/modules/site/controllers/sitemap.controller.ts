@@ -15,7 +15,8 @@ export class SitemapController {
   @Header('Content-Type', 'application/xml; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=3600')
   async getSitemapIndex(@Req() req: Request, @Res() res: Response): Promise<void> {
-    const cacheKey = 'sitemap:index'
+    const host = req.get('x-forwarded-host')?.split(',')[0]?.trim() || req.get('host')
+    const cacheKey = `sitemap:index:${host}`
     const cached = await this.cacheService.get<string>(cacheKey)
     if (cached) {
       res.type('application/xml; charset=utf-8').send(cached)
@@ -54,7 +55,8 @@ export class SitemapController {
       return
     }
 
-    const cacheKey = `sitemap:${type}:${page}`
+    const host = req.get('x-forwarded-host')?.split(',')[0]?.trim() || req.get('host')
+    const cacheKey = `sitemap:${type}:${page}:${host}`
     const cached = await this.cacheService.get<string>(cacheKey)
     if (cached) {
       res.type('application/xml; charset=utf-8').send(cached)
