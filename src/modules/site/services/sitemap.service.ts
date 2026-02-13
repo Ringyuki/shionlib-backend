@@ -8,6 +8,7 @@ import { SitemapType } from '../enums/sitemap/sitemap-type.enum'
 import { IndexItem } from '../types/sitemap/IndexItem'
 import { SiteMapReqDto } from '../dto/req/site-map.req.dto'
 import { Lang } from '../../../shared/types/i18n/lang.types'
+import { Request } from 'express'
 
 @Injectable()
 export class SitemapService {
@@ -16,27 +17,33 @@ export class SitemapService {
     private readonly configService: ShionConfigService,
   ) {}
 
-  private get siteUrl(): string {
-    return this.configService.get('siteUrl')
+  private getSiteUrl(request: Request): string {
+    const protocol = request.get('x-forwarded-proto')?.split(',')[0]?.trim() || request.protocol
+    const host = request.get('x-forwarded-host')?.split(',')[0]?.trim() || request.get('host')
+
+    return host ? `${protocol}://${host}` : this.configService.get('siteUrl')
   }
+
   private readonly supportedLangs: Lang[] = ['zh', 'ja', 'en']
   private readonly defaultLang: Lang = 'en'
   private stylesheetCache?: string
   private get stylesheetUrl(): string {
-    const isDev = this.configService.get('environment') === 'development'
-    const port = this.configService.get('port')
-    return isDev ? `http://localhost:${port}/sitemap.xsl` : `${this.siteUrl}/sitemap.xsl`
+    return '/sitemap.xsl'
   }
   private get stylesheetPath(): string {
     return path.join(__dirname, '../assets/sitemap.xsl')
   }
 
-  async getBaseInfos(type: SitemapType, options: SiteMapReqDto): Promise<SiteItem[]> {
+  async getBaseInfos(
+    request: Request,
+    type: SitemapType,
+    options: SiteMapReqDto,
+  ): Promise<SiteItem[]> {
     const { page, pageSize } = options
     const skip = (page - 1) * pageSize
 
     const buildUrl = (t: SitemapType, id: number) => {
-      return `${this.siteUrl}/${t}/${id}`
+      return `${this.getSiteUrl(request)}/${t}/${id}`
     }
     let items: SiteItem[] = []
 
@@ -75,7 +82,7 @@ export class SitemapService {
     return items
   }
 
-  async generateIndex(): Promise<string> {
+  async generateIndex(request: Request): Promise<string> {
     const pageSize = 50000
 
     const [gameCount, developerCount, characterCount] = await Promise.all([
@@ -96,7 +103,7 @@ export class SitemapService {
       const totalPages = Math.ceil(s.count / pageSize)
       for (let p = 1; p <= totalPages; p++) {
         entries.push(
-          `<sitemap><loc>${this.siteUrl}/sitemap-${s.type}-${p}.xml</loc><lastmod>${now}</lastmod></sitemap>`,
+          `<sitemap><loc>${this.getSiteUrl(request)}/sitemap-${s.type}-${p}.xml</loc><lastmod>${now}</lastmod></sitemap>`,
         )
       }
     }
@@ -106,30 +113,35 @@ export class SitemapService {
     )}\n</sitemapindex>`
   }
 
-  async generateSectionSitemap(type: SitemapType, options: SiteMapReqDto): Promise<string> {
+  async generateSectionSitemap(
+    request: Request,
+    type: SitemapType,
+    options: SiteMapReqDto,
+  ): Promise<string> {
     const changefreq = 'weekly'
     const priority = type === SitemapType.GAME ? '1.0' : '0.8'
 
-    const items = await this.getBaseInfos(type, options)
+    const items = await this.getBaseInfos(request, type, options)
     const urls = items
       .map(i => {
         const url = i.url
         const alternates = this.supportedLangs
           .map(l => {
-            return `<xhtml:link rel="alternate" hreflang="${l}" href="${this.buildUrl(url, l)}"/>`
+            return `<xhtml:link rel="alternate" hreflang="${l}" href="${this.buildUrl(request, url, l)}"/>`
           })
           .join('')
-        const xDefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${this.buildUrl(url, this.defaultLang)}"/>`
+        const xDefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${this.buildUrl(request, url, this.defaultLang)}"/>`
         const lastmod = `<lastmod>${i.lastmod}</lastmod>`
-        return `<url><loc>${this.buildUrl(url, this.defaultLang)}</loc>${alternates}${xDefault}${lastmod}<changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
+        return `<url><loc>${this.buildUrl(request, url, this.defaultLang)}</loc>${alternates}${xDefault}${lastmod}<changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
       })
       .join('\n')
 
     return `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="${this.stylesheetUrl}"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>`
   }
 
-  private buildUrl(originalUrl: string, lang: Lang): string {
-    const base = this.siteUrl.endsWith('/') ? this.siteUrl.slice(0, -1) : this.siteUrl
+  private buildUrl(request: Request, originalUrl: string, lang: Lang): string {
+    const siteUrl = this.getSiteUrl(request)
+    const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl
     if (!originalUrl.startsWith(base + '/')) return originalUrl
     const path = originalUrl.slice((base + '/').length)
     return `${base}/${lang}/${path}`

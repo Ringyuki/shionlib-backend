@@ -1,7 +1,7 @@
-import { Controller, Get, Header, Res, Param, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Header, Res, Param, ParseIntPipe, Req } from '@nestjs/common'
 import { SitemapService } from '../services/sitemap.service'
 import { CacheService } from '../../cache/services/cache.service'
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { SitemapType } from '../enums/sitemap/sitemap-type.enum'
 
 @Controller()
@@ -14,7 +14,7 @@ export class SitemapController {
   @Get('sitemap.xml')
   @Header('Content-Type', 'application/xml; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=3600')
-  async getSitemapIndex(@Res() res: Response): Promise<void> {
+  async getSitemapIndex(@Req() req: Request, @Res() res: Response): Promise<void> {
     const cacheKey = 'sitemap:index'
     const cached = await this.cacheService.get<string>(cacheKey)
     if (cached) {
@@ -22,7 +22,7 @@ export class SitemapController {
       return
     }
 
-    const xml = await this.sitemapService.generateIndex()
+    const xml = await this.sitemapService.generateIndex(req)
     await this.cacheService.set(cacheKey, xml, 60 * 60 * 1000)
     res.type('application/xml; charset=utf-8').send(xml)
     return
@@ -42,6 +42,7 @@ export class SitemapController {
   async getSectionSitemap(
     @Param('type') type: SitemapType,
     @Param('page', ParseIntPipe) page: number,
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     if (![SitemapType.GAME, SitemapType.DEVELOPER, SitemapType.CHARACTER].includes(type)) {
@@ -60,7 +61,10 @@ export class SitemapController {
       return
     }
 
-    const xml = await this.sitemapService.generateSectionSitemap(type, { page, pageSize: 50000 })
+    const xml = await this.sitemapService.generateSectionSitemap(req, type, {
+      page,
+      pageSize: 50000,
+    })
     await this.cacheService.set(cacheKey, xml, 60 * 60 * 1000)
     res.type('application/xml; charset=utf-8').send(xml)
     return
