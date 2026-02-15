@@ -24,13 +24,18 @@ export class MessageController {
     return this.messageService.getById(id, req)
   }
 
-  @Post(':id/read')
-  async markAsRead(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
-    return this.messageService.markAsRead(id, req)
-  }
-
   @Post('all/read')
   async markAllAsRead(@Req() req: RequestWithUser) {
     return this.messageService.markAllAsRead(req)
+  }
+
+  @Post('all/unread')
+  async markAllAsUnread(@Req() req: RequestWithUser) {
+    return this.messageService.markAllAsUnread(req)
+  }
+
+  @Post(':id/read')
+  async markAsRead(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return this.messageService.markAsRead(id, req)
   }
 }

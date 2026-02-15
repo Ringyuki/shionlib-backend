@@ -216,4 +216,15 @@ export class MessageService {
     })
     this.messageNotifier.notifyUnreadCount(req.user.sub, 0)
   }
+
+  async markAllAsUnread(req: RequestWithUser) {
+    await this.prisma.message.updateMany({
+      where: { receiver_id: req.user.sub, read: true },
+      data: { read: false, read_at: null },
+    })
+    const unread = await this.prisma.message.count({
+      where: { receiver_id: req.user.sub, read: false },
+    })
+    this.messageNotifier.notifyUnreadCount(req.user.sub, unread)
+  }
 }
