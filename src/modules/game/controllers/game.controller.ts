@@ -79,11 +79,43 @@ export class GameController {
     if (cached) {
       return cached
     }
-    const result = await this.gameService.getById(
-      getGameReqDto.id,
-      req.user?.sub,
-      req.user?.content_limit,
-    )
+    const result = await this.gameService.getById(getGameReqDto.id, req.user?.content_limit)
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
+  }
+
+  @Get(':id/header')
+  async getGameHeader(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    const cacheKey = `game:${id}:header:auth:${req.user.sub}:cl:${req.user.content_limit}`
+    const cached = await this.cacheService.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getHeader(id, req.user?.content_limit)
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
+  }
+
+  @Get(':id/details')
+  async getGameDetails(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    const cacheKey = `game:${id}:details:auth:${req.user.sub}:cl:${req.user.content_limit}`
+    const cached = await this.cacheService.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getDetails(id, req.user?.content_limit)
+    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    return result
+  }
+
+  @Get(':id/characters')
+  async getGameCharacters(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    const cacheKey = `game:${id}:characters:auth:${req.user.sub}:cl:${req.user.content_limit}`
+    const cached = await this.cacheService.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const result = await this.gameService.getCharacters(id, req.user?.content_limit)
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
   }

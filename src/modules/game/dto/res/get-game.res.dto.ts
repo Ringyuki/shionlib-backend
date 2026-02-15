@@ -26,7 +26,6 @@ export class GetGameResDto {
   developers: GameDeveloper[]
   characters: GameCharacter[]
   creator: Creator
-  is_favorite: boolean
   content_limit: number
 }
 
