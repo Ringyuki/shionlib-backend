@@ -40,6 +40,7 @@ async function bootstrap() {
     origin: configService.get('cors.origin'),
     methods: configService.get('cors.methods'),
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['shionlib-auth-stale'],
   })
 
   app.useGlobalPipes(

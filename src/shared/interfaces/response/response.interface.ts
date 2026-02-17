@@ -4,6 +4,7 @@ export interface ResponseInterface<T> {
   data: T | null
   requestId: string
   timestamp: string
+  meta?: Record<string, unknown>
 }
 
 type MetaBase = {

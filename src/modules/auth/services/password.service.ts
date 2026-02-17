@@ -41,8 +41,6 @@ export class PasswordService {
 
     const resetLink = this.buildResetPasswordLink(uuid, email)
     await this.emailService.sendPasswordResetLink(email, resetLink, ttlMs / 1000)
-
-    return { uuid }
   }
 
   private buildResetPasswordLink(token: string, email: string): string {
